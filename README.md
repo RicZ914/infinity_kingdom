@@ -17,6 +17,13 @@ Godot 4 action prototype with three playable families, a town boss rush, custom 
 - `F10`: audio mix panel
 - `Esc`: close audio panel
 
+## Test
+
+```powershell
+godot --headless --path . --quit --verbose
+godot --headless --path . --script res://tests/smoke_accessory_flow.gd
+```
+
 ## Structure
 
 - `characters/`: playable character scenes and state machines

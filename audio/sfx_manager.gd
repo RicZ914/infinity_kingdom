@@ -114,12 +114,23 @@ const EVENT_PROFILES := {
 var stream_cache: Dictionary = {}
 var missing_events: Dictionary = {}
 var rng := RandomNumberGenerator.new()
+var audio_runtime_available: bool = true
 
 func _ready() -> void:
 	rng.randomize()
+	audio_runtime_available = DisplayServer.get_name() != "headless"
+
+func _exit_tree() -> void:
+	for child in get_children():
+		if child is AudioStreamPlayer or child is AudioStreamPlayer2D:
+			child.stop()
+			child.stream = null
+			child.queue_free()
+	stream_cache.clear()
+	missing_events.clear()
 
 func play_event(event_id: StringName, world_position: Variant = null, volume_db: float = 0.0, pitch_scale: float = 1.0, bus: String = "") -> bool:
-	if event_id == &"":
+	if not audio_runtime_available or event_id == &"":
 		return false
 	var profile := _get_event_profile(String(event_id))
 	var stream := _get_stream(String(event_id))
