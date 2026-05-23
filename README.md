@@ -20,6 +20,16 @@ Godot 4 action prototype with three playable families, a town boss rush, custom 
 3. Pick Knight, Ranger, or Mage.
 4. Choose an accessory at the start and after each cleared encounter.
 
+On Windows, double-click `start_game.bat` to launch the game with the bundled local Godot copy if present.
+
+Useful script options:
+
+```powershell
+.\start_game.bat
+.\start_game.bat -Editor
+.\start_game.bat -Test
+```
+
 ## Controls
 
 - `WASD`: move
