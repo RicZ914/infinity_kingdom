@@ -1,0 +1,135 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://characters/knight/knight.gd" id="1"]
+[ext_resource type="Script" path="res://characters/knight/state_machine.gd" id="2"]
+[ext_resource type="Script" path="res://combat/health_component.gd" id="14"]
+[ext_resource type="Script" path="res://characters/knight/states/idle_state.gd" id="3"]
+[ext_resource type="Script" path="res://characters/knight/states/move_state.gd" id="4"]
+[ext_resource type="Script" path="res://characters/knight/states/attack_state.gd" id="5"]
+[ext_resource type="Script" path="res://characters/knight/states/charge_state.gd" id="6"]
+[ext_resource type="Script" path="res://characters/knight/states/dash_state.gd" id="7"]
+[ext_resource type="Script" path="res://characters/knight/states/skill_state.gd" id="8"]
+[ext_resource type="Script" path="res://characters/knight/states/guard_state.gd" id="9"]
+[ext_resource type="Script" path="res://characters/knight/states/buff_state.gd" id="10"]
+[ext_resource type="Script" path="res://characters/knight/states/hit_state.gd" id="11"]
+[ext_resource type="Script" path="res://characters/knight/states/dead_state.gd" id="12"]
+
+[sub_resource type="CircleShape2D" id="1"]
+radius = 24.0
+
+[sub_resource type="CircleShape2D" id="2"]
+radius = 24.0
+
+[node name="Knight" type="CharacterBody2D"]
+script = ExtResource("1")
+collision_layer = 1
+collision_mask = 1
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("3")
+state_name = &"Idle"
+priority = 0
+interruptible = true
+
+[node name="Move" type="Node" parent="StateMachine"]
+script = ExtResource("4")
+state_name = &"Move"
+priority = 1
+interruptible = true
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("5")
+state_name = &"Attack"
+priority = 2
+interruptible = true
+
+[node name="Charge" type="Node" parent="StateMachine"]
+script = ExtResource("6")
+state_name = &"Charge"
+priority = 3
+interruptible = true
+
+[node name="Dash" type="Node" parent="StateMachine"]
+script = ExtResource("7")
+state_name = &"Dash"
+priority = 3
+interruptible = false
+
+[node name="Skill" type="Node" parent="StateMachine"]
+script = ExtResource("8")
+state_name = &"Skill"
+priority = 4
+interruptible = true
+
+[node name="Guard" type="Node" parent="StateMachine"]
+script = ExtResource("9")
+state_name = &"Guard"
+priority = 4
+interruptible = false
+
+[node name="Buff" type="Node" parent="StateMachine"]
+script = ExtResource("10")
+state_name = &"Buff"
+priority = 3
+interruptible = true
+
+[node name="Hit" type="Node" parent="StateMachine"]
+script = ExtResource("11")
+state_name = &"Hit"
+priority = 5
+interruptible = false
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("12")
+state_name = &"Dead"
+priority = 6
+interruptible = false
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+
+[node name="Sprite2D" type="Polygon2D" parent="."]
+color = Color(0.75, 0.85, 1, 1)
+polygon = PackedVector2Array(-34, -26, 0, -46, 34, -26, 28, 22, 0, 42, -28, 22)
+
+[node name="SlashArc" type="Polygon2D" parent="."]
+visible = false
+position = Vector2(26, 0)
+color = Color(1, 0.95, 0.55, 0.6)
+polygon = PackedVector2Array(-8, -18, 42, -8, 54, 0, 42, 8, -8, 18, 18, 0)
+
+[node name="ShockwaveRing" type="Line2D" parent="."]
+visible = false
+default_color = Color(0.7, 0.92, 1, 0.95)
+width = 4.0
+closed = true
+points = PackedVector2Array(60, 0, 42, 42, 0, 60, -42, 42, -60, 0, -42, -42, 0, -60, 42, -42)
+
+[node name="SanctuaryRing" type="Line2D" parent="."]
+visible = false
+default_color = Color(1, 0.9, 0.45, 0.85)
+width = 3.0
+closed = true
+points = PackedVector2Array(80, 0, 56, 56, 0, 80, -56, 56, -80, 0, -56, -56, 0, -80, 56, -56)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+monitoring = true
+monitorable = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("2")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("14")
+
+[node name="EffectsLayer" type="Node2D" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+enabled = true

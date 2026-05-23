@@ -1,0 +1,51 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://actors/enemy/town_enemy.gd" id="1"]
+[ext_resource type="Script" path="res://combat/health_component.gd" id="2"]
+
+[sub_resource type="CircleShape2D" id="1"]
+radius = 18.0
+
+[node name="HunterEnemy" type="CharacterBody2D"]
+script = ExtResource("1")
+enemy_type = 3
+display_name = "猎手"
+max_hp = 160.0
+defense_value = 40.0
+move_speed = 135.0
+attack_damage = 10.0
+attack_interval = 3.0
+attack_range = 58.0
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.58, 0.28, 0.28, 1)
+polygon = PackedVector2Array(-14, 20, 14, 20, 18, -2, 6, -22, -6, -22, -18, -2)
+
+[node name="Weapon" type="Polygon2D" parent="."]
+color = Color(0.9, 0.82, 0.7, 1)
+position = Vector2(12, -4)
+polygon = PackedVector2Array(-2, 6, 3, 6, 5, -12, 0, -22, -4, -12)
+
+[node name="TelegraphRing" type="Line2D" parent="."]
+visible = false
+default_color = Color(0.94, 0.62, 0.62, 0.8)
+width = 2.0
+closed = true
+points = PackedVector2Array(22, 0, 16, 16, 0, 22, -16, 16, -22, 0, -16, -16, 0, -22, 16, -16)
+
+[node name="TelegraphLine" type="Line2D" parent="."]
+visible = false
+default_color = Color(0.94, 0.62, 0.62, 0.8)
+width = 8.0
+points = PackedVector2Array(0, 0, 180, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1")
+
+[node name="ProjectileSpawner" type="Node2D" parent="."]
+position = Vector2(20, -2)
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="EffectsLayer" type="Node2D" parent="."]

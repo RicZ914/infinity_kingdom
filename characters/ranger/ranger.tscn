@@ -1,0 +1,98 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://characters/ranger/ranger.gd" id="1"]
+[ext_resource type="Script" path="res://characters/ranger/state_machine.gd" id="2"]
+[ext_resource type="Script" path="res://combat/health_component.gd" id="3"]
+[ext_resource type="Script" path="res://characters/ranger/states/idle_state.gd" id="4"]
+[ext_resource type="Script" path="res://characters/ranger/states/move_state.gd" id="5"]
+[ext_resource type="Script" path="res://characters/ranger/states/attack_state.gd" id="6"]
+[ext_resource type="Script" path="res://characters/ranger/states/dash_state.gd" id="7"]
+[ext_resource type="Script" path="res://characters/ranger/states/skill_state.gd" id="8"]
+[ext_resource type="Script" path="res://characters/ranger/states/hit_state.gd" id="9"]
+[ext_resource type="Script" path="res://characters/ranger/states/dead_state.gd" id="10"]
+
+[sub_resource type="CircleShape2D" id="1"]
+radius = 20.0
+
+[sub_resource type="CircleShape2D" id="2"]
+radius = 20.0
+
+[node name="Ranger" type="CharacterBody2D"]
+script = ExtResource("1")
+collision_layer = 1
+collision_mask = 1
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("4")
+
+[node name="Move" type="Node" parent="StateMachine"]
+script = ExtResource("5")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("6")
+
+[node name="Dash" type="Node" parent="StateMachine"]
+script = ExtResource("7")
+
+[node name="Skill" type="Node" parent="StateMachine"]
+script = ExtResource("8")
+
+[node name="Hit" type="Node" parent="StateMachine"]
+script = ExtResource("9")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("10")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.36, 0.86, 0.62, 1)
+polygon = PackedVector2Array(-14, 22, 14, 22, 22, -2, 6, -24, -6, -24, -22, -2)
+
+[node name="SlashArc" type="Polygon2D" parent="."]
+visible = false
+position = Vector2(24, 0)
+color = Color(0.85, 1, 0.68, 0.6)
+polygon = PackedVector2Array(-6, -14, 40, -6, 50, 0, 40, 6, -6, 14, 20, 0)
+
+[node name="AimRing" type="Line2D" parent="."]
+visible = false
+default_color = Color(0.66, 1, 0.8, 0.95)
+width = 2.0
+closed = true
+points = PackedVector2Array(18, 0, 12, 12, 0, 18, -12, 12, -18, 0, -12, -12, 0, -18, 12, -12)
+
+[node name="AssassinationMark" type="Line2D" parent="."]
+visible = false
+default_color = Color(1, 0.45, 0.4, 0.95)
+width = 3.0
+closed = true
+points = PackedVector2Array(28, 0, 20, 20, 0, 28, -20, 20, -28, 0, -20, -20, 0, -28, 20, -20)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1")
+
+[node name="ProjectileSpawner" type="Node2D" parent="."]
+position = Vector2(28, -2)
+
+[node name="AfterimageLayer" type="Node2D" parent="."]
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+monitoring = true
+monitorable = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("2")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("3")
+
+[node name="EffectsLayer" type="Node2D" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+enabled = true

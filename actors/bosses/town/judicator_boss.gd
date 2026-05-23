@@ -1,0 +1,312 @@
+extends Node2D
+
+signal defeated
+
+const DAMAGE_NUMBER_SCENE := preload("res://effects/damage_number.tscn")
+
+@export var max_hp: float = 1500.0
+@export var defense_value: float = 180.0
+@export var move_speed: float = 96.0
+@export var attack_damage: float = 50.0
+@export var attack_range: float = 92.0
+@export var attack_interval: float = 2.0
+@export var skill1_damage: float = 30.0
+@export var skill1_cooldown: float = 6.0
+@export var skill1_jump_start_duration: float = 0.45
+@export var skill1_travel_duration: float = 0.42
+@export var skill1_recover_duration: float = 2.0
+@export var skill1_radius: float = 96.0
+@export var skill2_damage: float = 50.0
+@export var skill2_cooldown: float = 8.0
+@export var skill2_charge_duration: float = 1.0
+@export var skill2_recover_duration: float = 2.0
+@export var skill2_length: float = 310.0
+@export var skill2_width: float = 34.0
+
+@onready var body: Polygon2D = $Body
+@onready var sword: Polygon2D = $Sword
+@onready var landing_ring: Line2D = $LandingRing
+@onready var slash_line: Line2D = $SlashLine
+@onready var hurtbox: Area2D = $Hurtbox
+@onready var health_component: Node = $HealthComponent
+@onready var effects_layer: Node2D = $EffectsLayer
+
+var target: Node2D = null
+var hp: float = 0.0
+var state: StringName = &"idle"
+var state_time: float = 0.0
+var attack_cooldown: float = 0.0
+var skill1_cooldown_remaining: float = 0.0
+var skill2_cooldown_remaining: float = 0.0
+var recover_duration: float = 0.0
+var leap_start_position: Vector2 = Vector2.ZERO
+var leap_target_position: Vector2 = Vector2.ZERO
+var line_direction: Vector2 = Vector2.RIGHT
+var action_committed: bool = false
+var silenced_time_remaining: float = 0.0
+var root_time_remaining: float = 0.0
+var slow_time_remaining: float = 0.0
+var slow_factor: float = 1.0
+
+func _ready() -> void:
+	add_to_group("damageable")
+	health_component.setup(max_hp, defense_value)
+	health_component.damaged.connect(_on_damaged)
+	health_component.defense_changed.connect(_on_defense_changed)
+	health_component.died.connect(_on_died)
+	hp = max_hp
+	landing_ring.visible = false
+	slash_line.visible = false
+	_update_visuals()
+
+func bind_player(player: Node2D) -> void:
+	target = player
+
+func get_status_title() -> String:
+	return "Judicator"
+
+func get_status_text() -> String:
+	return "HP %d / %d\nState: %s" % [
+		int(round(hp)),
+		int(round(max_hp)),
+		String(state)
+	]
+
+func _physics_process(delta: float) -> void:
+	if hp <= 0.0:
+		return
+	_update_status_timers(delta)
+	attack_cooldown = maxf(attack_cooldown - delta, 0.0)
+	skill1_cooldown_remaining = maxf(skill1_cooldown_remaining - delta, 0.0)
+	skill2_cooldown_remaining = maxf(skill2_cooldown_remaining - delta, 0.0)
+	state_time += delta
+	if target == null or not is_instance_valid(target):
+		_find_target()
+	_update_state(delta)
+	_update_visuals()
+
+func receive_hit(payload: Dictionary) -> void:
+	if hp <= 0.0:
+		return
+	var result: Dictionary = health_component.receive_hit(payload)
+	var final_damage := float(result.get("damage", 0.0))
+	if final_damage > 0.0:
+		apply_control_effects(payload)
+		_spawn_damage_number(final_damage, bool(result.get("is_critical", false)))
+
+func apply_control_effects(payload: Dictionary) -> void:
+	if payload.has("silence_duration"):
+		silenced_time_remaining = maxf(silenced_time_remaining, float(payload["silence_duration"]))
+	if payload.has("root_duration"):
+		root_time_remaining = maxf(root_time_remaining, float(payload["root_duration"]))
+	if payload.has("slow_duration"):
+		slow_time_remaining = maxf(slow_time_remaining, float(payload["slow_duration"]))
+		slow_factor = minf(slow_factor, float(payload.get("slow_multiplier", 1.0)))
+
+func _find_target() -> void:
+	var players := get_tree().get_nodes_in_group("player")
+	target = players[0] if not players.is_empty() else null
+
+func _update_status_timers(delta: float) -> void:
+	silenced_time_remaining = maxf(silenced_time_remaining - delta, 0.0)
+	root_time_remaining = maxf(root_time_remaining - delta, 0.0)
+	if slow_time_remaining > 0.0:
+		slow_time_remaining = maxf(slow_time_remaining - delta, 0.0)
+	else:
+		slow_factor = 1.0
+
+func _update_state(delta: float) -> void:
+	match state:
+		&"idle":
+			_process_idle(delta)
+		&"basic_attack":
+			_process_basic_attack()
+		&"skill_1_jump_start":
+			_process_skill1_jump_start()
+		&"skill_1_slam":
+			_process_skill1_slam()
+		&"skill_2_charge":
+			_process_skill2_charge()
+		&"recover":
+			_process_recover()
+		&"dead":
+			return
+
+func _process_idle(delta: float) -> void:
+	if target == null or not is_instance_valid(target):
+		return
+	var to_target := target.global_position - global_position
+	if to_target != Vector2.ZERO:
+		line_direction = to_target.normalized()
+	var distance := to_target.length()
+	if _can_use_skills() and skill2_cooldown_remaining <= 0.0 and distance >= 120.0 and distance <= skill2_length:
+		_start_skill2()
+		return
+	if _can_use_skills() and skill1_cooldown_remaining <= 0.0 and distance <= 220.0:
+		_start_skill1()
+		return
+	if attack_cooldown <= 0.0 and distance <= attack_range:
+		_start_basic_attack()
+		return
+	if distance > attack_range * 0.8 and root_time_remaining <= 0.0:
+		global_position += line_direction * move_speed * slow_factor * delta
+
+func _start_basic_attack() -> void:
+	state = &"basic_attack"
+	state_time = 0.0
+	action_committed = false
+	attack_cooldown = attack_interval
+	Sfx.play_event(&"boss_judicator_attack", global_position)
+
+func _process_basic_attack() -> void:
+	if not action_committed and state_time >= 0.45:
+		action_committed = true
+		_hit_target_in_radius(attack_range, attack_damage, false)
+	if state_time >= 0.9:
+		_enter_recover(0.45)
+
+func _start_skill1() -> void:
+	state = &"skill_1_jump_start"
+	state_time = 0.0
+	action_committed = false
+	skill1_cooldown_remaining = skill1_cooldown
+	leap_start_position = global_position
+	leap_target_position = target.global_position if target != null else global_position
+	landing_ring.visible = true
+	landing_ring.global_position = leap_target_position
+	Sfx.play_event(&"boss_judicator_skill1", global_position)
+
+func _process_skill1_jump_start() -> void:
+	if state_time >= skill1_jump_start_duration:
+		state = &"skill_1_slam"
+		state_time = 0.0
+		action_committed = false
+
+func _process_skill1_slam() -> void:
+	var progress := clampf(state_time / maxf(skill1_travel_duration, 0.001), 0.0, 1.0)
+	global_position = leap_start_position.lerp(leap_target_position, progress) + Vector2(0.0, -sin(progress * PI) * 120.0)
+	if not action_committed and progress >= 1.0:
+		action_committed = true
+		global_position = leap_target_position
+		landing_ring.visible = false
+		_hit_target_in_radius(skill1_radius, skill1_damage, true)
+	if state_time >= skill1_travel_duration + 0.08:
+		_enter_recover(skill1_recover_duration)
+
+func _start_skill2() -> void:
+	state = &"skill_2_charge"
+	state_time = 0.0
+	action_committed = false
+	skill2_cooldown_remaining = skill2_cooldown
+	line_direction = (target.global_position - global_position).normalized() if target != null else line_direction
+	if line_direction == Vector2.ZERO:
+		line_direction = Vector2.RIGHT
+	slash_line.visible = true
+	slash_line.global_position = global_position
+	slash_line.rotation = line_direction.angle()
+	Sfx.play_event(&"boss_judicator_skill2", global_position)
+
+func _process_skill2_charge() -> void:
+	slash_line.global_position = global_position
+	if not action_committed and state_time >= skill2_charge_duration:
+		action_committed = true
+		_hit_target_in_line(skill2_damage)
+		slash_line.default_color = Color(1.0, 0.74, 0.4, 0.95)
+	if state_time >= skill2_charge_duration + 0.18:
+		slash_line.visible = false
+		slash_line.default_color = Color(1.0, 0.52, 0.4, 0.8)
+		_enter_recover(skill2_recover_duration)
+
+func _enter_recover(duration: float) -> void:
+	state = &"recover"
+	state_time = 0.0
+	recover_duration = duration
+	landing_ring.visible = false
+	slash_line.visible = false
+
+func _process_recover() -> void:
+	if state_time >= recover_duration:
+		state = &"idle"
+		state_time = 0.0
+
+func _hit_target_in_radius(radius: float, damage: float, knockback: bool) -> void:
+	if target == null or not is_instance_valid(target):
+		return
+	if global_position.distance_to(target.global_position) > radius:
+		return
+	target.receive_hit({
+		"source": self,
+		"damage": damage,
+		"crit_rate": 0.0
+	})
+	if knockback and target is CharacterBody2D:
+		var actor: CharacterBody2D = target
+		var direction := (actor.global_position - global_position).normalized()
+		actor.velocity = direction * 320.0
+
+func _hit_target_in_line(damage: float) -> void:
+	if target == null or not is_instance_valid(target):
+		return
+	var start_position := global_position
+	var end_position := global_position + line_direction * skill2_length
+	if _distance_to_segment(target.global_position, start_position, end_position) > skill2_width:
+		return
+	target.receive_hit({
+		"source": self,
+		"damage": damage,
+		"crit_rate": 0.0
+	})
+
+func _distance_to_segment(point: Vector2, start_position: Vector2, end_position: Vector2) -> float:
+	var segment := end_position - start_position
+	var segment_length_squared := segment.length_squared()
+	if segment_length_squared <= 0.0001:
+		return point.distance_to(start_position)
+	var weight := clampf((point - start_position).dot(segment) / segment_length_squared, 0.0, 1.0)
+	var closest_point := start_position + segment * weight
+	return point.distance_to(closest_point)
+
+func _can_use_skills() -> bool:
+	return silenced_time_remaining <= 0.0
+
+func _update_visuals() -> void:
+	var body_color := Color(0.68, 0.7, 0.78, 1.0)
+	if state == &"skill_1_jump_start" or state == &"skill_2_charge":
+		body_color = Color(0.9, 0.74, 0.52, 1.0)
+	elif silenced_time_remaining > 0.0:
+		body_color = Color(0.72, 0.64, 0.92, 1.0)
+	body.color = body_color
+	sword.color = Color(0.92, 0.84, 0.72, 1.0)
+	if target != null and is_instance_valid(target):
+		sword.rotation = (target.global_position - global_position).angle()
+
+func _spawn_damage_number(amount: float, is_critical: bool) -> void:
+	var damage_number := DAMAGE_NUMBER_SCENE.instantiate()
+	damage_number.position = Vector2(0.0, -42.0)
+	damage_number.setup(amount, is_critical)
+	effects_layer.add_child(damage_number)
+
+func _on_damaged(_amount: float, remaining_hp: float, _source: Node) -> void:
+	hp = remaining_hp
+	body.color = Color(1.0, 0.58, 0.58, 1.0)
+	var timer := get_tree().create_timer(0.14)
+	timer.timeout.connect(func() -> void:
+		if is_instance_valid(self) and hp > 0.0:
+			_update_visuals()
+	)
+
+func _on_defense_changed(_current_defense: float, _max_defense: float) -> void:
+	pass
+
+func _on_died() -> void:
+	hp = 0.0
+	state = &"dead"
+	landing_ring.visible = false
+	slash_line.visible = false
+	Sfx.play_event(&"boss_generic_dead", global_position)
+	var timer := get_tree().create_timer(0.5)
+	timer.timeout.connect(func() -> void:
+		if is_instance_valid(self):
+			defeated.emit()
+			queue_free()
+	)

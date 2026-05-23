@@ -1,0 +1,111 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://characters/mage/mage.gd" id="1"]
+[ext_resource type="Script" path="res://characters/mage/state_machine.gd" id="2"]
+[ext_resource type="Script" path="res://combat/health_component.gd" id="3"]
+[ext_resource type="Script" path="res://characters/mage/states/idle_state.gd" id="4"]
+[ext_resource type="Script" path="res://characters/mage/states/move_state.gd" id="5"]
+[ext_resource type="Script" path="res://characters/mage/states/attack_state.gd" id="6"]
+[ext_resource type="Script" path="res://characters/mage/states/skill_state.gd" id="7"]
+[ext_resource type="Script" path="res://characters/mage/states/hit_state.gd" id="8"]
+[ext_resource type="Script" path="res://characters/mage/states/dead_state.gd" id="9"]
+
+[sub_resource type="CircleShape2D" id="1"]
+radius = 20.0
+
+[sub_resource type="CircleShape2D" id="2"]
+radius = 20.0
+
+[node name="Mage" type="CharacterBody2D"]
+script = ExtResource("1")
+collision_layer = 1
+collision_mask = 1
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("4")
+
+[node name="Move" type="Node" parent="StateMachine"]
+script = ExtResource("5")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("6")
+
+[node name="Skill" type="Node" parent="StateMachine"]
+script = ExtResource("7")
+
+[node name="Hit" type="Node" parent="StateMachine"]
+script = ExtResource("8")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("9")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.6, 0.78, 1, 1)
+polygon = PackedVector2Array(-14, 22, 14, 22, 20, 0, 12, -18, 0, -26, -12, -18, -20, 0)
+
+[node name="FocusRing" type="Line2D" parent="."]
+visible = false
+default_color = Color(0.72, 0.86, 1, 0.9)
+width = 2.0
+closed = true
+points = PackedVector2Array(18, 0, 13, 13, 0, 18, -13, 13, -18, 0, -13, -13, 0, -18, 13, -13)
+
+[node name="BurstRing" type="Line2D" parent="."]
+visible = false
+default_color = Color(0.76, 0.88, 1, 0.9)
+width = 3.0
+closed = true
+points = PackedVector2Array(22, 0, 16, 16, 0, 22, -16, 16, -22, 0, -16, -16, 0, -22, 16, -16)
+
+[node name="EnchantSigil" type="Line2D" parent="."]
+visible = false
+default_color = Color(1, 0.9, 0.62, 0.95)
+width = 2.5
+closed = true
+points = PackedVector2Array(24, 0, 12, 12, 0, 24, -12, 12, -24, 0, -12, -12, 0, -24, 12, -12)
+
+[node name="BladeOrbit" type="Node2D" parent="."]
+visible = false
+
+[node name="BladeA" type="Polygon2D" parent="BladeOrbit"]
+color = Color(0.82, 0.94, 1, 0.92)
+position = Vector2(34, 0)
+polygon = PackedVector2Array(-3, 6, 0, -10, 3, 6)
+
+[node name="BladeB" type="Polygon2D" parent="BladeOrbit"]
+color = Color(0.82, 0.94, 1, 0.92)
+position = Vector2(-17, 30)
+polygon = PackedVector2Array(-3, 6, 0, -10, 3, 6)
+
+[node name="BladeC" type="Polygon2D" parent="BladeOrbit"]
+color = Color(0.82, 0.94, 1, 0.92)
+position = Vector2(-17, -30)
+polygon = PackedVector2Array(-3, 6, 0, -10, 3, 6)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1")
+
+[node name="ProjectileSpawner" type="Node2D" parent="."]
+position = Vector2(26, -2)
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+monitoring = true
+monitorable = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("2")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("3")
+
+[node name="EffectsLayer" type="Node2D" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+enabled = true

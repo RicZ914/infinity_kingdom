@@ -1,0 +1,51 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://actors/enemy/town_enemy.gd" id="1"]
+[ext_resource type="Script" path="res://combat/health_component.gd" id="2"]
+
+[sub_resource type="CircleShape2D" id="1"]
+radius = 18.0
+
+[node name="ApprenticeMageEnemy" type="CharacterBody2D"]
+script = ExtResource("1")
+enemy_type = 4
+display_name = "学徒法师"
+max_hp = 100.0
+defense_value = 30.0
+move_speed = 90.0
+attack_damage = 7.0
+attack_interval = 3.0
+attack_range = 220.0
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.52, 0.58, 0.92, 1)
+polygon = PackedVector2Array(-14, 22, 14, 22, 18, 4, 12, -20, 0, -28, -12, -20, -18, 4)
+
+[node name="Weapon" type="Polygon2D" parent="."]
+color = Color(0.84, 0.86, 1, 1)
+position = Vector2(12, -2)
+polygon = PackedVector2Array(-3, 6, 3, 6, 4, -20, 0, -30, -4, -20)
+
+[node name="TelegraphRing" type="Line2D" parent="."]
+visible = false
+default_color = Color(0.76, 0.84, 1, 0.82)
+width = 2.0
+closed = true
+points = PackedVector2Array(22, 0, 16, 16, 0, 22, -16, 16, -22, 0, -16, -16, 0, -22, 16, -16)
+
+[node name="TelegraphLine" type="Line2D" parent="."]
+visible = false
+default_color = Color(0.76, 0.84, 1, 0.82)
+width = 8.0
+points = PackedVector2Array(0, 0, 220, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1")
+
+[node name="ProjectileSpawner" type="Node2D" parent="."]
+position = Vector2(20, -4)
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="EffectsLayer" type="Node2D" parent="."]

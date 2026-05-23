@@ -1,0 +1,85 @@
+extends Area2D
+
+@export var speed: float = 440.0
+@export var lifetime: float = 3.0
+
+@onready var bolt: Polygon2D = $Bolt
+
+var direction: Vector2 = Vector2.RIGHT
+var damage: float = 18.0
+var source: Node = null
+var expired: bool = false
+var pulse_time: float = 0.0
+
+func _ready() -> void:
+	body_entered.connect(_on_body_entered)
+	area_entered.connect(_on_area_entered)
+
+func setup(owner_actor: Node, travel_direction: Vector2, hit_damage: float) -> void:
+	source = owner_actor
+	direction = travel_direction.normalized() if travel_direction != Vector2.ZERO else Vector2.RIGHT
+	damage = hit_damage
+	rotation = direction.angle()
+	var timer := get_tree().create_timer(lifetime)
+	timer.timeout.connect(queue_free)
+
+func _physics_process(delta: float) -> void:
+	global_position += direction * speed * delta
+	pulse_time += delta
+	bolt.scale = Vector2.ONE * (1.0 + sin(pulse_time * 20.0) * 0.04)
+
+func _on_body_entered(body: Node) -> void:
+	_try_hit(body)
+
+func _on_area_entered(area: Area2D) -> void:
+	if area == null:
+		return
+	_try_hit(area.get_parent())
+
+func _try_hit(target: Variant) -> void:
+	if expired:
+		return
+	target = _resolve_damage_target(target)
+	if target == null or target == source:
+		return
+	if not target.has_method("receive_hit"):
+		return
+	expired = true
+	target.receive_hit({
+		"source": source,
+		"damage": damage,
+		"crit_rate": 0.0
+	})
+	_spawn_hit_flash()
+	queue_free()
+
+func _resolve_damage_target(target: Variant) -> Node:
+	if target == null or not (target is Node):
+		return null
+	var node: Node = target
+	if node.has_method("receive_hit"):
+		return node
+	if node.get_parent() != null and node.get_parent().has_method("receive_hit"):
+		return node.get_parent()
+	return null
+
+func _spawn_hit_flash() -> void:
+	var flash := Polygon2D.new()
+	flash.polygon = PackedVector2Array([
+		Vector2(-7, -4),
+		Vector2(0, -12),
+		Vector2(7, -4),
+		Vector2(12, 0),
+		Vector2(7, 4),
+		Vector2(0, 12),
+		Vector2(-7, 4),
+		Vector2(-12, 0)
+	])
+	flash.color = Color(1.0, 0.84, 0.52, 0.9)
+	flash.global_position = global_position
+	flash.rotation = rotation
+	get_tree().current_scene.add_child(flash)
+	var tween := flash.create_tween()
+	tween.tween_property(flash, "scale", Vector2.ONE * 1.7, 0.1)
+	tween.parallel().tween_property(flash, "modulate:a", 0.0, 0.1)
+	tween.finished.connect(flash.queue_free)

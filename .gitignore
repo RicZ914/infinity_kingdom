@@ -1,18 +1,20 @@
-demo/.godot/
-demo/bin/*.dll
-demo/bin/*.exp
-demo/bin/*.lib
-demo/bin/*.pdb
-demo/bin/*.so
-demo/bin/*.dylib
-demo/bin/*.wasm
-demo/bin/*.a
-demo/bin/*.xcframework/
+# Godot 4+ specific ignores
+.godot/
+/android/
+/.import/
+export_presets.cfg
+*.translation
+
+# Build and generated files
 build/
-.sconsign.dblite
-compile_commands.json
-*.obj
-*.o
-*.ilk
-*.log
+bin/
 *.tmp
+*.log
+*.uid
+
+# OS/editor noise
+.DS_Store
+._*
+Thumbs.db
+.vscode/
+.idea/
