@@ -54,6 +54,25 @@ func _run() -> void:
 		push_error("Character select did not initialize")
 		quit(1)
 		return
+	if world.battle_status == null or not world.battle_status.has_method("set_context"):
+		push_error("Battle status did not initialize its context API")
+		quit(1)
+		return
+	var objective_value := world.battle_status.get("objective_value_label") as Label
+	var threat_value := world.battle_status.get("threat_value_label") as Label
+	var status_run_label := world.battle_status.get("run_label") as Label
+	if objective_value == null or objective_value.text.find("champion") == -1:
+		push_error("Battle status objective did not describe champion selection")
+		quit(1)
+		return
+	if threat_value == null or threat_value.text.is_empty():
+		push_error("Battle status threat label is empty")
+		quit(1)
+		return
+	if status_run_label == null or status_run_label.text.is_empty():
+		push_error("Battle status run summary is empty")
+		quit(1)
+		return
 	if not world.character_select.has_signal("quit_requested"):
 		push_error("Character select is missing quit signal")
 		quit(1)
@@ -194,6 +213,7 @@ func _run() -> void:
 		_set_layout_override(world.accessory_choice, test_size)
 		_set_layout_override(world.run_event_panel, test_size)
 		_set_layout_override(world.result_screen, test_size)
+		_set_layout_override(world.battle_status, test_size)
 		await process_frame
 		await process_frame
 		var character_panel := world.character_select.get("panel") as PanelContainer
@@ -265,8 +285,17 @@ func _run() -> void:
 			return
 		world.run_event_panel.close()
 
+		var status_margin := world.battle_status.get("root_margin") as MarginContainer
+		if not _assert_virtual_rect_fits(status_margin, test_size, "Battle status panel"):
+			quit(1)
+			return
+
 	if world.result_screen == null or not world.result_screen.has_method("show_result"):
 		push_error("Result screen missing")
+		quit(1)
+		return
+	if not world.result_screen.has_signal("quit_requested"):
+		push_error("Result screen is missing quit signal")
 		quit(1)
 		return
 	world.result_screen.show_result("victory", "Smoke Victory", "UI loaded.", "Result screen rendered.")

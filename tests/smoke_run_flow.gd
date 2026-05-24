@@ -27,6 +27,26 @@ func _run() -> void:
 		push_error("Player was not spawned for run flow test")
 		quit(1)
 		return
+	var objective_value := world.battle_status.get("objective_value_label") as Label
+	if objective_value == null or objective_value.text.find("relic") == -1:
+		push_error("Battle status did not switch to relic objective after character select")
+		quit(1)
+		return
+
+	world.active_run_event_kind = "shop"
+	world.run_event_panel.open("shop", 0)
+	await process_frame
+	world._on_run_event_choice_made("shop_attack")
+	await process_frame
+	if not world.run_event_panel.visible:
+		push_error("Unaffordable shop choice did not keep the event panel open")
+		quit(1)
+		return
+	if world.encounter_index != -1:
+		push_error("Unaffordable shop choice incorrectly advanced the encounter index")
+		quit(1)
+		return
+	world.run_event_panel.close()
 
 	var choices: Array = accessory_manager.current_choices
 	if choices.is_empty():
@@ -40,6 +60,11 @@ func _run() -> void:
 	accessory_manager.equip(String(first_choice.get("id", "")), world.player_character)
 	world._on_accessory_choice_made(String(first_choice.get("id", "")), false)
 	await process_frame
+	var threat_value := world.battle_status.get("threat_value_label") as Label
+	if threat_value == null or threat_value.text.is_empty():
+		push_error("Battle status threat label did not populate after starting an encounter")
+		quit(1)
+		return
 
 	world.encounter_index = world.ENCOUNTER_SCENES.size() - 1
 	var stub_encounter := Node.new()

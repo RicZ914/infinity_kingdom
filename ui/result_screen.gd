@@ -1,10 +1,11 @@
 extends CanvasLayer
 
 signal closed
+signal quit_requested
 
 const UISkin := preload("res://ui/ui_skin.gd")
 const PANEL_MIN_SIZE := Vector2(320, 320)
-const PANEL_MAX_SIZE := Vector2(620, 470)
+const PANEL_MAX_SIZE := Vector2(680, 470)
 
 @onready var backdrop: TextureRect = $Backdrop
 @onready var dimmer: ColorRect = $Dimmer
@@ -14,7 +15,9 @@ const PANEL_MAX_SIZE := Vector2(620, 470)
 @onready var title_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Title
 @onready var subtitle_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Subtitle
 @onready var detail_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Detail
-@onready var continue_button: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ContinueButton
+@onready var button_row: HBoxContainer = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonRow
+@onready var continue_button: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonRow/ContinueButton
+@onready var quit_button: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonRow/QuitButton
 
 var layout_size_override: Vector2 = Vector2.ZERO
 
@@ -27,13 +30,14 @@ func _ready() -> void:
 	UISkin.label(subtitle_label, 17, Color(0.88, 0.90, 0.94))
 	UISkin.label(detail_label, 14, Color(0.74, 0.80, 0.88))
 	UISkin.button_styles(continue_button, "large")
+	UISkin.button_styles(quit_button, "large")
 	if get_viewport() != null and not get_viewport().size_changed.is_connected(_queue_layout_refresh):
 		get_viewport().size_changed.connect(_queue_layout_refresh)
 	_queue_layout_refresh()
-	continue_button.pressed.connect(func() -> void:
-		visible = false
+	continue_button.pressed.connect(_close_result)
+	quit_button.pressed.connect(func() -> void:
 		get_tree().paused = false
-		closed.emit()
+		quit_requested.emit()
 	)
 
 func show_result(kind: String, title: String, subtitle: String, detail: String) -> void:
@@ -58,8 +62,26 @@ func show_result(kind: String, title: String, subtitle: String, detail: String) 
 	get_tree().paused = true
 	continue_button.grab_focus()
 
+func _unhandled_input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		match event.keycode:
+			KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_SPACE:
+				_close_result()
+				get_viewport().set_input_as_handled()
+			KEY_Q:
+				get_tree().paused = false
+				quit_requested.emit()
+				get_viewport().set_input_as_handled()
+
 func _queue_layout_refresh() -> void:
 	call_deferred("_refresh_layout")
+
+func _close_result() -> void:
+	visible = false
+	get_tree().paused = false
+	closed.emit()
 
 func _refresh_layout() -> void:
 	if panel == null:
@@ -80,7 +102,12 @@ func _refresh_layout() -> void:
 	panel_margin.add_theme_constant_override("margin_bottom", 26 if compact else 34)
 	decoration.custom_minimum_size.y = clampf(viewport_size.y * 0.14, 64.0, 108.0)
 	detail_label.custom_minimum_size.y = 64.0 if compact else 80.0
-	continue_button.custom_minimum_size.y = 52.0 if compact else 58.0
+	button_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	button_row.add_theme_constant_override("separation", 10 if compact else 12)
+	continue_button.custom_minimum_size = Vector2(0.0, 52.0 if compact else 58.0)
+	quit_button.custom_minimum_size = Vector2(0.0, 52.0 if compact else 58.0)
+	continue_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	quit_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	UISkin.label(title_label, 28 if compact else 34, Color(0.98, 0.90, 0.66))
 	UISkin.label(subtitle_label, 15 if compact else 17, Color(0.88, 0.90, 0.94))
 	UISkin.label(detail_label, 13 if compact else 14, Color(0.74, 0.80, 0.88))

@@ -36,6 +36,7 @@ var music_request_serial: int = 0
 var audio_panel_was_open: bool = false
 var waiting_for_accessory_choice: bool = false
 var active_accessory_reason: String = ""
+var active_run_event_kind: String = ""
 var return_pause_after_audio_panel: bool = false
 var return_pause_after_settings_panel: bool = false
 var last_attack_feedback_msec: int = 0
@@ -65,33 +66,27 @@ func _ready() -> void:
 		pause_menu.quit_requested.connect(_on_quit_requested)
 	if result_screen != null and result_screen.has_signal("closed"):
 		result_screen.closed.connect(_on_result_closed)
+		if result_screen.has_signal("quit_requested"):
+			result_screen.quit_requested.connect(_on_quit_requested)
 	if audio_settings_panel != null and audio_settings_panel.has_signal("closed"):
 		audio_settings_panel.closed.connect(_on_audio_settings_panel_closed)
 	if settings_panel != null and settings_panel.has_signal("closed"):
 		settings_panel.closed.connect(_on_settings_panel_closed)
 	if debug_panel != null and debug_panel.has_method("bind_world"):
 		debug_panel.bind_world(self)
-	if battle_status != null and battle_status.has_method("set_message"):
-		battle_status.set_message(
-			"Town Boss Trial",
-			"Pick a champion, then claim relics between encounters.",
-			_detail_text("")
-		)
+	_refresh_battle_status(
+		"Town Boss Trial",
+		"Pick a champion, then claim relics between encounters.",
+		_detail_text("")
+	)
 	if Music != null:
 		Music.play_profile(&"title", true)
 	if audio_shortcut_hint != null and audio_shortcut_hint.has_method("show_hint"):
 		audio_shortcut_hint.show_hint(true)
 
 func _process(_delta: float) -> void:
-	if battle_status == null or not battle_status.has_method("set_message"):
-		return
 	_sync_audio_hint_state()
-	if current_encounter != null and is_instance_valid(current_encounter) and current_encounter.has_method("get_status_title") and current_encounter.has_method("get_status_text"):
-		battle_status.set_message(
-			current_encounter.get_status_title(),
-			current_encounter.get_status_text(),
-			_detail_text("Encounter order: Town Enemies -> Judicator -> Guard Formation -> Twin Princes")
-		)
+	_refresh_battle_status()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -114,14 +109,17 @@ func _unhandled_input(event: InputEvent) -> void:
 			if audio_settings_panel != null and audio_settings_panel.has_method("is_open") and bool(audio_settings_panel.is_open()):
 				audio_settings_panel.hide_panel()
 				_sync_audio_hint_state()
+				_refresh_battle_status()
 				get_viewport().set_input_as_handled()
 				return
 			if settings_panel != null and settings_panel.visible:
 				settings_panel.close()
+				_refresh_battle_status()
 				get_viewport().set_input_as_handled()
 				return
 			if pause_menu != null and pause_menu.has_method("is_open") and bool(pause_menu.is_open()):
 				pause_menu.close()
+				_refresh_battle_status()
 				get_viewport().set_input_as_handled()
 				return
 			if accessory_choice != null and accessory_choice.visible:
@@ -130,6 +128,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				return
 			if pause_menu != null and pause_menu.has_method("open"):
 				pause_menu.open()
+				_refresh_battle_status()
 				get_viewport().set_input_as_handled()
 				return
 
@@ -174,6 +173,7 @@ func _on_character_selected(character_id: StringName) -> void:
 func _start_next_encounter() -> void:
 	waiting_for_accessory_choice = false
 	active_accessory_reason = ""
+	active_run_event_kind = ""
 	return_pause_after_audio_panel = false
 	return_pause_after_settings_panel = false
 	encounter_index += 1
@@ -188,17 +188,17 @@ func _start_next_encounter() -> void:
 		current_encounter.bind_player(player_character)
 	if current_encounter.has_signal("defeated"):
 		current_encounter.defeated.connect(_on_encounter_defeated)
+	_refresh_battle_status()
 
 func _on_encounter_defeated() -> void:
 	var reward := RunDirector.reward_encounter(encounter_index, player_character)
 	current_encounter = null
 	var defeated_final_encounter := encounter_index >= ENCOUNTER_SCENES.size() - 1
-	if battle_status != null and battle_status.has_method("set_message"):
-		battle_status.set_message(
-			"Trial Complete" if defeated_final_encounter else "Encounter Cleared",
-			"+%d gold earned." % reward,
-			_detail_text("Gold: %d" % int(RunDirector.gold))
-		)
+	_refresh_battle_status(
+		"Trial Complete" if defeated_final_encounter else "Encounter Cleared",
+		"+%d gold earned." % reward,
+		_detail_text("Gold: %d" % int(RunDirector.gold))
+	)
 	var timer := get_tree().create_timer(1.1)
 	timer.timeout.connect(func() -> void:
 		if is_instance_valid(self) and player_character != null and is_instance_valid(player_character) and float(player_character.hp) > 0.0:
@@ -215,12 +215,11 @@ func _on_player_died() -> void:
 	if Music != null:
 		Music.play_profile(&"defeat")
 	_schedule_title_music(2.4)
-	if battle_status != null and battle_status.has_method("set_message"):
-		battle_status.set_message(
-			"Defeated",
-			"The town boss rush resets after death.",
-			_detail_text("Pick a champion to restart.")
-		)
+	_refresh_battle_status(
+		"Defeated",
+		"The town boss rush resets after death.",
+		_detail_text("Pick a champion to restart.")
+	)
 	if character_select != null:
 		character_select.visible = true
 	if result_screen != null and result_screen.has_method("show_result"):
@@ -230,6 +229,7 @@ func _on_player_died() -> void:
 			"The town boss rush resets after death.",
 			"Continue to return to champion selection and try a different relic path."
 		)
+	_refresh_battle_status()
 	waiting_for_accessory_choice = false
 	active_accessory_reason = ""
 
@@ -239,27 +239,27 @@ func _offer_accessory(reason: String) -> void:
 		return
 	waiting_for_accessory_choice = true
 	active_accessory_reason = reason
+	active_run_event_kind = ""
 	var choices := AccessoryManager.generate_choices(3)
 	accessory_choice.open(choices, player_character, reason, RELIC_REROLL_COST, int(RunDirector.gold))
-	if battle_status != null and battle_status.has_method("set_message"):
-		battle_status.set_message(
-			reason,
-			"Choose a relic before the next fight.",
-			_detail_text("Current: %s" % String(AccessoryManager.get_equipped_accessory().get("name", "No Accessory")))
-		)
+	_refresh_battle_status(
+		reason,
+		"Choose a relic before the next fight.",
+		_detail_text("Current: %s" % String(AccessoryManager.get_equipped_accessory().get("name", "No Accessory")))
+	)
 
 func _offer_next_run_event() -> void:
 	var kind := RunDirector.next_event_kind()
 	if kind == "relic" or run_event_panel == null or not run_event_panel.has_method("open"):
 		_offer_accessory("Victory Relic")
 		return
+	active_run_event_kind = kind
 	run_event_panel.open(kind, int(RunDirector.gold))
-	if battle_status != null and battle_status.has_method("set_message"):
-		battle_status.set_message(
-			"Run Event",
-			"Choose a reward before the next fight.",
-			_detail_text("Gold: %d" % int(RunDirector.gold))
-		)
+	_refresh_battle_status(
+		"Run Event",
+		"Choose a reward before the next fight.",
+		_detail_text("Gold: %d" % int(RunDirector.gold))
+	)
 
 func _on_accessory_choice_made(_accessory_id: String, kept_current: bool) -> void:
 	waiting_for_accessory_choice = false
@@ -269,12 +269,11 @@ func _on_accessory_choice_made(_accessory_id: String, kept_current: bool) -> voi
 	if Sfx != null:
 		_play_ui_feedback(true)
 	var accessory_name := String(AccessoryManager.get_equipped_accessory().get("name", "No Accessory"))
-	if battle_status != null and battle_status.has_method("set_message"):
-		battle_status.set_message(
-			"Relic Kept" if kept_current else "Relic Equipped",
-			accessory_name,
-			_detail_text("The next encounter begins now.")
-		)
+	_refresh_battle_status(
+		"Relic Kept" if kept_current else "Relic Equipped",
+		accessory_name,
+		_detail_text("The next encounter begins now.")
+	)
 	_start_next_encounter()
 
 func _on_accessory_reroll_requested() -> void:
@@ -289,23 +288,31 @@ func _on_accessory_reroll_requested() -> void:
 	var reason := active_accessory_reason if not active_accessory_reason.is_empty() else "Relic Offering"
 	var choices := AccessoryManager.generate_choices(3)
 	accessory_choice.open(choices, player_character, reason, RELIC_REROLL_COST, int(RunDirector.gold))
-	if battle_status != null and battle_status.has_method("set_message"):
-		battle_status.set_message(
-			"Relic Rerolled",
-			"New relic choices are available.",
-			_detail_text("Gold: %d" % int(RunDirector.gold))
-		)
+	_refresh_battle_status(
+		"Relic Rerolled",
+		"New relic choices are available.",
+		_detail_text("Gold: %d" % int(RunDirector.gold))
+	)
 
 func _on_run_event_choice_made(choice_id: String) -> void:
 	var applied := _apply_run_event_choice(choice_id)
 	if Sfx != null:
 		_play_ui_feedback(applied)
-	if battle_status != null and battle_status.has_method("set_message"):
-		battle_status.set_message(
-			"Event Complete" if applied else "Not Enough Gold",
-			_run_event_summary(choice_id) if applied else "Choose another reward next time.",
+	if not applied and choice_id != "skip":
+		if active_run_event_kind != "" and run_event_panel != null and run_event_panel.has_method("open"):
+			run_event_panel.open(active_run_event_kind, int(RunDirector.gold))
+		_refresh_battle_status(
+			"Not Enough Gold",
+			"Choose another reward or skip the event.",
 			_detail_text("Gold: %d" % int(RunDirector.gold))
 		)
+		return
+	_refresh_battle_status(
+		"Event Complete",
+		_run_event_summary(choice_id),
+		_detail_text("Gold: %d" % int(RunDirector.gold))
+	)
+	active_run_event_kind = ""
 	if choice_id == "shop_relic" and applied:
 		_offer_accessory("Purchased Relic")
 	else:
@@ -338,12 +345,11 @@ func _complete_run_victory() -> void:
 	if Music != null:
 		Music.play_profile(&"victory")
 	_schedule_title_music(2.8)
-	if battle_status != null and battle_status.has_method("set_message"):
-		battle_status.set_message(
-			"Town Cleared",
-			"All enemy waves and town boss encounters are defeated.",
-			_detail_text("Pick another champion to restart the sequence.")
-		)
+	_refresh_battle_status(
+		"Town Cleared",
+		"All enemy waves and town boss encounters are defeated.",
+		_detail_text("Pick another champion to restart the sequence.")
+	)
 	if character_select != null:
 		character_select.visible = true
 	if result_screen != null and result_screen.has_method("show_result"):
@@ -353,6 +359,7 @@ func _complete_run_victory() -> void:
 			"All enemy waves and bosses are defeated.",
 			"Your relic build survived the trial. Continue to select a new champion."
 		)
+	_refresh_battle_status()
 
 func _bind_actor_audio(actor: Node) -> void:
 	if actor == null:
@@ -453,6 +460,211 @@ func _detail_text(extra: String) -> String:
 		return CONTROL_HINT
 	return "%s\n%s" % [extra, CONTROL_HINT]
 
+func _refresh_battle_status(override_title: String = "", override_subtitle: String = "", override_detail: String = "") -> void:
+	if battle_status == null or not battle_status.has_method("set_message"):
+		return
+	if not override_title.is_empty():
+		battle_status.set_message(override_title, override_subtitle, override_detail)
+	elif current_encounter != null and is_instance_valid(current_encounter) and current_encounter.has_method("get_status_title") and current_encounter.has_method("get_status_text"):
+		battle_status.set_message(
+			current_encounter.get_status_title(),
+			current_encounter.get_status_text(),
+			_detail_text("Encounter order: Town Enemies -> Judicator -> Guard Formation -> Twin Princes")
+		)
+	if battle_status.has_method("set_context"):
+		battle_status.set_context(_build_battle_status_context())
+
+func _build_battle_status_context() -> Dictionary:
+	return {
+		"objective": _objective_status_text(),
+		"threat": _threat_status_text(),
+		"hero": _hero_status_text(),
+		"relic": _relic_status_text()
+	}
+
+func _objective_status_text() -> String:
+	if result_screen != null and result_screen.visible:
+		return "Review the result and return to champion select."
+	if pause_menu != null and pause_menu.visible:
+		return "Resume, tune options, restart, or quit cleanly."
+	if audio_settings_panel != null and audio_settings_panel.has_method("is_open") and bool(audio_settings_panel.is_open()):
+		return "Adjust the mix without leaving the current run."
+	if settings_panel != null and settings_panel.visible:
+		return "Adjust display options, then return to the run."
+	if accessory_choice != null and accessory_choice.visible:
+		var accessory_title := active_accessory_reason if not active_accessory_reason.is_empty() else "Relic Offering"
+		return "%s: choose one relic before the next fight." % accessory_title
+	if run_event_panel != null and run_event_panel.visible:
+		var event_name := RunDirector.describe_event_kind(active_run_event_kind if not active_run_event_kind.is_empty() else RunDirector.peek_next_event_kind())
+		return "%s: choose one reward." % event_name
+	if character_select != null and character_select.visible and player_character == null:
+		return "Select a champion to begin the town trial."
+	if current_encounter != null and is_instance_valid(current_encounter):
+		return "Encounter %d / %d: clear the arena." % [encounter_index + 1, ENCOUNTER_SCENES.size()]
+	if player_character != null and is_instance_valid(player_character):
+		return "Prepare for the next encounter. Next event: %s." % RunDirector.describe_event_kind(RunDirector.peek_next_event_kind())
+	return "Pick a champion, then shape the run with relics."
+
+func _threat_status_text() -> String:
+	if result_screen != null and result_screen.visible:
+		return "Try a different relic route or hero opener on the next run."
+	if pause_menu != null and pause_menu.visible:
+		return "Run state is frozen while paused."
+	if audio_settings_panel != null and audio_settings_panel.has_method("is_open") and bool(audio_settings_panel.is_open()):
+		return "Audio changes save locally and do not affect combat pacing."
+	if settings_panel != null and settings_panel.visible:
+		return "Fullscreen and VSync change immediately once selected."
+	if accessory_choice != null and accessory_choice.visible:
+		return "Relic swaps are permanent. Cover a weakness or double down on your build."
+	if run_event_panel != null and run_event_panel.visible:
+		return _event_status_hint(active_run_event_kind)
+	if character_select != null and character_select.visible and player_character == null:
+		return "Knight is safest, Ranger snowballs tempo, Mage controls space and range."
+	if current_encounter != null and is_instance_valid(current_encounter):
+		return _encounter_threat_hint(current_encounter)
+	if player_character != null and is_instance_valid(player_character):
+		var hp_ratio := _property_ratio(player_character, "hp", "max_hp")
+		var defense_ratio := _property_ratio(player_character, "defense", "max_defense")
+		if hp_ratio <= 0.40:
+			return "Low health. Safe relics or recovery events are worth more than greed here."
+		if defense_ratio <= 0.25:
+			return "Defense is low. Clean dodges matter until armor is rebuilt."
+	return "The route ramps from mixed enemy waves into three boss checks."
+
+func _hero_status_text() -> String:
+	if player_character == null or not is_instance_valid(player_character):
+		return "No champion selected."
+	var hero_name := String(player_character.get_character_name()) if player_character.has_method("get_character_name") else "Champion"
+	var stats: Array[String] = []
+	if _has_property(player_character, "hp") and _has_property(player_character, "max_hp"):
+		stats.append("HP %d/%d" % [int(round(float(player_character.get("hp")))), int(round(float(player_character.get("max_hp"))))])
+	if _has_property(player_character, "defense") and _has_property(player_character, "max_defense"):
+		stats.append("DEF %d/%d" % [int(round(float(player_character.get("defense")))), int(round(float(player_character.get("max_defense"))))])
+	if _has_property(player_character, "inspiration") and _has_property(player_character, "max_inspiration"):
+		stats.append("Insp %d/%d" % [int(round(float(player_character.get("inspiration")))), int(round(float(player_character.get("max_inspiration"))))])
+	return "%s\n%s" % [hero_name, "  |  ".join(stats)] if not stats.is_empty() else hero_name
+
+func _relic_status_text() -> String:
+	var equipped_accessory: Dictionary = AccessoryManager.get_equipped_accessory()
+	var accessory_name := String(equipped_accessory.get("name", "No Accessory"))
+	var tags_text := AccessoryManager.describe_tags(equipped_accessory.get("tags", []))
+	var summary := String(equipped_accessory.get("summary", ""))
+	if accessory_name == "No Accessory":
+		return "No Accessory\nChoose a relic to shape this run."
+	var detail_parts: Array[String] = []
+	if not tags_text.is_empty():
+		detail_parts.append(tags_text)
+	if not summary.is_empty():
+		detail_parts.append(summary)
+	return "%s\n%s" % [accessory_name, "  |  ".join(detail_parts)] if not detail_parts.is_empty() else accessory_name
+
+func _event_status_hint(kind: String) -> String:
+	match kind:
+		"shop":
+			return "Spend gold only where it sharpens the next boss check or patches a real weakness."
+		"rest":
+			return "Recovery is immediate. Heal if survival is shaky, or refill defense and inspiration if stable."
+		"training":
+			return "Training is permanent. Reinforce the lane your hero and relic already reward."
+		"pact":
+			return "Pacts are permanent tradeoffs. Take only the drawback your current hero can absorb."
+		"attunement":
+			return "Attunement is the cleanest way to reinforce the relic identity you already built."
+		_:
+			return "Choose the cleanest upgrade and keep the route moving."
+
+func _encounter_threat_hint(encounter: Node) -> String:
+	var script_path := _script_path(encounter)
+	if script_path.ends_with("town_mob_encounter.gd"):
+		var wave_index := int(encounter.get("wave_index")) if _has_property(encounter, "wave_index") else -1
+		var wave_total := 0
+		if _has_property(encounter, "active_waves"):
+			var active_waves_value: Variant = encounter.get("active_waves")
+			if active_waves_value is Array:
+				wave_total = (active_waves_value as Array).size()
+		if _has_property(encounter, "waiting_for_next_wave") and bool(encounter.get("waiting_for_next_wave")):
+			return "Wave %d cleared. Reposition before the next pack lands." % max(wave_index + 1, 1)
+		if wave_total > 0 and wave_index >= wave_total - 1:
+			return "Final wave mixes elites with arcanist control. Remove ranged pressure first."
+		var active_enemy_count := 0
+		if _has_property(encounter, "active_enemies"):
+			var active_enemies_value: Variant = encounter.get("active_enemies")
+			if active_enemies_value is Array:
+				active_enemy_count = (active_enemies_value as Array).size()
+		if active_enemy_count >= 5:
+			return "Mixed melee and ranged pressure. Thin archers and mages before hunters collapse."
+		return "Keep space from flankers and do not stand still against ranged telegraphs."
+	if script_path.ends_with("judicator_boss.gd"):
+		var state_name := String(encounter.get("state")) if _has_property(encounter, "state") else ""
+		var enraged := bool(encounter.get("enraged")) if _has_property(encounter, "enraged") else false
+		if enraged:
+			if state_name == "skill_1_jump_start" or state_name == "skill_1_slam":
+				return "Enraged leap adds an aftershock. Leave the landing ring early."
+			if state_name == "skill_2_charge":
+				return "Enraged line verdict is wider and longer. Exit the lane immediately."
+			return "Below 45% HP he enrages, hits harder, and chains leap aftershocks."
+		if state_name == "skill_1_jump_start" or state_name == "skill_1_slam":
+			return "Leap slam is committed. Move off the landing ring before impact."
+		if state_name == "skill_2_charge":
+			return "Line verdict is charging. Side-step the telegraph before the slash fires."
+		return "Respect his cooldowns and save movement for leap or line verdict."
+	if script_path.ends_with("royal_guard_formation.gd"):
+		var coverage := float(encounter.get("coverage_progress")) if _has_property(encounter, "coverage_progress") else 0.0
+		var guard_count := 0
+		if _has_property(encounter, "all_guards"):
+			var guards_value: Variant = encounter.get("all_guards")
+			if guards_value is Array:
+				guard_count = (guards_value as Array).size()
+		if coverage < 1.0:
+			return "The formation stays immune until coverage fills. Survive and isolate exposed guards."
+		if guard_count > 2:
+			return "Coverage is broken. Collapse the mobile guards before the crossfire settles."
+		return "The formation is vulnerable. Clean up the remaining guards quickly."
+	if script_path.ends_with("twin_princes_boss.gd"):
+		var phase := int(encounter.get("current_phase")) if _has_property(encounter, "current_phase") else 1
+		var state_name := String(encounter.get("state")) if _has_property(encounter, "state") else ""
+		var desperate := bool(encounter.get("desperation_active")) if _has_property(encounter, "desperation_active") else false
+		if phase == 1:
+			if state_name == "teleport_mark" or state_name == "teleport_slash":
+				return "Blink slash lands beside you. Keep moving so the follow-up whiffs."
+			if state_name == "spear_charge":
+				return "Spear charge owns a straight lane. Step off the line early."
+			return "Phase one alternates blink slash and spear charge with short rests."
+		if state_name == "phase_change":
+			return "Phase two is arming up. Re-center before barrage patterns start."
+		if desperate:
+			if state_name == "barrage_cast":
+				return "Desperate barrage fires extra bolts and a second wave. Keep distance, then sidestep."
+			return "Desperate phase speeds up teleports and adds heavier barrage pressure."
+		if state_name == "barrage_cast":
+			return "Royal barrage is casting. Create angle before the bolt spread fans out."
+		return "Phase two adds barrage pressure and shorter recovery windows."
+	return "Read telegraphs, preserve space, and do not spend movement too early."
+
+func _script_path(target: Object) -> String:
+	if target == null:
+		return ""
+	var script_value: Variant = target.get_script()
+	if script_value is Script:
+		return String((script_value as Script).resource_path)
+	return ""
+
+func _property_ratio(target: Object, current_field: String, max_field: String) -> float:
+	if not _has_property(target, current_field) or not _has_property(target, max_field):
+		return 1.0
+	var max_value := float(target.get(max_field))
+	if max_value <= 0.0:
+		return 1.0
+	return clampf(float(target.get(current_field)) / max_value, 0.0, 1.0)
+
+func _has_property(target: Object, field: String) -> bool:
+	if target == null:
+		return false
+	for property in target.get_property_list():
+		if String(property.get("name", "")) == field:
+			return true
+	return false
+
 func _sync_audio_hint_state() -> void:
 	if audio_shortcut_hint == null or not audio_shortcut_hint.has_method("set_panel_open"):
 		return
@@ -469,6 +681,7 @@ func _on_pause_resume_requested() -> void:
 	return_pause_after_settings_panel = false
 	if pause_menu != null and pause_menu.has_method("close"):
 		pause_menu.close()
+	_refresh_battle_status()
 
 func _on_pause_audio_requested() -> void:
 	return_pause_after_audio_panel = true
@@ -480,6 +693,7 @@ func _on_pause_audio_requested() -> void:
 	if audio_settings_panel != null and audio_settings_panel.has_method("show_panel"):
 		audio_settings_panel.show_panel()
 	_sync_audio_hint_state()
+	_refresh_battle_status()
 
 func _on_pause_settings_requested() -> void:
 	return_pause_after_settings_panel = true
@@ -490,6 +704,7 @@ func _on_pause_settings_requested() -> void:
 			pause_menu.visible = false
 	if settings_panel != null and settings_panel.has_method("open"):
 		settings_panel.open()
+	_refresh_battle_status()
 
 func _on_pause_restart_requested() -> void:
 	if pause_menu != null and pause_menu.has_method("close"):
@@ -501,11 +716,13 @@ func _on_title_audio_requested() -> void:
 	if audio_settings_panel != null and audio_settings_panel.has_method("show_panel"):
 		audio_settings_panel.show_panel()
 	_sync_audio_hint_state()
+	_refresh_battle_status()
 
 func _on_title_settings_requested() -> void:
 	return_pause_after_settings_panel = false
 	if settings_panel != null and settings_panel.has_method("open"):
 		settings_panel.open()
+	_refresh_battle_status()
 
 func _on_audio_settings_panel_closed() -> void:
 	if return_pause_after_audio_panel:
@@ -515,6 +732,7 @@ func _on_audio_settings_panel_closed() -> void:
 		elif pause_menu != null and pause_menu.has_method("open"):
 			pause_menu.open()
 	_sync_audio_hint_state()
+	_refresh_battle_status()
 
 func _on_settings_panel_closed() -> void:
 	if return_pause_after_settings_panel:
@@ -523,6 +741,7 @@ func _on_settings_panel_closed() -> void:
 			pause_menu.resume_from_submenu()
 		elif pause_menu != null and pause_menu.has_method("open"):
 			pause_menu.open()
+	_refresh_battle_status()
 
 func _on_quit_requested() -> void:
 	return_pause_after_audio_panel = false
@@ -552,18 +771,18 @@ func _reset_to_character_select() -> void:
 	encounter_index = -1
 	waiting_for_accessory_choice = false
 	active_accessory_reason = ""
+	active_run_event_kind = ""
 	return_pause_after_audio_panel = false
 	return_pause_after_settings_panel = false
 	AccessoryManager.reset_run()
 	RunDirector.reset_run()
 	if character_select != null:
 		character_select.visible = true
-	if battle_status != null and battle_status.has_method("set_message"):
-		battle_status.set_message(
-			"Town Boss Trial",
-			"Pick a champion, then claim relics between encounters.",
-			_detail_text("")
-		)
+	_refresh_battle_status(
+		"Town Boss Trial",
+		"Pick a champion, then claim relics between encounters.",
+		_detail_text("")
+	)
 	if Music != null:
 		Music.play_profile(&"title")
 
