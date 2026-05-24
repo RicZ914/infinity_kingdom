@@ -5,8 +5,11 @@ signal state_changed(state: Dictionary)
 const EVENT_POOL := [
 	"rest",
 	"training",
-	"pact"
+	"pact",
+	"attunement"
 ]
+
+const EVENTS_PER_RUN := 3
 
 var gold: int = 0
 var cleared_encounters: int = 0
@@ -69,6 +72,8 @@ func describe_event_kind(kind: String) -> String:
 			return "Training Drill"
 		"pact":
 			return "Forbidden Pact"
+		"attunement":
+			return "Relic Resonance"
 		_:
 			return "Unknown"
 
@@ -154,9 +159,9 @@ func _performance_bonus(actor: Node) -> int:
 	return bonus
 
 func _build_event_deck() -> Array[String]:
-	var pool: Array[String] = ["rest", "training", "pact"]
+	var pool: Array[String] = ["rest", "training", "pact", "attunement"]
 	var deck: Array[String] = ["shop"]
-	while not pool.is_empty():
+	while deck.size() < EVENTS_PER_RUN and not pool.is_empty():
 		var next_index := rng.randi_range(0, pool.size() - 1)
 		deck.append(pool[next_index])
 		pool.remove_at(next_index)

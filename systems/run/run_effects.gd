@@ -1,6 +1,56 @@
 class_name RunEffects
 extends RefCounted
 
+const ATTUNEMENT_TAG_MAP := {
+	"attack": "attune_offense",
+	"crit": "attune_gambit",
+	"damage": "attune_offense",
+	"defense": "attune_guard",
+	"power": "attune_offense",
+	"resource": "attune_focus",
+	"risk": "attune_gambit",
+	"skill": "attune_focus",
+	"speed": "attune_flow",
+	"survival": "attune_guard",
+	"tempo": "attune_flow"
+}
+
+const ATTUNEMENT_FILL_ORDER := [
+	"attune_offense",
+	"attune_focus",
+	"attune_guard",
+	"attune_flow",
+	"attune_gambit"
+]
+
+const ATTUNEMENT_CHOICE_DATA := {
+	"attune_offense": {
+		"title": "Battle Temper",
+		"summary": "+12% attack damage and +4% crit chance.",
+		"icon": "res://assets/ui/trait/trait_damage.png"
+	},
+	"attune_focus": {
+		"title": "Echo Circuit",
+		"summary": "+10 max inspiration and faster skill recovery.",
+		"icon": "res://assets/ui/trait/trait_echo.png"
+	},
+	"attune_guard": {
+		"title": "Warden Seal",
+		"summary": "+16 max defense, +6 max hp, and restore armor.",
+		"icon": "res://assets/ui/icon/ui_shield.png"
+	},
+	"attune_flow": {
+		"title": "Wind Rhythm",
+		"summary": "+10% move speed, faster attacks, and more inspiration on hit.",
+		"icon": "res://assets/ui/icon/stat_speed_pixel.png"
+	},
+	"attune_gambit": {
+		"title": "Last Nerve",
+		"summary": "+8% crit chance and +10% skill damage, but skills cost more inspiration.",
+		"icon": "res://assets/ui/trait/trait_execute.png"
+	}
+}
+
 static func apply_choice(choice_id: String, actor: Node) -> void:
 	if actor == null or not is_instance_valid(actor):
 		return
@@ -55,6 +105,32 @@ static func apply_choice(choice_id: String, actor: Node) -> void:
 			RunDirector.add_run_modifier("max_hp", -12.0, 1.0, 30.0)
 			for field in ["skill1_cooldown", "skill2_cooldown", "skill3_cooldown"]:
 				RunDirector.add_run_modifier(field, 0.0, 0.92, 0.0)
+			persistent_changed = true
+		"attune_offense":
+			RunDirector.add_run_modifier("attack_damage", 0.0, 1.12)
+			RunDirector.add_run_modifier("crit_rate", 0.04)
+			persistent_changed = true
+		"attune_focus":
+			RunDirector.add_run_modifier("max_inspiration", 10.0)
+			for field in ["skill1_cooldown", "skill2_cooldown", "skill3_cooldown"]:
+				RunDirector.add_run_modifier(field, 0.0, 0.92, 0.0)
+			persistent_changed = true
+		"attune_guard":
+			RunDirector.add_run_modifier("max_defense", 16.0)
+			RunDirector.add_run_modifier("max_hp", 6.0)
+			persistent_changed = true
+			restore_defense_after_refresh = true
+		"attune_flow":
+			RunDirector.add_run_modifier("move_speed", 0.0, 1.10)
+			RunDirector.add_run_modifier("attack_interval", 0.0, 0.94, 0.15)
+			RunDirector.add_run_modifier("inspiration_gain_on_attack_hit", 0.8)
+			persistent_changed = true
+		"attune_gambit":
+			RunDirector.add_run_modifier("crit_rate", 0.08)
+			for field in ["skill1_damage", "skill2_damage", "skill3_damage"]:
+				RunDirector.add_run_modifier(field, 0.0, 1.10, 0.0)
+			for field in ["skill1_cost", "skill2_cost", "skill3_cost"]:
+				RunDirector.add_run_modifier(field, 0.0, 1.08, 0.0)
 			persistent_changed = true
 	if persistent_changed:
 		refresh_persistent_modifiers(actor)
@@ -111,8 +187,43 @@ static func summary(choice_id: String) -> String:
 			return "Iron Oath accepted."
 		"pact_focus":
 			return "Astral Debt accepted."
+		"attune_offense":
+			return "Battle Temper attuned."
+		"attune_focus":
+			return "Echo Circuit attuned."
+		"attune_guard":
+			return "Warden Seal attuned."
+		"attune_flow":
+			return "Wind Rhythm attuned."
+		"attune_gambit":
+			return "Last Nerve attuned."
 		_:
 			return "You move on."
+
+static func attunement_choices() -> Array[Dictionary]:
+	var categories: Array[String] = []
+	for tag in AccessoryManager.get_equipped_tags():
+		var choice_id := String(ATTUNEMENT_TAG_MAP.get(String(tag), ""))
+		if choice_id.is_empty() or categories.has(choice_id):
+			continue
+		categories.append(choice_id)
+	for fallback in ATTUNEMENT_FILL_ORDER:
+		if categories.size() >= 3:
+			break
+		if categories.has(fallback):
+			continue
+		categories.append(fallback)
+	var choices: Array[Dictionary] = []
+	for choice_id in categories:
+		if choices.size() >= 3:
+			break
+		var data: Dictionary = (ATTUNEMENT_CHOICE_DATA.get(choice_id, {}) as Dictionary).duplicate(true)
+		if data.is_empty():
+			continue
+		data["id"] = choice_id
+		data["cost"] = 0
+		choices.append(data)
+	return choices
 
 static func heal_percent(actor: Node, percent: float) -> void:
 	if not _has_property(actor, "max_hp") or not actor.has_method("heal"):

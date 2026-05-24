@@ -139,9 +139,13 @@ func _build_rows() -> void:
 		UISkin.label(description, 12, Color(0.78, 0.84, 0.92))
 		header_row.add_child(description)
 
-		var controls_row := HBoxContainer.new()
-		controls_row.add_theme_constant_override("separation", 12)
-		column.add_child(controls_row)
+		var controls_column := VBoxContainer.new()
+		controls_column.add_theme_constant_override("separation", 8)
+		column.add_child(controls_column)
+
+		var slider_row := HBoxContainer.new()
+		slider_row.add_theme_constant_override("separation", 12)
+		controls_column.add_child(slider_row)
 
 		var slider := HSlider.new()
 		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -149,28 +153,33 @@ func _build_rows() -> void:
 		slider.max_value = 100.0
 		slider.step = 1.0
 		slider.value_changed.connect(_on_slider_value_changed.bind(bus_name))
-		controls_row.add_child(slider)
+		slider_row.add_child(slider)
 
 		var value_label := Label.new()
 		value_label.custom_minimum_size = Vector2(106.0, 0.0)
 		value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		value_label.text = "100% | 0.0 dB"
 		UISkin.label(value_label, 12, Color(0.86, 0.88, 0.92))
-		controls_row.add_child(value_label)
+		slider_row.add_child(value_label)
+
+		var buttons_row := HBoxContainer.new()
+		buttons_row.add_theme_constant_override("separation", 10)
+		buttons_row.alignment = BoxContainer.ALIGNMENT_END
+		controls_column.add_child(buttons_row)
 
 		var mute_button := Button.new()
 		mute_button.custom_minimum_size = Vector2(72.0, 34.0)
 		mute_button.toggle_mode = true
 		mute_button.toggled.connect(_on_mute_toggled.bind(bus_name))
 		UISkin.button_styles(mute_button, "thin")
-		controls_row.add_child(mute_button)
+		buttons_row.add_child(mute_button)
 
 		var preview_button := Button.new()
 		preview_button.custom_minimum_size = Vector2(82.0, 34.0)
 		preview_button.text = "Preview"
 		preview_button.pressed.connect(_on_preview_pressed.bind(bus_name))
 		UISkin.button_styles(preview_button, "thin")
-		controls_row.add_child(preview_button)
+		buttons_row.add_child(preview_button)
 
 		slider_map[bus_name] = slider
 		value_label_map[bus_name] = value_label

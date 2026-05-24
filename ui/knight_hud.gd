@@ -3,7 +3,7 @@ extends CanvasLayer
 const UISkin := preload("res://ui/ui_skin.gd")
 
 var player_character: Node = null
-
+var root_margin: MarginContainer
 var title_label: Label
 var hp_bar: TextureProgressBar
 var hp_label: Label
@@ -13,10 +13,13 @@ var inspiration_bar: TextureProgressBar
 var inspiration_label: Label
 var shield_label: Label
 var state_label: Label
+var run_state_label: Label
 var accessory_icon: TextureRect
 var accessory_name_label: Label
+var accessory_tags_label: Label
 var accessory_summary_label: Label
 var skill_slots: Dictionary = {}
+var meter_bars: Array[TextureProgressBar] = []
 var skill_icon_paths := {
 	"Knight": [
 		"res://assets/ui/skill/knight_charge_slash.png",
@@ -39,7 +42,13 @@ func _ready() -> void:
 	_build_ui()
 	if AccessoryManager != null and not AccessoryManager.accessory_equipped.is_connected(_on_accessory_equipped):
 		AccessoryManager.accessory_equipped.connect(_on_accessory_equipped)
+	if RunDirector != null and not RunDirector.state_changed.is_connected(_on_run_state_changed):
+		RunDirector.state_changed.connect(_on_run_state_changed)
+	if get_viewport() != null and not get_viewport().size_changed.is_connected(_queue_layout_refresh):
+		get_viewport().size_changed.connect(_queue_layout_refresh)
 	_on_accessory_equipped(AccessoryManager.get_equipped_accessory())
+	_on_run_state_changed(RunDirector.get_state())
+	_queue_layout_refresh()
 
 func bind_character(target: Node) -> void:
 	player_character = target
@@ -64,27 +73,27 @@ func bind_knight(target: Node) -> void:
 func _process(_delta: float) -> void:
 	if player_character == null or not is_instance_valid(player_character):
 		return
-	state_label.text = "State  %s" % String(player_character.state_machine.get_state_name())
+	state_label.text = "State %s" % String(player_character.state_machine.get_state_name())
 	_update_skill_slots()
 
 func _build_ui() -> void:
 	layer = 5
-	var margin := MarginContainer.new()
-	margin.anchor_top = 1.0
-	margin.anchor_bottom = 1.0
-	margin.offset_left = 18.0
-	margin.offset_top = -428.0
-	margin.offset_right = 470.0
-	margin.offset_bottom = -18.0
-	margin.add_theme_constant_override("margin_left", 10)
-	margin.add_theme_constant_override("margin_top", 10)
-	margin.add_theme_constant_override("margin_right", 10)
-	margin.add_theme_constant_override("margin_bottom", 10)
-	add_child(margin)
+	root_margin = MarginContainer.new()
+	root_margin.anchor_top = 1.0
+	root_margin.anchor_bottom = 1.0
+	root_margin.offset_left = 18.0
+	root_margin.offset_top = -428.0
+	root_margin.offset_right = 470.0
+	root_margin.offset_bottom = -18.0
+	root_margin.add_theme_constant_override("margin_left", 10)
+	root_margin.add_theme_constant_override("margin_top", 10)
+	root_margin.add_theme_constant_override("margin_right", 10)
+	root_margin.add_theme_constant_override("margin_bottom", 10)
+	add_child(root_margin)
 
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", UISkin.panel_style())
-	margin.add_child(panel)
+	root_margin.add_child(panel)
 
 	var inner_margin := MarginContainer.new()
 	inner_margin.add_theme_constant_override("margin_left", 12)
@@ -107,10 +116,13 @@ func _build_ui() -> void:
 	content.add_child(_meter("inspiration", "Inspiration", Color(0.30, 0.52, 0.95)))
 
 	var status_row := HBoxContainer.new()
-	status_row.add_theme_constant_override("separation", 14)
+	status_row.add_theme_constant_override("separation", 10)
 	content.add_child(status_row)
-	shield_label = _make_label("Shield 0", 14, Color(0.82, 0.90, 0.98))
-	state_label = _make_label("State Idle", 14, Color(0.82, 0.90, 0.98))
+	shield_label = _make_label("Shield 0", 13, Color(0.82, 0.90, 0.98))
+	state_label = _make_label("State Idle", 13, Color(0.82, 0.90, 0.98))
+	shield_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	state_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	state_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	status_row.add_child(shield_label)
 	status_row.add_child(state_label)
 
@@ -154,10 +166,20 @@ func _build_ui() -> void:
 	accessory_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	accessory_row.add_child(accessory_text)
 	accessory_name_label = _make_label("No Accessory", 15, Color.WHITE)
+	accessory_tags_label = _make_label("Tags: None", 11, Color(0.88, 0.84, 0.66))
 	accessory_summary_label = _make_label("Win encounters to claim relics.", 12, Color(0.72, 0.78, 0.86))
 	accessory_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	accessory_text.add_child(accessory_name_label)
+	accessory_text.add_child(accessory_tags_label)
 	accessory_text.add_child(accessory_summary_label)
+
+	var run_panel := PanelContainer.new()
+	run_panel.add_theme_stylebox_override("panel", UISkin.content_panel_style())
+	content.add_child(run_panel)
+
+	run_state_label = _make_label("Gold 0 | Next Black Market", 12, Color(0.84, 0.90, 0.98))
+	run_state_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	run_panel.add_child(run_state_label)
 
 func _meter(meter_id: String, label_text: String, _fill_color: Color) -> VBoxContainer:
 	var box := VBoxContainer.new()
@@ -167,6 +189,7 @@ func _meter(meter_id: String, label_text: String, _fill_color: Color) -> VBoxCon
 	var bar := TextureProgressBar.new()
 	bar.custom_minimum_size = Vector2(386, 22)
 	UISkin.texture_bar(bar, meter_id)
+	meter_bars.append(bar)
 	box.add_child(bar)
 	match meter_id:
 		"hp":
@@ -182,7 +205,8 @@ func _meter(meter_id: String, label_text: String, _fill_color: Color) -> VBoxCon
 
 func _skill_slot(key: String, hotkey: String, icon_path: String) -> Dictionary:
 	var root := PanelContainer.new()
-	root.custom_minimum_size = Vector2(92, 76)
+	root.custom_minimum_size = Vector2(84, 76)
+	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.add_theme_stylebox_override("panel", UISkin.texture_style(UISkin.asset("frame/icon_slot_dark.png"), 22, 5))
 
 	var stack := VBoxContainer.new()
@@ -242,7 +266,20 @@ func _on_accessory_equipped(accessory: Dictionary) -> void:
 		return
 	accessory_icon.texture = load(String(accessory.get("icon", "res://assets/ui/icon/ui_unknown.png"))) as Texture2D
 	accessory_name_label.text = String(accessory.get("name", "No Accessory"))
+	var tags := AccessoryManager.describe_tags(accessory.get("tags", []))
+	accessory_tags_label.text = "Tags: %s" % (tags if not tags.is_empty() else "None")
 	accessory_summary_label.text = String(accessory.get("summary", ""))
+
+func _on_run_state_changed(state: Dictionary) -> void:
+	if run_state_label == null:
+		return
+	var next_kind := String(state.get("next_event_kind", ""))
+	var next_label := RunDirector.describe_event_kind(next_kind) if not next_kind.is_empty() else "Victory"
+	run_state_label.text = "Gold %d | Last +%d | Next %s" % [
+		int(state.get("gold", 0)),
+		int(state.get("last_reward_gold", 0)),
+		next_label
+	]
 
 func _refresh_skill_icons() -> void:
 	if player_character == null or not is_instance_valid(player_character):
@@ -270,3 +307,16 @@ func _update_skill_slots() -> void:
 		else:
 			label.text = "%s %.1f" % [String(slot["hotkey"]), cooldown]
 			label.modulate = Color(1.0, 0.80, 0.62)
+
+func _queue_layout_refresh() -> void:
+	call_deferred("_refresh_layout")
+
+func _refresh_layout() -> void:
+	if root_margin == null:
+		return
+	var viewport_size := get_viewport().get_visible_rect().size
+	var panel_width := clampf(viewport_size.x * 0.24, 352.0, 470.0)
+	root_margin.offset_right = panel_width
+	root_margin.offset_top = -clampf(viewport_size.y * 0.40, 336.0, 428.0)
+	for bar in meter_bars:
+		bar.custom_minimum_size.x = panel_width - 72.0

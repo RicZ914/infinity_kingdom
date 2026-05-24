@@ -10,11 +10,19 @@ class TestActor:
 	var max_inspiration: float = 40.0
 	var inspiration: float = 10.0
 	var attack_damage: float = 20.0
+	var attack_interval: float = 1.0
 	var move_speed: float = 300.0
 	var crit_rate: float = 0.0
+	var inspiration_gain_on_attack_hit: float = 2.0
+	var skill1_cost: float = 10.0
+	var skill2_cost: float = 12.0
+	var skill3_cost: float = 14.0
 	var skill1_cooldown: float = 4.0
 	var skill2_cooldown: float = 8.0
 	var skill3_cooldown: float = 12.0
+	var skill1_damage: float = 50.0
+	var skill2_damage: float = 65.0
+	var skill3_damage: float = 80.0
 
 	func heal(amount: float) -> void:
 		hp = clampf(hp + amount, 0.0, max_hp)
@@ -37,6 +45,7 @@ func _run() -> void:
 		push_error("Required run autoloads are missing")
 		quit(1)
 		return
+	accessory_manager.reset_run()
 	run_director.reset_run()
 	if run_director.peek_next_event_kind() != "shop":
 		push_error("Run event deck did not start with shop")
@@ -89,11 +98,29 @@ func _run() -> void:
 		push_error("rest_repair did not keep max hp in a healthy range")
 		quit(1)
 		return
-	var modified_damage := float(actor.attack_damage)
+	accessory_manager.equip("wolf_pendant", actor)
+	var attunement_choices: Array = run_effects.attunement_choices()
+	var attunement_ids := {}
+	for choice in attunement_choices:
+		attunement_ids[String((choice as Dictionary).get("id", ""))] = true
+	if not attunement_ids.has("attune_offense") or not attunement_ids.has("attune_gambit"):
+		push_error("Attunement choices did not reflect equipped relic tags")
+		quit(1)
+		return
+	var before_attunement_damage := float(actor.attack_damage)
+	run_effects.apply_choice("attune_offense", actor)
+	if float(actor.attack_damage) <= before_attunement_damage:
+		push_error("attune_offense did not increase attack damage")
+		quit(1)
+		return
 	accessory_manager.equip("iron_branch_pendant", actor)
 	run_effects.refresh_persistent_modifiers(actor)
-	if float(actor.attack_damage) < modified_damage - 0.01:
+	if float(actor.attack_damage) <= base_damage:
 		push_error("Run modifiers were lost after accessory reapply")
+		quit(1)
+		return
+	if float(actor.max_defense) <= 50.0:
+		push_error("New accessory stats were not applied after re-equip")
 		quit(1)
 		return
 	actor.queue_free()

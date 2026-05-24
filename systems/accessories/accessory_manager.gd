@@ -4,6 +4,19 @@ signal accessory_equipped(accessory: Dictionary)
 signal choices_generated(choices: Array[Dictionary])
 
 const ACCESSORY_DATA_PATH := "res://systems/accessories/accessories.json"
+const TAG_LABELS := {
+	"attack": "Attack",
+	"crit": "Crit",
+	"damage": "Damage",
+	"defense": "Defense",
+	"power": "Power",
+	"resource": "Resource",
+	"risk": "Risk",
+	"skill": "Skill",
+	"speed": "Speed",
+	"survival": "Survival",
+	"tempo": "Tempo"
+}
 
 const EMPTY_ACCESSORY := {
 	"id": "none",
@@ -166,6 +179,27 @@ func reset_run() -> void:
 
 func get_equipped_accessory() -> Dictionary:
 	return equipped_accessory.duplicate(true)
+
+func get_equipped_tags() -> Array[String]:
+	var tags: Array[String] = []
+	for tag in equipped_accessory.get("tags", []):
+		var next_tag := String(tag)
+		if next_tag.is_empty() or tags.has(next_tag):
+			continue
+		tags.append(next_tag)
+	return tags
+
+func describe_tags(tags: Array = []) -> String:
+	var source_tags := tags
+	if source_tags.is_empty():
+		source_tags = get_equipped_tags()
+	var parts: Array[String] = []
+	for tag in source_tags:
+		var next_tag := String(tag)
+		if next_tag.is_empty():
+			continue
+		parts.append(String(TAG_LABELS.get(next_tag, next_tag.capitalize())))
+	return ", ".join(parts)
 
 func generate_choices(count: int = 3) -> Array[Dictionary]:
 	var pool := get_catalog()

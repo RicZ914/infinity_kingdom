@@ -9,7 +9,8 @@ Godot 4 action prototype with three playable families, a town boss rush, custom 
 - Three playable families: Knight, Ranger, and Mage.
 - Boss-rush loop with town mobs, elite bosses, cleaner victory/defeat flow, and no dead-end post-boss event.
 - Accessory relic system with generated choices, current relic display, and stat modifiers.
-- Mid-run event deck with shop, rest, training, and high-risk pact branches.
+- Mid-run event deck with shop, relic resonance, rest, training, and high-risk pact branches.
+- Variable town enemy sweep waves instead of a single fixed opener every run.
 - Custom UI art library for buttons, panels, icons, bars, portraits, and relic cards.
 - Layered music, ambience, SFX, and an in-game audio mix panel.
 - Headless smoke test for project boot and accessory selection flow.

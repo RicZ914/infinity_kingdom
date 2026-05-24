@@ -2,6 +2,7 @@ extends CanvasLayer
 
 signal event_choice_made(choice_id: String)
 
+const RunEffects := preload("res://systems/run/run_effects.gd")
 const UISkin := preload("res://ui/ui_skin.gd")
 const PANEL_MIN_SIZE := Vector2(720, 480)
 const PANEL_MAX_SIZE := Vector2(1080, 640)
@@ -78,12 +79,30 @@ func _rebuild(kind: String, gold: int) -> void:
 			choice_row.add_child(_choice_card("pact_guard", "Iron Oath", "Gain heavy defense and restore armor, but move slower.", "res://assets/ui/icon/ui_shield.png", 0, gold))
 			choice_row.add_child(_choice_card("pact_focus", "Astral Debt", "Gain inspiration and cooldown efficiency, but lose max hp.", "res://assets/ui/icon/ui_mana_flame.png", 0, gold))
 			choice_row.add_child(_choice_card("skip", "Refuse", "Walk away without changing the build.", "res://assets/ui/icon/ui_back.png", 0, gold))
+		"attunement":
+			var tags_text := AccessoryManager.describe_tags()
+			title_label.text = "Relic Resonance"
+			subtitle_label.text = "Your relic leans toward %s. Draw out one matching response for the rest of this run." % (tags_text if not tags_text.is_empty() else "an unknown path")
+			footer_label.text = "Relic: %s" % String(AccessoryManager.get_equipped_accessory().get("name", "No Accessory"))
+			for choice in RunEffects.attunement_choices():
+				choice_row.add_child(_choice_card_from_data(choice, gold))
+			choice_row.add_child(_choice_card("skip", "Leave It Still", "Keep the relic unchanged and move on.", "res://assets/ui/icon/ui_back.png", 0, gold))
 		_:
 			title_label.text = "Travel"
 			subtitle_label.text = "No event is available."
 			footer_label.text = ""
 			choice_row.add_child(_choice_card("skip", "Continue", "Move to the next encounter.", "res://assets/ui/icon/ui_check.png", 0, gold))
 	_refresh_layout()
+
+func _choice_card_from_data(choice: Dictionary, gold: int) -> Button:
+	return _choice_card(
+		String(choice.get("id", "")),
+		String(choice.get("title", "Choice")),
+		String(choice.get("summary", "")),
+		String(choice.get("icon", "res://assets/ui/icon/ui_unknown.png")),
+		int(choice.get("cost", 0)),
+		gold
+	)
 
 func _choice_card(choice_id: String, title: String, summary: String, icon_path: String, cost: int, gold: int) -> Button:
 	var button := Button.new()

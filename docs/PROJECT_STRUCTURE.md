@@ -7,13 +7,13 @@ Infinity Kingdom is a Godot 4 action prototype centered on a short town boss-rus
 1. `world.tscn` loads the title UI, audio managers, HUD, character select, and accessory choice UI.
 2. The player selects Knight, Ranger, or Mage.
 3. `AccessoryManager` resets the run and opens the first relic choice.
-4. Encounters advance in order: town mobs, Judicator, Royal Guard Formation, Twin Princes.
-5. `RunDirector` awards gold, then deals a short event deck of shop plus shuffled rest/training/pact branches.
+4. Encounters advance in order: a variable town enemy sweep, Judicator, Royal Guard Formation, Twin Princes.
+5. `RunDirector` awards gold, then deals a short event deck of shop plus shuffled rest/training/pact/attunement branches.
 
 ## Main Folders
 
 - `characters/`: playable character scenes, controllers, and state machines.
-- `actors/`: enemy units, encounter controllers, and town bosses.
+- `actors/`: enemy units, encounter controllers with variable waves, and town bosses.
 - `combat/`: shared health and defense logic.
 - `effects/`: damage numbers and projectile scenes.
 - `systems/accessories/`: relic data, choice generation, stat application, and equipped state.
@@ -37,5 +37,5 @@ load time and falls back to its built-in catalog if the file is missing or malfo
 ## Run Events
 
 `systems/run/run_director.gd` tracks gold, cleared encounters, and the remaining event deck.
-`ui/run_event_panel.tscn` offers shop, rest, training, and pact choices; `systems/run/run_effects.gd`
-applies the selected reward or tradeoff to the current character.
+`ui/run_event_panel.tscn` offers shop, rest, training, relic resonance, and pact choices;
+`systems/run/run_effects.gd` applies the selected reward or tradeoff to the current character.

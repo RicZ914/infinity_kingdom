@@ -16,8 +16,10 @@ var target: Node2D = null
 var active_enemies: Array[Node] = []
 var wave_index: int = -1
 var waiting_for_next_wave: bool = false
+var active_waves: Array[Dictionary] = []
+var rng := RandomNumberGenerator.new()
 
-var wave_defs := [
+var wave_pool := [
 	{
 		"title": "Frontline Probe",
 		"units": [
@@ -38,6 +40,26 @@ var wave_defs := [
 		]
 	},
 	{
+		"title": "Shielded Volley",
+		"units": [
+			{"scene": SHIELD_SCENE, "spawn": 2},
+			{"scene": SHIELD_SCENE, "spawn": 3},
+			{"scene": ARCHER_SCENE, "spawn": 4},
+			{"scene": ARCHER_SCENE, "spawn": 5},
+			{"scene": APPRENTICE_SCENE, "spawn": 8}
+		]
+	},
+	{
+		"title": "Hunter Pincer",
+		"units": [
+			{"scene": SWORDSMAN_SCENE, "spawn": 0},
+			{"scene": HUNTER_SCENE, "spawn": 6},
+			{"scene": HUNTER_SCENE, "spawn": 7},
+			{"scene": ARCHER_SCENE, "spawn": 4},
+			{"scene": ARCHER_SCENE, "spawn": 5}
+		]
+	},
+	{
 		"title": "Shadow and Spell",
 		"units": [
 			{"scene": SHIELD_SCENE, "spawn": 2},
@@ -46,37 +68,42 @@ var wave_defs := [
 			{"scene": APPRENTICE_SCENE, "spawn": 4},
 			{"scene": APPRENTICE_SCENE, "spawn": 5}
 		]
-	},
-	{
-		"title": "Arcane Command",
-		"units": [
-			{"scene": SWORDSMAN_SCENE, "spawn": 0, "elite": true},
-			{"scene": SHIELD_SCENE, "spawn": 2, "elite": true},
-			{"scene": ARCHER_SCENE, "spawn": 4, "elite": true},
-			{"scene": HUNTER_SCENE, "spawn": 6, "elite": true},
-			{"scene": APPRENTICE_SCENE, "spawn": 5},
-			{"scene": ARCANIST_SCENE, "spawn": 8}
-		]
 	}
 ]
 
+var final_wave := {
+	"title": "Arcane Command",
+	"units": [
+		{"scene": SWORDSMAN_SCENE, "spawn": 0, "elite": true},
+		{"scene": SHIELD_SCENE, "spawn": 2, "elite": true},
+		{"scene": ARCHER_SCENE, "spawn": 4, "elite": true},
+		{"scene": HUNTER_SCENE, "spawn": 6, "elite": true},
+		{"scene": APPRENTICE_SCENE, "spawn": 5},
+		{"scene": ARCANIST_SCENE, "spawn": 8}
+	]
+}
+
 func _ready() -> void:
+	rng.randomize()
 	_build_spawn_markers()
 
 func bind_player(player: Node2D) -> void:
 	target = player
+	active_waves = _build_active_waves()
 	_start_next_wave()
 
 func get_status_title() -> String:
 	return "Town Enemy Sweep"
 
 func get_status_text() -> String:
-	if wave_index >= wave_defs.size():
+	if active_waves.is_empty():
+		return "Scouts are forming up."
+	if wave_index >= active_waves.size():
 		return "All enemy waves cleared."
-	var wave_name: String = String(wave_defs[wave_index]["title"]) if wave_index >= 0 else "Preparing"
+	var wave_name: String = String(active_waves[wave_index]["title"]) if wave_index >= 0 and wave_index < active_waves.size() else "Preparing"
 	return "Wave %d / %d\n%s\nEnemies remaining %d" % [
 		max(wave_index + 1, 1),
-		wave_defs.size(),
+		active_waves.size(),
 		String(wave_name),
 		active_enemies.size()
 	]
@@ -93,12 +120,12 @@ func _physics_process(_delta: float) -> void:
 func _start_next_wave() -> void:
 	waiting_for_next_wave = false
 	wave_index += 1
-	if wave_index >= wave_defs.size():
+	if wave_index >= active_waves.size():
 		defeated.emit()
 		queue_free()
 		return
 	active_enemies.clear()
-	var wave: Dictionary = wave_defs[wave_index]
+	var wave: Dictionary = active_waves[wave_index]
 	for unit_def in wave["units"]:
 		var scene: PackedScene = unit_def["scene"] as PackedScene
 		var enemy: Node = scene.instantiate()
@@ -133,3 +160,15 @@ func _build_spawn_markers() -> void:
 		marker.name = "Spawn%d" % index
 		marker.position = positions[index]
 		spawn_layer.add_child(marker)
+
+func _build_active_waves() -> Array[Dictionary]:
+	var pool: Array[Dictionary] = []
+	for wave in wave_pool:
+		pool.append((wave as Dictionary).duplicate(true))
+	var selection: Array[Dictionary] = []
+	while selection.size() < 3 and not pool.is_empty():
+		var next_index := rng.randi_range(0, pool.size() - 1)
+		selection.append(pool[next_index])
+		pool.remove_at(next_index)
+	selection.append((final_wave as Dictionary).duplicate(true))
+	return selection

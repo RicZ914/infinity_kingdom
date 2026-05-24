@@ -75,6 +75,13 @@ func _run() -> void:
 		quit(1)
 		return
 	world.run_event_panel.close()
+	world.run_event_panel.open("attunement", 100)
+	await process_frame
+	if not world.run_event_panel.visible:
+		push_error("Attunement panel did not open")
+		quit(1)
+		return
+	world.run_event_panel.close()
 
 	if world.accessory_choice == null or not world.accessory_choice.has_signal("reroll_requested"):
 		push_error("Accessory choice is missing reroll signal")
