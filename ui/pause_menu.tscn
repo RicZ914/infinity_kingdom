@@ -47,6 +47,35 @@ text = "Town boss trial is waiting."
 horizontal_alignment = 1
 autowrap_mode = 3
 
+[node name="RunPanel" type="PanelContainer" parent="Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/RunPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/RunPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="RunSummary" type="Label" parent="Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/RunPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Hero No Champion  |  Gold 0  |  Cleared 0"
+autowrap_mode = 3
+
+[node name="EncounterSummary" type="Label" parent="Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/RunPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Current No active encounter  |  Next Black Market"
+autowrap_mode = 3
+
+[node name="RelicSummary" type="Label" parent="Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/RunPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Relic No Accessory"
+autowrap_mode = 3
+
 [node name="ResumeButton" type="Button" parent="Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
@@ -71,3 +100,9 @@ text = "Champion Select"
 custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 text = "Quit Game"
+
+[node name="Hint" type="Label" parent="Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Esc resume  |  A/F10 audio  |  S settings  |  R select  |  Q quit"
+horizontal_alignment = 1
+autowrap_mode = 3

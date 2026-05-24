@@ -75,6 +75,40 @@ func _run() -> void:
 		return
 	world.pause_menu.close()
 
+	world.pause_menu.open()
+	await process_frame
+	if world.has_method("_on_pause_audio_requested"):
+		world._on_pause_audio_requested()
+		await process_frame
+		if not world.audio_settings_panel.visible or world.pause_menu.visible:
+			push_error("Pause audio flow did not switch to audio panel")
+			quit(1)
+			return
+		world.audio_settings_panel.hide_panel()
+		await process_frame
+		if not world.pause_menu.visible:
+			push_error("Pause menu did not return after closing audio panel")
+			quit(1)
+			return
+		world.pause_menu.close()
+
+	world.pause_menu.open()
+	await process_frame
+	if world.has_method("_on_pause_settings_requested"):
+		world._on_pause_settings_requested()
+		await process_frame
+		if not world.settings_panel.visible or world.pause_menu.visible:
+			push_error("Pause settings flow did not switch to settings panel")
+			quit(1)
+			return
+		world.settings_panel.close()
+		await process_frame
+		if not world.pause_menu.visible:
+			push_error("Pause menu did not return after closing settings panel")
+			quit(1)
+			return
+		world.pause_menu.close()
+
 	if world.audio_settings_panel == null or not world.audio_settings_panel.has_method("show_panel"):
 		push_error("Audio settings panel missing")
 		quit(1)
@@ -130,6 +164,7 @@ func _run() -> void:
 	accessory_manager.reset_run()
 	var test_sizes := [Vector2i(720, 540), Vector2i(1024, 720)]
 	for test_size in test_sizes:
+		_set_layout_override(world.pause_menu, test_size)
 		_set_layout_override(world.audio_settings_panel, test_size)
 		_set_layout_override(world.settings_panel, test_size)
 		_set_layout_override(world.debug_panel, test_size)
@@ -139,6 +174,14 @@ func _run() -> void:
 		_set_layout_override(world.result_screen, test_size)
 		await process_frame
 		await process_frame
+		world.pause_menu.open()
+		await process_frame
+		var pause_panel := world.pause_menu.get_node("Backdrop/CenterContainer/PanelContainer") as PanelContainer
+		if not _assert_control_fits(pause_panel, test_size, "Pause menu panel"):
+			quit(1)
+			return
+		world.pause_menu.close()
+
 		world.audio_settings_panel.show_panel()
 		await process_frame
 		var audio_panel := world.audio_settings_panel.get_node("Backdrop/MarginContainer") as MarginContainer

@@ -12,6 +12,7 @@ const ENCOUNTER_SCENES := [
 ]
 const CONTROL_HINT := "Controls: WASD move, J attack, K / L / I skills. F10 audio mix."
 const RELIC_REROLL_COST := 20
+const HIT_FEEDBACK_COOLDOWN_MSEC := 55
 
 @onready var spawn_marker: Marker2D = $PlayerSpawn
 @onready var encounter_marker: Marker2D = $EncounterSpawn
@@ -35,6 +36,9 @@ var music_request_serial: int = 0
 var audio_panel_was_open: bool = false
 var waiting_for_accessory_choice: bool = false
 var active_accessory_reason: String = ""
+var return_pause_after_audio_panel: bool = false
+var return_pause_after_settings_panel: bool = false
+var last_attack_feedback_msec: int = 0
 
 func _ready() -> void:
 	if character_select != null:
@@ -52,6 +56,8 @@ func _ready() -> void:
 	if run_event_panel != null and run_event_panel.has_signal("event_choice_made"):
 		run_event_panel.event_choice_made.connect(_on_run_event_choice_made)
 	if pause_menu != null:
+		if pause_menu.has_method("bind_world"):
+			pause_menu.bind_world(self)
 		pause_menu.resume_requested.connect(_on_pause_resume_requested)
 		pause_menu.audio_requested.connect(_on_pause_audio_requested)
 		pause_menu.settings_requested.connect(_on_pause_settings_requested)
@@ -59,6 +65,10 @@ func _ready() -> void:
 		pause_menu.quit_requested.connect(_on_quit_requested)
 	if result_screen != null and result_screen.has_signal("closed"):
 		result_screen.closed.connect(_on_result_closed)
+	if audio_settings_panel != null and audio_settings_panel.has_signal("closed"):
+		audio_settings_panel.closed.connect(_on_audio_settings_panel_closed)
+	if settings_panel != null and settings_panel.has_signal("closed"):
+		settings_panel.closed.connect(_on_settings_panel_closed)
 	if debug_panel != null and debug_panel.has_method("bind_world"):
 		debug_panel.bind_world(self)
 	if battle_status != null and battle_status.has_method("set_message"):
@@ -91,6 +101,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 			return
 		if event.keycode == KEY_F10:
+			if pause_menu != null and pause_menu.has_method("is_open") and bool(pause_menu.is_open()):
+				_on_pause_audio_requested()
+				get_viewport().set_input_as_handled()
+				return
 			if audio_settings_panel != null and audio_settings_panel.has_method("toggle_panel"):
 				audio_settings_panel.toggle_panel()
 				_sync_audio_hint_state()
@@ -160,6 +174,8 @@ func _on_character_selected(character_id: StringName) -> void:
 func _start_next_encounter() -> void:
 	waiting_for_accessory_choice = false
 	active_accessory_reason = ""
+	return_pause_after_audio_panel = false
+	return_pause_after_settings_panel = false
 	encounter_index += 1
 	if encounter_index >= ENCOUNTER_SCENES.size():
 		_complete_run_victory()
@@ -343,6 +359,8 @@ func _bind_actor_audio(actor: Node) -> void:
 		return
 	if actor.has_signal("attack_started") and not actor.attack_started.is_connected(_on_actor_attack_started):
 		actor.attack_started.connect(_on_actor_attack_started.bind(actor))
+	if actor.has_signal("attack_hit") and not actor.attack_hit.is_connected(_on_actor_attack_hit):
+		actor.attack_hit.connect(_on_actor_attack_hit.bind(actor))
 	if actor.has_signal("took_damage") and not actor.took_damage.is_connected(_on_actor_took_damage):
 		actor.took_damage.connect(_on_actor_took_damage.bind(actor))
 	if actor.has_signal("died") and not actor.died.is_connected(_on_actor_died):
@@ -389,6 +407,19 @@ func _on_actor_took_damage(_amount: float, _remaining_hp: float, actor: Node) ->
 	if Feedback != null:
 		Feedback.hitstop(0.035)
 
+func _on_actor_attack_hit(attack_name: StringName, target: Node, _actor: Node) -> void:
+	if not (target is Node2D):
+		return
+	var now := Time.get_ticks_msec()
+	var target_defeated := _is_target_defeated(target)
+	var skill_hit := attack_name != &"attack"
+	if not target_defeated and now - last_attack_feedback_msec < HIT_FEEDBACK_COOLDOWN_MSEC:
+		return
+	last_attack_feedback_msec = now
+	if Feedback != null and (skill_hit or target_defeated):
+		Feedback.hitstop(0.028 if target_defeated else 0.018)
+	_spawn_attack_hit_feedback((target as Node2D).global_position, skill_hit, target_defeated)
+
 func _on_actor_died(actor: Node) -> void:
 	if actor == null or not actor.has_method("get_character_name") or Sfx == null:
 		return
@@ -434,19 +465,29 @@ func _sync_audio_hint_state() -> void:
 	audio_shortcut_hint.set_panel_open(panel_open)
 
 func _on_pause_resume_requested() -> void:
+	return_pause_after_audio_panel = false
+	return_pause_after_settings_panel = false
 	if pause_menu != null and pause_menu.has_method("close"):
 		pause_menu.close()
 
 func _on_pause_audio_requested() -> void:
-	if pause_menu != null and pause_menu.has_method("close"):
-		pause_menu.close()
+	return_pause_after_audio_panel = true
+	if pause_menu != null:
+		if pause_menu.has_method("suspend"):
+			pause_menu.suspend()
+		else:
+			pause_menu.visible = false
 	if audio_settings_panel != null and audio_settings_panel.has_method("show_panel"):
 		audio_settings_panel.show_panel()
 	_sync_audio_hint_state()
 
 func _on_pause_settings_requested() -> void:
-	if pause_menu != null and pause_menu.has_method("close"):
-		pause_menu.close()
+	return_pause_after_settings_panel = true
+	if pause_menu != null:
+		if pause_menu.has_method("suspend"):
+			pause_menu.suspend()
+		else:
+			pause_menu.visible = false
 	if settings_panel != null and settings_panel.has_method("open"):
 		settings_panel.open()
 
@@ -456,15 +497,36 @@ func _on_pause_restart_requested() -> void:
 	_reset_to_character_select()
 
 func _on_title_audio_requested() -> void:
+	return_pause_after_audio_panel = false
 	if audio_settings_panel != null and audio_settings_panel.has_method("show_panel"):
 		audio_settings_panel.show_panel()
 	_sync_audio_hint_state()
 
 func _on_title_settings_requested() -> void:
+	return_pause_after_settings_panel = false
 	if settings_panel != null and settings_panel.has_method("open"):
 		settings_panel.open()
 
+func _on_audio_settings_panel_closed() -> void:
+	if return_pause_after_audio_panel:
+		return_pause_after_audio_panel = false
+		if pause_menu != null and pause_menu.has_method("resume_from_submenu"):
+			pause_menu.resume_from_submenu()
+		elif pause_menu != null and pause_menu.has_method("open"):
+			pause_menu.open()
+	_sync_audio_hint_state()
+
+func _on_settings_panel_closed() -> void:
+	if return_pause_after_settings_panel:
+		return_pause_after_settings_panel = false
+		if pause_menu != null and pause_menu.has_method("resume_from_submenu"):
+			pause_menu.resume_from_submenu()
+		elif pause_menu != null and pause_menu.has_method("open"):
+			pause_menu.open()
+
 func _on_quit_requested() -> void:
+	return_pause_after_audio_panel = false
+	return_pause_after_settings_panel = false
 	if pause_menu != null and pause_menu.has_method("close") and bool(pause_menu.is_open()):
 		pause_menu.close()
 	get_tree().paused = false
@@ -490,6 +552,8 @@ func _reset_to_character_select() -> void:
 	encounter_index = -1
 	waiting_for_accessory_choice = false
 	active_accessory_reason = ""
+	return_pause_after_audio_panel = false
+	return_pause_after_settings_panel = false
 	AccessoryManager.reset_run()
 	RunDirector.reset_run()
 	if character_select != null:
@@ -502,3 +566,54 @@ func _reset_to_character_select() -> void:
 		)
 	if Music != null:
 		Music.play_profile(&"title")
+
+func _spawn_attack_hit_feedback(world_position: Vector2, strong: bool, defeated: bool) -> void:
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return
+	var ring := Line2D.new()
+	ring.width = 3.0 if strong else 2.0
+	ring.closed = true
+	ring.default_color = Color(1.0, 0.82, 0.64, 0.92) if strong else Color(0.82, 0.96, 1.0, 0.86)
+	ring.points = _build_feedback_ring_points(18.0 if strong else 14.0, 10)
+	ring.global_position = world_position
+	scene_root.add_child(ring)
+	var ring_tween := create_tween()
+	ring_tween.tween_property(ring, "scale", Vector2.ONE * (1.45 if strong else 1.22), 0.14)
+	ring_tween.parallel().tween_property(ring, "modulate:a", 0.0, 0.14)
+	ring_tween.finished.connect(ring.queue_free)
+	if not defeated:
+		return
+	var burst := Line2D.new()
+	burst.width = 2.5
+	burst.closed = true
+	burst.default_color = Color(1.0, 0.88, 0.56, 0.95)
+	burst.points = _build_feedback_burst_points(10.0, 22.0, 8)
+	burst.global_position = world_position
+	scene_root.add_child(burst)
+	var burst_tween := create_tween()
+	burst_tween.tween_property(burst, "rotation", TAU * 0.22, 0.18)
+	burst_tween.parallel().tween_property(burst, "scale", Vector2.ONE * 1.34, 0.18)
+	burst_tween.parallel().tween_property(burst, "modulate:a", 0.0, 0.18)
+	burst_tween.finished.connect(burst.queue_free)
+
+func _build_feedback_ring_points(radius: float, point_count: int) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	for index in range(point_count):
+		var angle := TAU * float(index) / float(max(point_count, 1))
+		points.append(Vector2.RIGHT.rotated(angle) * radius)
+	return points
+
+func _build_feedback_burst_points(inner_radius: float, outer_radius: float, point_count: int) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	for index in range(point_count * 2):
+		var angle := TAU * float(index) / float(max(point_count * 2, 1))
+		var radius := outer_radius if index % 2 == 0 else inner_radius
+		points.append(Vector2.RIGHT.rotated(angle) * radius)
+	return points
+
+func _is_target_defeated(target: Node) -> bool:
+	for property in target.get_property_list():
+		if String(property.get("name", "")) == "hp":
+			return float(target.get("hp")) <= 0.0
+	return false

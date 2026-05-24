@@ -14,6 +14,7 @@ var inspiration_label: Label
 var shield_label: Label
 var state_label: Label
 var control_label: Label
+var combat_feed_label: Label
 var run_state_label: Label
 var accessory_icon: TextureRect
 var accessory_name_label: Label
@@ -21,6 +22,8 @@ var accessory_tags_label: Label
 var accessory_summary_label: Label
 var skill_slots: Dictionary = {}
 var meter_bars: Array[TextureProgressBar] = []
+var combat_feed_tween: Tween = null
+var last_control_summary: String = ""
 var skill_icon_paths := {
 	"Knight": [
 		"res://assets/ui/skill/knight_charge_slash.png",
@@ -55,6 +58,7 @@ func bind_character(target: Node) -> void:
 	player_character = target
 	if player_character == null:
 		return
+	last_control_summary = ""
 	title_label.text = "%s Combat Frame" % String(player_character.get_character_name())
 	_refresh_skill_icons()
 	_connect_character_signal("hp_changed", _on_hp_changed)
@@ -63,6 +67,8 @@ func bind_character(target: Node) -> void:
 	_connect_character_signal("shield_changed", _on_shield_changed)
 	_connect_character_signal("took_damage", _on_took_damage)
 	_connect_character_signal("control_status_changed", _on_control_status_changed)
+	_connect_character_signal("attack_started", _on_attack_started)
+	_connect_character_signal("attack_hit", _on_attack_hit)
 	_on_hp_changed(player_character.hp, player_character.max_hp)
 	_on_defense_changed(player_character.defense, player_character.max_defense)
 	_on_inspiration_changed(player_character.inspiration, player_character.max_inspiration)
@@ -79,6 +85,7 @@ func _process(_delta: float) -> void:
 		return
 	state_label.text = "State %s" % String(player_character.state_machine.get_state_name())
 	_update_skill_slots()
+	_update_danger_visuals()
 
 func _build_ui() -> void:
 	layer = 5
@@ -133,6 +140,11 @@ func _build_ui() -> void:
 	control_label = _make_label("Status Stable", 12, Color(0.72, 0.88, 1.0))
 	control_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	content.add_child(control_label)
+
+	combat_feed_label = _make_label("Combat feed ready.", 12, Color(0.90, 0.94, 1.0))
+	combat_feed_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	combat_feed_label.custom_minimum_size.y = 22.0
+	content.add_child(combat_feed_label)
 
 	var skills_panel := PanelContainer.new()
 	skills_panel.add_theme_stylebox_override("panel", UISkin.content_panel_style())
@@ -265,9 +277,16 @@ func _on_defense_changed(current_defense: float, max_defense_value: float) -> vo
 func _on_shield_changed(current_shield: float) -> void:
 	shield_label.text = "Shield %d" % int(round(current_shield))
 
-func _on_took_damage(_amount: float, _remaining_hp: float) -> void:
+func _on_took_damage(amount: float, remaining_hp: float) -> void:
 	if player_character != null and is_instance_valid(player_character):
 		_on_shield_changed(player_character.shield)
+	var max_hp_value := float(player_character.max_hp) if player_character != null and is_instance_valid(player_character) else 0.0
+	var hp_ratio := 0.0 if max_hp_value <= 0.0 else clampf(remaining_hp / max_hp_value, 0.0, 1.0)
+	if amount > 0.0:
+		if hp_ratio <= 0.25:
+			_set_combat_feed("Danger %.0f HP" % remaining_hp, Color(1.0, 0.72, 0.68), 1.06)
+		else:
+			_set_combat_feed("Took %.0f damage" % amount, Color(1.0, 0.84, 0.76), 1.04)
 
 func _on_control_status_changed(summary: String) -> void:
 	if control_label == null:
@@ -275,9 +294,30 @@ func _on_control_status_changed(summary: String) -> void:
 	if summary.is_empty():
 		control_label.text = "Status Stable"
 		control_label.modulate = Color(0.72, 0.88, 1.0)
+		if not last_control_summary.is_empty():
+			_set_combat_feed("Steady", Color(0.98, 0.90, 0.68), 1.05)
+		last_control_summary = ""
 		return
 	control_label.text = "Status %s" % summary
 	control_label.modulate = Color(1.0, 0.84, 0.64)
+	if summary != last_control_summary:
+		_set_combat_feed(summary, Color(0.90, 0.82, 1.0), 1.04)
+	last_control_summary = summary
+
+func _on_attack_started(attack_name: StringName) -> void:
+	if attack_name == &"attack":
+		return
+	_set_combat_feed("%s ready" % _attack_display_name(attack_name), Color(0.84, 0.90, 1.0), 1.04)
+
+func _on_attack_hit(attack_name: StringName, target: Node) -> void:
+	var action_label := _attack_display_name(attack_name)
+	var target_defeated := _is_target_defeated(target)
+	if target_defeated:
+		_set_combat_feed("%s finished the target" % action_label, Color(1.0, 0.86, 0.66), 1.08)
+	elif attack_name == &"attack":
+		_set_combat_feed("Hit confirmed", Color(0.86, 0.96, 1.0), 1.03)
+	else:
+		_set_combat_feed("%s landed" % action_label, Color(0.88, 1.0, 0.82), 1.05)
 
 func _on_accessory_equipped(accessory: Dictionary) -> void:
 	if accessory_icon == null:
@@ -325,6 +365,73 @@ func _update_skill_slots() -> void:
 		else:
 			label.text = "%s %.1f" % [String(slot["hotkey"]), cooldown]
 			label.modulate = Color(1.0, 0.80, 0.62)
+
+func _update_danger_visuals() -> void:
+	if player_character == null or not is_instance_valid(player_character):
+		return
+	var max_hp_value := float(player_character.max_hp)
+	var hp_ratio := 0.0 if max_hp_value <= 0.0 else clampf(float(player_character.hp) / max_hp_value, 0.0, 1.0)
+	if hp_ratio <= 0.30:
+		var pulse := 0.78 + 0.22 * sin(Time.get_ticks_msec() * 0.01)
+		hp_label.modulate = Color(1.0, 0.70 + 0.12 * pulse, 0.70 + 0.10 * pulse, 1.0)
+		hp_bar.modulate = Color(1.0, 0.92, 0.92, 0.92 + 0.08 * pulse)
+	else:
+		hp_label.modulate = Color.WHITE
+		hp_bar.modulate = Color.WHITE
+
+func _set_combat_feed(text: String, color_value: Color, scale_value: float = 1.0) -> void:
+	if combat_feed_label == null:
+		return
+	combat_feed_label.text = text
+	combat_feed_label.modulate = color_value
+	combat_feed_label.scale = Vector2.ONE * scale_value
+	if combat_feed_tween != null:
+		combat_feed_tween.kill()
+	combat_feed_tween = create_tween()
+	combat_feed_tween.tween_property(combat_feed_label, "scale", Vector2.ONE, 0.16)
+
+func _attack_display_name(attack_name: StringName) -> String:
+	var character_name := String(player_character.get_character_name()) if player_character != null and is_instance_valid(player_character) and player_character.has_method("get_character_name") else ""
+	match character_name:
+		"Knight":
+			match attack_name:
+				&"skill1":
+					return "Charge Slash"
+				&"skill2":
+					return "Counter Shock"
+				&"skill3":
+					return "Holy Field"
+		"Ranger":
+			match attack_name:
+				&"skill1":
+					return "Piercing Arrow"
+				&"skill2":
+					return "Shadow Step"
+				&"skill3":
+					return "Hunt Rush"
+		"Mage":
+			match attack_name:
+				&"skill1":
+					return "Arcane Blades"
+				&"skill2":
+					return "Arcane Burst"
+				&"skill3":
+					return "Silence Decree"
+	match attack_name:
+		&"attack":
+			return "Attack"
+		&"skill1_bonus":
+			return "Blade Echo"
+		_:
+			return String(attack_name).capitalize()
+
+func _is_target_defeated(target: Node) -> bool:
+	if target == null or not is_instance_valid(target):
+		return false
+	for property in target.get_property_list():
+		if String(property.get("name", "")) == "hp":
+			return float(target.get("hp")) <= 0.0
+	return false
 
 func _queue_layout_refresh() -> void:
 	call_deferred("_refresh_layout")

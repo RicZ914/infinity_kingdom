@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+signal closed
+
 const BUS_MUSIC := "Music"
 const BUS_AMBIENCE := "Ambience"
 const BUS_SFX := "SFX"
@@ -91,8 +93,11 @@ func is_open() -> bool:
 	return visible
 
 func set_panel_visible(is_visible: bool) -> void:
+	var was_visible := visible
 	visible = is_visible
 	if not is_visible:
+		if was_visible:
+			closed.emit()
 		return
 	refresh_values()
 	_set_status_text("Audio settings are saved locally. Drag a slider or mute a lane to adjust the chapter mix.")
