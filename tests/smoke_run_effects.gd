@@ -1,15 +1,36 @@
 extends SceneTree
 
-const KNIGHT_SCENE := preload("res://characters/knight/knight.tscn")
-const RunEffects := preload("res://systems/run/run_effects.gd")
+class TestActor:
+	extends Node
+
+	var max_hp: float = 100.0
+	var hp: float = 60.0
+	var max_defense: float = 50.0
+	var defense: float = 12.0
+	var max_inspiration: float = 40.0
+	var inspiration: float = 10.0
+	var attack_damage: float = 20.0
+	var move_speed: float = 300.0
+	var crit_rate: float = 0.0
+	var skill1_cooldown: float = 4.0
+	var skill2_cooldown: float = 8.0
+	var skill3_cooldown: float = 12.0
+
+	func heal(amount: float) -> void:
+		hp = clampf(hp + amount, 0.0, max_hp)
+
+	func emit_stat_signals() -> void:
+		pass
 
 func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
-	var knight := KNIGHT_SCENE.instantiate()
-	root.add_child(knight)
-	await process_frame
+	var run_effects := load("res://systems/run/run_effects.gd")
+	if run_effects == null:
+		push_error("RunEffects script did not load")
+		quit(1)
+		return
 	var run_director := root.get_node_or_null("/root/RunDirector")
 	var accessory_manager := root.get_node_or_null("/root/AccessoryManager")
 	if run_director == null or accessory_manager == null:
@@ -17,31 +38,32 @@ func _run() -> void:
 		quit(1)
 		return
 	run_director.reset_run()
-	var base_damage := float(knight.attack_damage)
-	var base_speed := float(knight.move_speed)
-	var base_crit := float(knight.crit_rate)
-	RunEffects.apply_choice("shop_attack", knight)
-	RunEffects.apply_choice("train_speed", knight)
-	RunEffects.apply_choice("train_crit", knight)
-	if float(knight.attack_damage) <= base_damage:
+	var actor := TestActor.new()
+	root.add_child(actor)
+	var base_damage := float(actor.attack_damage)
+	var base_speed := float(actor.move_speed)
+	var base_crit := float(actor.crit_rate)
+	run_effects.apply_choice("shop_attack", actor)
+	run_effects.apply_choice("train_speed", actor)
+	run_effects.apply_choice("train_crit", actor)
+	if float(actor.attack_damage) <= base_damage:
 		push_error("shop_attack did not increase damage")
 		quit(1)
 		return
-	if float(knight.move_speed) <= base_speed:
+	if float(actor.move_speed) <= base_speed:
 		push_error("train_speed did not increase move speed")
 		quit(1)
 		return
-	if float(knight.crit_rate) <= base_crit:
+	if float(actor.crit_rate) <= base_crit:
 		push_error("train_crit did not increase crit rate")
 		quit(1)
 		return
-	var modified_damage := float(knight.attack_damage)
-	accessory_manager.equip("iron_branch_pendant", knight)
-	RunEffects.refresh_persistent_modifiers(knight)
-	if float(knight.attack_damage) < modified_damage - 0.01:
+	var modified_damage := float(actor.attack_damage)
+	accessory_manager.equip("iron_branch_pendant", actor)
+	run_effects.refresh_persistent_modifiers(actor)
+	if float(actor.attack_damage) < modified_damage - 0.01:
 		push_error("Run modifiers were lost after accessory reapply")
 		quit(1)
 		return
-	knight.queue_free()
-	await process_frame
+	actor.queue_free()
 	quit(0)

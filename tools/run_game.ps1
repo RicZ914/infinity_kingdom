@@ -7,8 +7,8 @@ $ErrorActionPreference = "Stop"
 
 $ProjectRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $CandidatePaths = @(
-    (Join-Path $ProjectRoot "..\_tools\godot_4_6_3\Godot_v4.6.3-stable_win64.exe"),
-    (Join-Path $ProjectRoot "..\_tools\godot_4_6_3\Godot_v4.6.3-stable_win64_console.exe")
+    (Join-Path $ProjectRoot "..\_tools\godot_4_6_3\Godot_v4.6.3-stable_win64_console.exe"),
+    (Join-Path $ProjectRoot "..\_tools\godot_4_6_3\Godot_v4.6.3-stable_win64.exe")
 )
 
 $Godot = $null
