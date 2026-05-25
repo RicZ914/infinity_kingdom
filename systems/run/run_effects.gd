@@ -51,6 +51,36 @@ const ATTUNEMENT_CHOICE_DATA := {
 	}
 }
 
+const HERO_TAG_PROFILES := {
+	"Knight": ["defense", "survival", "power"],
+	"Ranger": ["crit", "speed", "tempo", "damage"],
+	"Mage": ["skill", "resource", "power"]
+}
+
+const CHOICE_TAGS := {
+	"shop_attack": ["attack", "damage"],
+	"shop_defense": ["defense", "survival"],
+	"shop_relic": ["resource", "tempo"],
+	"bounty_cache": ["resource"],
+	"bounty_contract": ["resource", "tempo"],
+	"bounty_tithe": ["risk", "damage"],
+	"rest_heal": ["survival"],
+	"rest_focus": ["defense", "resource", "skill"],
+	"rest_repair": ["defense", "survival"],
+	"train_crit": ["crit", "damage"],
+	"train_speed": ["speed", "tempo"],
+	"train_cooldown": ["skill", "tempo", "resource"],
+	"train_resource": ["resource", "skill"],
+	"pact_power": ["power", "damage", "risk"],
+	"pact_guard": ["defense", "survival"],
+	"pact_focus": ["skill", "resource", "power"],
+	"attune_offense": ["damage", "crit"],
+	"attune_focus": ["skill", "resource"],
+	"attune_guard": ["defense", "survival"],
+	"attune_flow": ["speed", "tempo"],
+	"attune_gambit": ["crit", "risk", "damage"]
+}
+
 static func apply_choice(choice_id: String, actor: Node) -> void:
 	if actor == null or not is_instance_valid(actor):
 		return
@@ -239,6 +269,91 @@ static func attunement_choices() -> Array[Dictionary]:
 		choices.append(data)
 	return choices
 
+static func choice_tags(choice_id: String) -> Array[String]:
+	var tags: Array[String] = []
+	for tag in CHOICE_TAGS.get(choice_id, []):
+		var next_tag := String(tag)
+		if next_tag.is_empty() or tags.has(next_tag):
+			continue
+		tags.append(next_tag)
+	return tags
+
+static func evaluate_choice(choice_id: String, actor: Node = null) -> Dictionary:
+	if choice_id == "skip":
+		return {
+			"label": "Hold",
+			"color": Color(0.76, 0.82, 0.90),
+			"reason": "Passing keeps the current route and build unchanged."
+		}
+	var relic_tags := AccessoryManager.get_equipped_tags()
+	var hero_name := _hero_name(actor)
+	var hero_tags: Array[String] = []
+	for tag in HERO_TAG_PROFILES.get(hero_name, []):
+		var next_tag := String(tag)
+		if next_tag.is_empty() or hero_tags.has(next_tag):
+			continue
+		hero_tags.append(next_tag)
+	var effect_tags := choice_tags(choice_id)
+	var relic_matches: Array[String] = []
+	var hero_matches: Array[String] = []
+	for tag in effect_tags:
+		if relic_tags.has(tag) and not relic_matches.has(tag):
+			relic_matches.append(tag)
+		if hero_tags.has(tag) and not hero_matches.has(tag):
+			hero_matches.append(tag)
+
+	var hp_ratio := _ratio(actor, "hp", "max_hp")
+	var defense_ratio := _ratio(actor, "defense", "max_defense")
+	var inspiration_ratio := _ratio(actor, "inspiration", "max_inspiration")
+	var score := relic_matches.size() * 2 + hero_matches.size()
+	var reasons: Array[String] = []
+	if not relic_matches.is_empty():
+		reasons.append("Matches relic tags: %s." % AccessoryManager.describe_tags(relic_matches))
+	if not hero_matches.is_empty() and not hero_name.is_empty():
+		reasons.append("Plays well with %s's preferred lane." % hero_name)
+	if choice_id == "rest_heal" and hp_ratio <= 0.55:
+		score += 3
+		reasons.append("Your health margin is low enough that raw healing is premium.")
+	if choice_id == "rest_focus" and (defense_ratio <= 0.35 or inspiration_ratio <= 0.35):
+		score += 2
+		reasons.append("You are short on armor or inspiration for the next check.")
+	if choice_id == "shop_defense" and defense_ratio <= 0.40:
+		score += 2
+		reasons.append("Defense is already thin, so armor value is immediate.")
+	if choice_id == "train_resource" and inspiration_ratio <= 0.40:
+		score += 2
+		reasons.append("Your hero is running close to inspiration pressure.")
+	if choice_id == "shop_relic" and AccessoryManager.get_equipped_tags().is_empty():
+		score += 2
+		reasons.append("An extra relic is strongest when your build identity is still thin.")
+	if choice_id in ["bounty_tithe", "pact_power", "attune_gambit"] and hp_ratio <= 0.42:
+		score -= 3
+		reasons.append("This stacks risk while your current health buffer is already narrow.")
+	if choice_id == "pact_guard" and hero_name == "Ranger":
+		score -= 1
+		reasons.append("The move-speed tax cuts into Ranger's cleanest advantage.")
+
+	var label := "Flexible"
+	var color := Color(0.80, 0.88, 1.0)
+	if score >= 5:
+		label = "Best Now"
+		color = Color(0.78, 0.96, 0.82)
+	elif score >= 2:
+		label = "Strong Fit"
+		color = Color(0.92, 0.90, 0.66)
+	elif score >= 0:
+		label = "Flexible"
+		color = Color(0.80, 0.88, 1.0)
+	else:
+		label = "Risky"
+		color = Color(1.0, 0.76, 0.70)
+
+	return {
+		"label": label,
+		"color": color,
+		"reason": reasons[0] if not reasons.is_empty() else "Keeps the run moving without a special synergy hook."
+	}
+
 static func heal_percent(actor: Node, percent: float) -> void:
 	if not _has_property(actor, "max_hp") or not actor.has_method("heal"):
 		return
@@ -270,3 +385,18 @@ static func _has_property(actor: Node, field: String) -> bool:
 		if String(property.get("name", "")) == field:
 			return true
 	return false
+
+static func _ratio(actor: Node, current_field: String, max_field: String) -> float:
+	if actor == null or not is_instance_valid(actor):
+		return 1.0
+	if not _has_property(actor, current_field) or not _has_property(actor, max_field):
+		return 1.0
+	var max_value := float(actor.get(max_field))
+	if max_value <= 0.0:
+		return 1.0
+	return clampf(float(actor.get(current_field)) / max_value, 0.0, 1.0)
+
+static func _hero_name(actor: Node) -> String:
+	if actor == null or not is_instance_valid(actor) or not actor.has_method("get_character_name"):
+		return ""
+	return String(actor.get_character_name())

@@ -73,6 +73,22 @@ func peek_next_event_kind() -> String:
 		return ""
 	return String(event_deck[0])
 
+func get_upcoming_events(limit: int = -1) -> Array[String]:
+	var events: Array[String] = []
+	for event_kind in event_deck:
+		events.append(String(event_kind))
+		if limit > 0 and events.size() >= limit:
+			break
+	return events
+
+func describe_event_route(limit: int = 4, include_victory: bool = true) -> String:
+	var parts: Array[String] = []
+	for event_kind in get_upcoming_events(limit):
+		parts.append(describe_event_kind(event_kind))
+	if include_victory:
+		parts.append("Victory")
+	return " -> ".join(parts)
+
 func describe_event_kind(kind: String) -> String:
 	match kind:
 		"shop":

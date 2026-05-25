@@ -178,11 +178,13 @@ func _run() -> void:
 		return
 	world.run_event_panel.open("shop", 100)
 	await process_frame
+	await process_frame
 	if not world.run_event_panel.visible:
 		push_error("Run event panel did not open")
 		quit(1)
 		return
 	var build_summary := world.run_event_panel.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ContextPanel/MarginContainer/VBoxContainer/BuildSummary") as Label
+	var rule_summary_label := world.run_event_panel.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ContextPanel/MarginContainer/VBoxContainer/RuleSummary") as Label
 	var detail_label := world.run_event_panel.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Detail") as Label
 	if build_summary == null or build_summary.text.is_empty():
 		push_error("Run event panel build summary is empty")
@@ -190,6 +192,14 @@ func _run() -> void:
 		return
 	if detail_label == null or detail_label.text.is_empty():
 		push_error("Run event panel detail preview is empty")
+		quit(1)
+		return
+	if detail_label.text.find("Fit") == -1:
+		push_error("Run event panel detail preview is missing build fit guidance")
+		quit(1)
+		return
+	if rule_summary_label == null or rule_summary_label.text.find("Route") == -1:
+		push_error("Run event panel rule summary is missing route preview")
 		quit(1)
 		return
 	var event_footer := world.run_event_panel.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Footer") as Label
@@ -202,6 +212,19 @@ func _run() -> void:
 	await process_frame
 	if not world.run_event_panel.visible:
 		push_error("Attunement panel did not open")
+		quit(1)
+		return
+	world.run_event_panel.close()
+	world.run_event_panel.open("training", 100)
+	await process_frame
+	var training_choice_row := world.run_event_panel.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ChoiceScroll/ChoiceRow") as GridContainer
+	var training_has_skip := false
+	for child in training_choice_row.get_children():
+		if child is Button and String((child as Button).get_meta("choice_id", "")) == "skip":
+			training_has_skip = true
+			break
+	if not training_has_skip:
+		push_error("Training panel is missing an explicit skip choice")
 		quit(1)
 		return
 	world.run_event_panel.close()

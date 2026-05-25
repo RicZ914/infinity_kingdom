@@ -176,13 +176,15 @@ func _on_run_state_changed(state: Dictionary) -> void:
 		if reward_multiplier > 1.001:
 			parts.append("x%.2f reward" % reward_multiplier)
 		reward_bonus_text = " ".join(parts)
-	run_label.text = "Gold %d  |  Last +%d  |  Cleared %d\nNext %s  |  Run effects %d  |  Bounty %s" % [
+	var route_preview := RunDirector.describe_event_route(3)
+	run_label.text = "Gold %d  |  Last +%d  |  Cleared %d\nNext %s  |  Run effects %d  |  Bounty %s\nRoute %s" % [
 		int(state.get("gold", 0)),
 		int(state.get("last_reward_gold", 0)),
 		int(state.get("cleared_encounters", 0)),
 		next_text,
 		modifier_count,
-		reward_bonus_text
+		reward_bonus_text,
+		route_preview
 	]
 
 func _queue_layout_refresh() -> void:

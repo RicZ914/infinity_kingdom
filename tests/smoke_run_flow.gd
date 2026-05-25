@@ -82,6 +82,11 @@ func _run() -> void:
 			quit(1)
 			return
 	run_director.reset_run()
+	var route_preview: String = run_director.describe_event_route(4)
+	if route_preview.find("Black Market") == -1 or route_preview.find("Victory") == -1:
+		push_error("RunDirector route preview did not describe the current event route")
+		quit(1)
+		return
 
 	world._on_character_selected(&"knight")
 	await process_frame

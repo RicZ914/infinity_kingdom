@@ -98,6 +98,7 @@ func _rebuild(kind: String, gold: int) -> void:
 			choice_row.add_child(_choice_card("train_speed", "Footwork", "+8% move speed.", "res://assets/ui/icon/stat_speed_pixel.png", 0, gold))
 			choice_row.add_child(_choice_card("train_cooldown", "Rhythm", "-6% skill cooldowns.", "res://assets/ui/icon/stat_cooldown_pixel.png", 0, gold))
 			choice_row.add_child(_choice_card("train_resource", "Focus Drill", "+12 max inspiration.", "res://assets/ui/icon/stat_mana_pixel.png", 0, gold))
+			choice_row.add_child(_choice_card("skip", "Leave the Yard", "Skip training and keep the build unchanged.", "res://assets/ui/icon/ui_back.png", 0, gold))
 		"pact":
 			title_label.text = "Forbidden Pact"
 			subtitle_label.text = "Take a sharp edge now, and live with the tradeoff for the rest of the run."
@@ -164,7 +165,8 @@ func _choice_card(choice_id: String, title: String, summary: String, icon_path: 
 	badge_row.add_theme_constant_override("separation", 6)
 	box.add_child(badge_row)
 	badge_row.add_child(_badge(String(meta.get("type", "Choice")), meta.get("color", Color(0.82, 0.86, 0.96))))
-	badge_row.add_child(_badge(String(meta.get("timing", "Now")), meta.get("timing_color", Color(0.92, 0.84, 0.66))))
+	var fit_data := RunEffects.evaluate_choice(choice_id, _current_actor())
+	badge_row.add_child(_badge(String(fit_data.get("label", meta.get("timing", "Now"))), fit_data.get("color", meta.get("timing_color", Color(0.92, 0.84, 0.66)))))
 
 	var slot := PanelContainer.new()
 	slot.custom_minimum_size = Vector2(88, 88)
@@ -226,6 +228,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_4, KEY_KP_4:
 				_activate_choice_index(3)
 				get_viewport().set_input_as_handled()
+			KEY_5, KEY_KP_5:
+				_activate_choice_index(4)
+				get_viewport().set_input_as_handled()
 			KEY_ESCAPE:
 				_activate_skip_choice()
 				get_viewport().set_input_as_handled()
@@ -253,18 +258,18 @@ func _refresh_context(kind: String, gold: int) -> void:
 	var equipped_accessory := AccessoryManager.get_equipped_accessory()
 	var accessory_name := String(equipped_accessory.get("name", "No Accessory"))
 	var tags_text := AccessoryManager.describe_tags(equipped_accessory.get("tags", []))
-	var next_event := RunDirector.describe_event_kind(RunDirector.peek_next_event_kind())
+	var route_preview := RunDirector.describe_event_route(4)
 	build_summary_label.text = "Gold %d  |  Relic %s%s" % [
 		gold,
 		accessory_name,
 		("  |  %s" % tags_text) if not tags_text.is_empty() else ""
 	]
-	rule_summary_label.text = _rule_summary_for_kind(kind, next_event)
+	rule_summary_label.text = "%s\nRoute %s" % [_rule_summary_for_kind(kind), route_preview]
 
-func _rule_summary_for_kind(kind: String, next_event: String) -> String:
+func _rule_summary_for_kind(kind: String) -> String:
 	match kind:
 		"shop":
-			return "Buy one focused upgrade now. Next event after this: %s." % next_event
+			return "Buy one focused upgrade now. Economy spent here is gone immediately."
 		"bounty":
 			return "Bounties shape your economy. Immediate gold spikes now, contracts pay through later fights."
 		"rest":
@@ -296,7 +301,10 @@ func _default_detail_for_kind(kind: String) -> String:
 			return "Choose a path and continue."
 
 func _footer_text_for_kind(kind: String) -> String:
-	var lead := "1-4 choose  |  Esc skip"
+	var shortcut_count := mini(maxi(choice_row.get_child_count(), 1), 5)
+	var lead := "1-%d choose" % shortcut_count
+	if _has_skip_choice():
+		lead += "  |  Esc skip"
 	match kind:
 		"shop":
 			return "%s  |  Gold is spent immediately." % lead
@@ -315,12 +323,14 @@ func _footer_text_for_kind(kind: String) -> String:
 
 func _preview_choice(choice_id: String, title: String, summary: String, cost: int, disabled: bool) -> void:
 	var meta := _choice_meta(choice_id, cost)
+	var fit_data := RunEffects.evaluate_choice(choice_id, _current_actor())
 	var cost_text := "Cost %d gold." % cost if cost > 0 else "No gold cost."
 	if disabled:
 		cost_text = "Not enough gold yet."
-	detail_label.text = "%s: %s %s %s" % [
+	detail_label.text = "%s: Fit %s. %s %s %s" % [
 		title,
-		String(meta.get("detail", "")),
+		String(fit_data.get("label", "Flexible")),
+		String(fit_data.get("reason", meta.get("detail", ""))),
 		summary,
 		cost_text
 	]
@@ -383,6 +393,18 @@ func _choice_meta(choice_id: String, cost: int) -> Dictionary:
 		meta["timing"] = "Cost %d" % cost
 	return meta
 
+func _current_actor() -> Node:
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return null
+	return scene_root.get("player_character") if scene_root.has_method("get") else null
+
+func _has_skip_choice() -> bool:
+	for button in choice_buttons:
+		if button != null and String(button.get_meta("choice_id", "")) == "skip":
+			return true
+	return false
+
 func _badge(text_value: String, color_value: Color) -> PanelContainer:
 	var panel_value := PanelContainer.new()
 	panel_value.add_theme_stylebox_override(
@@ -422,7 +444,10 @@ func _refresh_layout() -> void:
 	UISkin.label(detail_label, 11 if compact else 12, Color(0.92, 0.86, 0.72))
 	UISkin.label(footer_label, 11 if compact else 12, Color(0.74, 0.80, 0.88))
 	if very_compact:
-		footer_label.text = "1-4 choose  |  Esc skip"
+		footer_label.text = "1-%d choose%s" % [
+			mini(maxi(choice_row.get_child_count(), 1), 5),
+			"  |  Esc skip" if _has_skip_choice() else ""
+		]
 	var card_width := 212.0 if very_compact else (224.0 if compact else 236.0)
 	var card_height := 238.0 if very_compact else (252.0 if compact else 274.0)
 	var available_width := maxf(choice_scroll.size.x, panel.custom_minimum_size.x - (56.0 if very_compact else 96.0))
