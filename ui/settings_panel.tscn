@@ -47,6 +47,12 @@ text = "Windowed | VSync On"
 horizontal_alignment = 1
 autowrap_mode = 3
 
+[node name="Hint" type="Label" parent="Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "F fullscreen  |  W windowed  |  V vsync  |  Esc close"
+horizontal_alignment = 1
+autowrap_mode = 3
+
 [node name="FullscreenButton" type="Button" parent="Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 56)
 layout_mode = 2

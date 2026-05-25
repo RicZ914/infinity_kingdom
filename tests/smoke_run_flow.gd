@@ -21,6 +21,48 @@ func _run() -> void:
 		quit(1)
 		return
 
+	var town_encounter_scene := load("res://actors/encounters/town_mob_encounter.tscn") as PackedScene
+	if town_encounter_scene == null:
+		push_error("Town encounter scene did not load")
+		quit(1)
+		return
+	var encounter_player := Node2D.new()
+	encounter_player.name = "EncounterSmokePlayer"
+	encounter_player.add_to_group("player")
+	root.add_child(encounter_player)
+	var preview_encounter := town_encounter_scene.instantiate()
+	root.add_child(preview_encounter)
+	var preview_rng := preview_encounter.get("rng") as RandomNumberGenerator
+	if preview_rng == null:
+		push_error("Town encounter RNG did not initialize")
+		quit(1)
+		return
+	preview_rng.seed = 11
+	if not preview_encounter.has_method("bind_player"):
+		push_error("Town encounter is missing bind_player")
+		quit(1)
+		return
+	preview_encounter.call("bind_player", encounter_player)
+	await process_frame
+	var preview_waves: Variant = preview_encounter.get("active_waves")
+	if not (preview_waves is Array) or (preview_waves as Array).size() != 4:
+		push_error("Town encounter did not build three waves plus a final wave")
+		quit(1)
+		return
+	var modifier_title := String(preview_encounter.call("get_modifier_title")) if preview_encounter.has_method("get_modifier_title") else ""
+	var modifier_hint := String(preview_encounter.call("get_modifier_hint")) if preview_encounter.has_method("get_modifier_hint") else ""
+	if modifier_title.is_empty() or modifier_hint.is_empty():
+		push_error("Town encounter modifier did not initialize")
+		quit(1)
+		return
+	if String(preview_encounter.call("get_status_text")).find("Modifier:") == -1:
+		push_error("Town encounter status text did not expose the encounter modifier")
+		quit(1)
+		return
+	preview_encounter.queue_free()
+	encounter_player.queue_free()
+	await process_frame
+
 	var world := world_scene.instantiate()
 	root.add_child(world)
 	await process_frame

@@ -578,6 +578,7 @@ func _event_status_hint(kind: String) -> String:
 func _encounter_threat_hint(encounter: Node) -> String:
 	var script_path := _script_path(encounter)
 	if script_path.ends_with("town_mob_encounter.gd"):
+		var modifier_hint := String(encounter.call("get_modifier_hint")) if encounter.has_method("get_modifier_hint") else ""
 		var wave_index := int(encounter.get("wave_index")) if _has_property(encounter, "wave_index") else -1
 		var wave_total := 0
 		if _has_property(encounter, "active_waves"):
@@ -585,17 +586,21 @@ func _encounter_threat_hint(encounter: Node) -> String:
 			if active_waves_value is Array:
 				wave_total = (active_waves_value as Array).size()
 		if _has_property(encounter, "waiting_for_next_wave") and bool(encounter.get("waiting_for_next_wave")):
-			return "Wave %d cleared. Reposition before the next pack lands." % max(wave_index + 1, 1)
+			var reset_hint := "Wave %d cleared. Reposition before the next pack lands." % max(wave_index + 1, 1)
+			return "%s %s" % [modifier_hint, reset_hint] if not modifier_hint.is_empty() else reset_hint
 		if wave_total > 0 and wave_index >= wave_total - 1:
-			return "Final wave mixes elites with arcanist control. Remove ranged pressure first."
+			var final_hint := "Final wave mixes elites with arcanist control. Remove ranged pressure first."
+			return "%s %s" % [modifier_hint, final_hint] if not modifier_hint.is_empty() else final_hint
 		var active_enemy_count := 0
 		if _has_property(encounter, "active_enemies"):
 			var active_enemies_value: Variant = encounter.get("active_enemies")
 			if active_enemies_value is Array:
 				active_enemy_count = (active_enemies_value as Array).size()
 		if active_enemy_count >= 5:
-			return "Mixed melee and ranged pressure. Thin archers and mages before hunters collapse."
-		return "Keep space from flankers and do not stand still against ranged telegraphs."
+			var crowd_hint := "Mixed melee and ranged pressure. Thin archers and mages before hunters collapse."
+			return "%s %s" % [modifier_hint, crowd_hint] if not modifier_hint.is_empty() else crowd_hint
+		var baseline_hint := "Keep space from flankers and do not stand still against ranged telegraphs."
+		return "%s %s" % [modifier_hint, baseline_hint] if not modifier_hint.is_empty() else baseline_hint
 	if script_path.ends_with("judicator_boss.gd"):
 		var state_name := String(encounter.get("state")) if _has_property(encounter, "state") else ""
 		var enraged := bool(encounter.get("enraged")) if _has_property(encounter, "enraged") else false

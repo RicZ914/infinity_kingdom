@@ -131,10 +131,19 @@ func _run() -> void:
 			push_error("Pause settings flow did not switch to settings panel")
 			quit(1)
 			return
-		world.settings_panel.close()
+		var settings_hint := world.settings_panel.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Hint") as Label
+		if settings_hint == null or settings_hint.text.find("Esc") == -1 or settings_hint.text.find("F") == -1:
+			push_error("Settings panel shortcut hint did not initialize")
+			quit(1)
+			return
+		var close_settings_event := InputEventKey.new()
+		close_settings_event.keycode = KEY_ESCAPE
+		close_settings_event.pressed = true
+		world.settings_panel._unhandled_input(close_settings_event)
+		await process_frame
 		await process_frame
 		if not world.pause_menu.visible:
-			push_error("Pause menu did not return after closing settings panel")
+			push_error("Pause menu did not return after keyboard-closing settings panel")
 			quit(1)
 			return
 		world.pause_menu.close()
@@ -263,6 +272,11 @@ func _run() -> void:
 		await process_frame
 		var settings_panel := world.settings_panel.get_node("Backdrop/CenterContainer/PanelContainer") as PanelContainer
 		if not _assert_control_fits(settings_panel, test_size, "Settings panel"):
+			quit(1)
+			return
+		var settings_hint := world.settings_panel.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Hint") as Label
+		if settings_hint == null or settings_hint.text.find("Esc") == -1:
+			push_error("Settings panel hint label is missing close shortcut text")
 			quit(1)
 			return
 		world.settings_panel.close()
