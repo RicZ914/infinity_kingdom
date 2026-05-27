@@ -35,6 +35,7 @@ var music_request_serial: int = 0
 var audio_panel_was_open: bool = false
 var waiting_for_accessory_choice: bool = false
 var active_accessory_reason: String = ""
+var active_accessory_source: String = ""
 var active_run_event_kind: String = ""
 var active_encounter_prep: Dictionary = {}
 var return_pause_after_audio_panel: bool = false
@@ -173,11 +174,12 @@ func _on_character_selected(character_id: StringName) -> void:
 	if player_character.has_signal("died"):
 		player_character.died.connect(_on_player_died)
 	encounter_index = -1
-	_offer_accessory(_ui_text("First Relic", "初始饰品", "初始飾品"))
+	_offer_accessory(_ui_text("First Relic", "初始饰品", "初始飾品"), "opening")
 
 func _start_next_encounter() -> void:
 	waiting_for_accessory_choice = false
 	active_accessory_reason = ""
+	active_accessory_source = ""
 	active_run_event_kind = ""
 	return_pause_after_audio_panel = false
 	return_pause_after_settings_panel = false
@@ -257,16 +259,21 @@ func _on_player_died() -> void:
 	_refresh_battle_status()
 	waiting_for_accessory_choice = false
 	active_accessory_reason = ""
+	active_accessory_source = ""
 	active_run_event_kind = ""
 
-func _offer_accessory(reason: String) -> void:
+func _offer_accessory(reason: String, source: String = "route") -> void:
 	if accessory_choice == null or not accessory_choice.has_method("open"):
 		_start_next_encounter()
 		return
 	waiting_for_accessory_choice = true
 	active_accessory_reason = reason
+	active_accessory_source = source
 	active_run_event_kind = ""
-	var choices := AccessoryManager.generate_choices(3)
+	var choices := AccessoryManager.generate_choices(3, player_character, {
+		"stage": maxi(encounter_index + 1, 0),
+		"source": source
+	})
 	accessory_choice.open(choices, player_character, reason, RELIC_REROLL_COST, int(RunDirector.gold))
 	_refresh_battle_status(
 		reason,
@@ -280,7 +287,7 @@ func _offer_accessory(reason: String) -> void:
 func _offer_next_run_event() -> void:
 	var kind := RunDirector.next_event_kind()
 	if kind == "relic" or run_event_panel == null or not run_event_panel.has_method("open"):
-		_offer_accessory(_ui_text("Victory Relic", "胜利饰品", "勝利飾品"))
+		_offer_accessory(_ui_text("Victory Relic", "胜利饰品", "勝利飾品"), "victory")
 		return
 	active_run_event_kind = kind
 	run_event_panel.open(kind, int(RunDirector.gold))
@@ -293,6 +300,7 @@ func _offer_next_run_event() -> void:
 func _on_accessory_choice_made(_accessory_id: String, kept_current: bool) -> void:
 	waiting_for_accessory_choice = false
 	active_accessory_reason = ""
+	active_accessory_source = ""
 	if player_character != null and is_instance_valid(player_character):
 		RunEffects.refresh_persistent_modifiers(player_character)
 	if Sfx != null:
@@ -315,7 +323,11 @@ func _on_accessory_reroll_requested() -> void:
 	if Sfx != null:
 		_play_ui_feedback(true)
 	var reason := active_accessory_reason if not active_accessory_reason.is_empty() else _ui_text("Relic Offering", "饰品赐予", "飾品賜予")
-	var choices := AccessoryManager.generate_choices(3)
+	var choices := AccessoryManager.generate_choices(3, player_character, {
+		"stage": maxi(encounter_index + 1, 0),
+		"source": active_accessory_source if not active_accessory_source.is_empty() else "route",
+		"reroll": true
+	})
 	accessory_choice.open(choices, player_character, reason, RELIC_REROLL_COST, int(RunDirector.gold))
 	_refresh_battle_status(
 		_ui_text("Relic Rerolled", "饰品重抽", "飾品重抽"),
@@ -349,7 +361,7 @@ func _on_run_event_choice_made(choice_id: String) -> void:
 	)
 	active_run_event_kind = ""
 	if choice_id == "shop_relic" and applied:
-		_offer_accessory(_ui_text("Purchased Relic", "购买饰品", "購買飾品"))
+		_offer_accessory(_ui_text("Purchased Relic", "购买饰品", "購買飾品"), "shop")
 	else:
 		_start_next_encounter()
 
@@ -896,6 +908,7 @@ func _reset_to_character_select() -> void:
 	encounter_index = -1
 	waiting_for_accessory_choice = false
 	active_accessory_reason = ""
+	active_accessory_source = ""
 	active_run_event_kind = ""
 	active_encounter_prep.clear()
 	return_pause_after_audio_panel = false

@@ -114,7 +114,7 @@ static func button_styles(button: Button, size: String = "medium") -> void:
 	_apply_button_text(button)
 
 static func label(label_value: Label, size: int, color: Color = COLOR_TEXT) -> void:
-	label_value.remove_theme_font_override("font")
+	label_value.add_theme_font_override("font", active_font())
 	label_value.add_theme_font_size_override("font_size", size)
 	label_value.add_theme_color_override("font_color", color)
 	label_value.add_theme_constant_override("line_spacing", 2)
@@ -142,7 +142,7 @@ static func ignore_mouse_recursive(node: Node) -> void:
 		ignore_mouse_recursive(child)
 
 static func _apply_button_text(button: Button) -> void:
-	button.remove_theme_font_override("font")
+	button.add_theme_font_override("font", active_font())
 	button.add_theme_font_size_override("font_size", 14)
 	button.add_theme_color_override("font_color", COLOR_ACCENT)
 	button.add_theme_color_override("font_hover_color", Color.WHITE)

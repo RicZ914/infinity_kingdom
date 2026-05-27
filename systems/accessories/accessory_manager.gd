@@ -120,7 +120,17 @@ const ACCESSORY_LOCALIZATION := {
 		"old_king_crest": {"name": "旧王纹章", "summary": "最大护甲 +25，技能伤害 +18%。"},
 		"hunter_bone_charm": {"name": "猎骨符", "summary": "攻击伤害 +10%，移动速度 +14%。"},
 		"nameless_astrolabe": {"name": "无名星盘", "summary": "最大灵感 +25，技能冷却 -15%。"},
-		"throne_remnant": {"name": "王座残片", "summary": "攻击与技能伤害 +20%，最大护甲 +20。"}
+		"throne_remnant": {"name": "王座残片", "summary": "攻击与技能伤害 +20%，最大护甲 +20。"},
+		"field_band": {"name": "绑缚绷带", "summary": "最大生命 +12，最大护甲 +6。"},
+		"sparring_token": {"name": "试锋令牌", "summary": "攻击伤害 +8%，普通攻击略微提速。"},
+		"gleam_feather": {"name": "曦羽", "summary": "移动速度 +16%，最大灵感 +12。"},
+		"pilgrim_censer": {"name": "朝圣香炉", "summary": "最大灵感 +18，技能伤害 +10%。"},
+		"oathwire_loop": {"name": "誓丝环", "summary": "技能冷却 -10%，暴击率 +8%。"},
+		"crimson_locket": {"name": "绯焰坠饰", "summary": "攻击伤害 +12%，普通攻击节奏更快。"},
+		"warden_vambrace": {"name": "卫城臂甲", "summary": "最大生命 +24，最大护甲 +12，移动速度 +8%。"},
+		"moonlit_quill": {"name": "月魄羽笔", "summary": "暴击率 +14%，攻击伤害 +10%，但最大护甲 -10。"},
+		"starvein_compass": {"name": "星脉罗盘", "summary": "最大灵感 +20，技能消耗 -8%，暴击率 +6%。"},
+		"crownwatch_sigil": {"name": "王卫印记", "summary": "攻击与技能伤害各 +15%，最大护甲 +15。"}
 	},
 	"zh_Hant": {
 		"none": {"name": "無飾品", "summary": "選擇一件飾品來決定這一局的構築方向。"},
@@ -134,7 +144,17 @@ const ACCESSORY_LOCALIZATION := {
 		"old_king_crest": {"name": "舊王紋章", "summary": "最大護甲 +25，技能傷害 +18%。"},
 		"hunter_bone_charm": {"name": "獵骨符", "summary": "攻擊傷害 +10%，移動速度 +14%。"},
 		"nameless_astrolabe": {"name": "無名星盤", "summary": "最大靈感 +25，技能冷卻 -15%。"},
-		"throne_remnant": {"name": "王座殘片", "summary": "攻擊與技能傷害 +20%，最大護甲 +20。"}
+		"throne_remnant": {"name": "王座殘片", "summary": "攻擊與技能傷害 +20%，最大護甲 +20。"},
+		"field_band": {"name": "綁縛繃帶", "summary": "最大生命 +12，最大護甲 +6。"},
+		"sparring_token": {"name": "試鋒令牌", "summary": "攻擊傷害 +8%，普通攻擊略微提速。"},
+		"gleam_feather": {"name": "曦羽", "summary": "移動速度 +16%，最大靈感 +12。"},
+		"pilgrim_censer": {"name": "朝聖香爐", "summary": "最大靈感 +18，技能傷害 +10%。"},
+		"oathwire_loop": {"name": "誓絲環", "summary": "技能冷卻 -10%，暴擊率 +8%。"},
+		"crimson_locket": {"name": "緋焰墜飾", "summary": "攻擊傷害 +12%，普通攻擊節奏更快。"},
+		"warden_vambrace": {"name": "衛城臂甲", "summary": "最大生命 +24，最大護甲 +12，移動速度 +8%。"},
+		"moonlit_quill": {"name": "月魄羽筆", "summary": "暴擊率 +14%，攻擊傷害 +10%，但最大護甲 -10。"},
+		"starvein_compass": {"name": "星脈羅盤", "summary": "最大靈感 +20，技能消耗 -8%，暴擊率 +6%。"},
+		"crownwatch_sigil": {"name": "王衛印記", "summary": "攻擊與技能傷害各 +15%，最大護甲 +15。"}
 	}
 }
 
@@ -312,14 +332,68 @@ const DIRECT_SKILL_ATTACKS := {
 	&"skill3": true
 }
 
+const RARITY_STAGE_WEIGHTS := [
+	{"Common": 0.78, "Uncommon": 1.0, "Rare": 0.62, "Epic": 0.16, "Legendary": 0.02},
+	{"Common": 0.28, "Uncommon": 0.92, "Rare": 1.0, "Epic": 0.34, "Legendary": 0.06},
+	{"Common": 0.08, "Uncommon": 0.62, "Rare": 0.98, "Epic": 0.62, "Legendary": 0.14},
+	{"Common": 0.0, "Uncommon": 0.34, "Rare": 0.88, "Epic": 0.82, "Legendary": 0.24}
+]
+
+const HERO_TAG_PROFILES := {
+	"Knight": ["survival", "defense", "power", "attack"],
+	"Ranger": ["crit", "speed", "damage", "attack"],
+	"Mage": ["skill", "resource", "tempo", "power"]
+}
+
+const FIT_LABELS_LOCALIZED := {
+	"zh_Hans": {
+		"Best Now": "当前最优",
+		"Strong Fit": "高度契合",
+		"Flexible": "灵活可拿",
+		"Pivot": "可作转向",
+		"Niche": "偏功能位"
+	},
+	"zh_Hant": {
+		"Best Now": "當前最優",
+		"Strong Fit": "高度契合",
+		"Flexible": "靈活可拿",
+		"Pivot": "可作轉向",
+		"Niche": "偏功能位"
+	}
+}
+
+const DROP_SOURCE_LABELS_LOCALIZED := {
+	"zh_Hans": {
+		"opening": "开局宝匣",
+		"victory": "战后战利品",
+		"shop": "黑市补货",
+		"reroll": "重抽补货",
+		"route": "路线奖励",
+		"boss": "高阶战利品"
+	},
+	"zh_Hant": {
+		"opening": "開局寶匣",
+		"victory": "戰後戰利品",
+		"shop": "黑市補貨",
+		"reroll": "重抽補貨",
+		"route": "路線獎勵",
+		"boss": "高階戰利品"
+	}
+}
+
 var equipped_accessory: Dictionary = EMPTY_ACCESSORY.duplicate(true)
 var current_choices: Array[Dictionary] = []
 var base_stats_by_actor: Dictionary = {}
 var combat_proc_ready_at: Dictionary = {}
 var choice_cursor: int = 0
 var accessory_catalog: Array[Dictionary] = []
+var recent_offer_ids: Array[String] = []
+var rare_pity: int = 0
+var legendary_pity: int = 0
+var rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
+	rng.randomize()
 	reload_catalog()
 
 func reload_catalog() -> void:
@@ -341,6 +415,9 @@ func reset_run() -> void:
 	base_stats_by_actor.clear()
 	combat_proc_ready_at.clear()
 	choice_cursor = 0
+	recent_offer_ids.clear()
+	rare_pity = 0
+	legendary_pity = 0
 	accessory_equipped.emit(_localize_accessory(equipped_accessory))
 
 func get_equipped_accessory() -> Dictionary:
@@ -386,31 +463,447 @@ func describe_playstyle(tags: Array = []) -> String:
 			break
 	return " ".join(hints)
 
-func generate_choices(count: int = 3) -> Array[Dictionary]:
-	var pool := get_catalog()
+func generate_choices(count: int = 3, actor: Node = null, context: Dictionary = {}) -> Array[Dictionary]:
 	var choices: Array[Dictionary] = []
+	var pool := get_catalog()
 	if pool.is_empty():
 		return choices
 	var equipped_id := String(equipped_accessory.get("id", "none"))
-	var attempts := 0
-	while choices.size() < count and attempts < pool.size() * 3:
-		var index := (choice_cursor + attempts * 3 + choices.size()) % pool.size()
-		var candidate: Dictionary = pool[index]
-		attempts += 1
-		if String(candidate.get("id", "")) == equipped_id:
+	var stage := _offer_stage(context)
+	var source_key := _offer_source_key(context, stage)
+	var candidate_entries: Array[Dictionary] = []
+	for accessory in pool:
+		var accessory_id := String(accessory.get("id", ""))
+		if accessory_id.is_empty() or accessory_id == equipped_id:
 			continue
-		var duplicate := false
-		for existing in choices:
-			if String(existing.get("id", "")) == String(candidate.get("id", "")):
-				duplicate = true
-				break
-		if duplicate:
-			continue
-		choices.append(candidate.duplicate(true))
-	choice_cursor = (choice_cursor + 2) % max(pool.size(), 1)
+		var annotated := accessory.duplicate(true)
+		var offer_meta := _build_offer_meta(annotated, actor, stage, source_key)
+		annotated["offer_meta"] = offer_meta
+		candidate_entries.append({
+			"id": accessory_id,
+			"data": annotated,
+			"base_weight": _base_offer_weight(annotated, offer_meta, stage, source_key)
+		})
+	var used_tags: Array[String] = []
+	while choices.size() < count and not candidate_entries.is_empty():
+		var pick_index := _pick_weighted_entry(candidate_entries, used_tags, choices)
+		if pick_index < 0:
+			pick_index = 0
+		var chosen_entry: Dictionary = candidate_entries[pick_index]
+		var chosen_accessory: Dictionary = (chosen_entry.get("data", {}) as Dictionary).duplicate(true)
+		var meta := chosen_accessory.get("offer_meta", {}) as Dictionary
+		meta["slot"] = choices.size() + 1
+		chosen_accessory["offer_meta"] = meta
+		choices.append(chosen_accessory)
+		for tag in _normalized_tags(chosen_accessory.get("tags", [])):
+			if not used_tags.has(tag):
+				used_tags.append(tag)
+		candidate_entries.remove_at(pick_index)
+	choice_cursor = (choice_cursor + count + 1) % max(pool.size(), 1)
+	_remember_offer_history(choices)
 	current_choices = choices
 	choices_generated.emit(current_choices)
 	return choices
+
+func evaluate_accessory_fit(accessory: Dictionary, actor: Node = null) -> Dictionary:
+	var candidate_tags := _normalized_tags(accessory.get("tags", []))
+	var current_tags := get_equipped_tags()
+	var hero_tags := _preferred_tags_for_actor(actor)
+	var build_overlap := _intersection_tags(candidate_tags, current_tags)
+	var hero_overlap := _intersection_tags(candidate_tags, hero_tags)
+	var score := float(build_overlap.size()) * 1.65 + float(hero_overlap.size()) * 1.15
+	var reasons: Array[String] = []
+	if not build_overlap.is_empty():
+		reasons.append(_localized_phrase(
+			"Matches your current %s route.",
+			"延续当前的 %s 构筑方向。",
+			"延續當前的 %s 構築方向。"
+		) % describe_tags(build_overlap))
+	if not hero_overlap.is_empty():
+		var hero_name := _localized_hero_name(_actor_name(actor))
+		if not hero_name.is_empty():
+			reasons.append(_localized_phrase(
+				"%s can cash in on these tags cleanly.",
+				"%s 很容易把这些标签兑现成稳定收益。",
+				"%s 很容易把這些標籤兌現成穩定收益。"
+			) % hero_name)
+	if actor != null and _ratio(actor, "hp", "max_hp") <= 0.58 and (candidate_tags.has("survival") or candidate_tags.has("defense")):
+		score += 1.35
+		reasons.append(_localized_phrase(
+			"Stabilizes the run immediately while your health is under pressure.",
+			"当前血线偏紧，这件能立刻稳住战局。",
+			"當前血線偏緊，這件能立刻穩住戰局。"
+		))
+	if actor != null and _ratio(actor, "inspiration", "max_inspiration") <= 0.45 and (candidate_tags.has("resource") or candidate_tags.has("skill")):
+		score += 1.05
+		reasons.append(_localized_phrase(
+			"Refills your rotation when inspiration is the real bottleneck.",
+			"灵感偏紧时，它能把循环重新拉顺。",
+			"靈感偏緊時，它能把循環重新拉順。"
+		))
+	if current_tags.is_empty():
+		score += 0.55
+		reasons.append(_localized_phrase(
+			"Clean first pick for setting the opening route.",
+			"很适合作为开局定方向的第一件。",
+			"很適合作為開局定方向的第一件。"
+		))
+	elif build_overlap.is_empty() and hero_overlap.is_empty():
+		score += 0.35
+		reasons.append(_localized_phrase(
+			"Useful as a pivot if your current route is running flat.",
+			"如果当前路线开始发闷，它适合拿来转向。",
+			"如果當前路線開始發悶，它適合拿來轉向。"
+		))
+	var fit_key := "Flexible"
+	if score >= 4.2:
+		fit_key = "Best Now"
+	elif score >= 2.85:
+		fit_key = "Strong Fit"
+	elif build_overlap.is_empty() and hero_overlap.is_empty() and not current_tags.is_empty():
+		fit_key = "Pivot"
+	elif score <= 0.9:
+		fit_key = "Niche"
+	if reasons.is_empty():
+		reasons.append(_localized_phrase(
+			"Solid raw value even without a direct tag match.",
+			"即使没有直接标签联动，它也有稳定的裸数值收益。",
+			"即使沒有直接標籤聯動，它也有穩定的裸數值收益。"
+		))
+	return {
+		"fit_key": fit_key,
+		"label": _fit_label(fit_key),
+		"reason": reasons[0],
+		"score": score,
+		"build_match": build_overlap.size(),
+		"hero_match": hero_overlap.size(),
+		"color": _fit_color(fit_key)
+	}
+
+func describe_offer_comparison(accessory: Dictionary) -> Dictionary:
+	var current_id := String(equipped_accessory.get("id", "none"))
+	var current_tags := get_equipped_tags()
+	var candidate_tags := _normalized_tags(accessory.get("tags", []))
+	var route_line := ""
+	if current_id == "none":
+		route_line = _localized_phrase(
+			"Opening route: %s.",
+			"开局路线：%s。",
+			"開局路線：%s。"
+		) % describe_tags(candidate_tags)
+	else:
+		var overlap := _intersection_tags(candidate_tags, current_tags)
+		if not overlap.is_empty():
+			route_line = _localized_phrase(
+				"Route stays on %s.",
+				"路线继续押在 %s。",
+				"路線繼續押在 %s。"
+			) % describe_tags(overlap)
+		else:
+			route_line = _localized_phrase(
+				"Route pivots from %s to %s.",
+				"路线从 %s 转向 %s。",
+				"路線從 %s 轉向 %s。"
+			) % [describe_tags(current_tags), describe_tags(candidate_tags)]
+	var delta_parts := _effect_delta_parts(equipped_accessory.get("effects", {}), accessory.get("effects", {}), 3)
+	var compare_line := ""
+	if delta_parts.is_empty():
+		compare_line = _localized_phrase(
+			"Swap keeps the same stat lane, but changes tag identity.",
+			"替换后的主数值变化不大，但标签身份会改变。",
+			"替換後的主數值變化不大，但標籤身份會改變。"
+		)
+	else:
+		compare_line = _localized_phrase(
+			"Swap: %s.",
+			"替换后：%s。",
+			"替換後：%s。"
+		) % ", ".join(delta_parts)
+	return {
+		"route_line": route_line,
+		"compare_line": compare_line,
+		"summary": "%s %s" % [route_line, compare_line]
+	}
+
+func _build_offer_meta(accessory: Dictionary, actor: Node, stage: int, source_key: String) -> Dictionary:
+	var fit_data := evaluate_accessory_fit(accessory, actor)
+	var comparison := describe_offer_comparison(accessory)
+	return {
+		"source_key": source_key,
+		"source_label": _source_label(source_key, stage),
+		"source_line": _source_hint(source_key, stage),
+		"fit_key": String(fit_data.get("fit_key", "Flexible")),
+		"fit_label": String(fit_data.get("label", "Flexible")),
+		"fit_reason": String(fit_data.get("reason", "")),
+		"fit_score": float(fit_data.get("score", 0.0)),
+		"fit_color": fit_data.get("color", Color(0.82, 0.88, 0.96)),
+		"build_match": int(fit_data.get("build_match", 0)),
+		"hero_match": int(fit_data.get("hero_match", 0)),
+		"route_line": String(comparison.get("route_line", "")),
+		"compare_line": String(comparison.get("compare_line", "")),
+		"comparison_summary": String(comparison.get("summary", "")),
+		"tag_summary": describe_tags(accessory.get("tags", [])),
+		"rarity_key": String(accessory.get("rarity_key", accessory.get("rarity", "Common"))),
+		"stage": stage
+	}
+
+func _offer_stage(context: Dictionary) -> int:
+	if context.has("stage"):
+		return maxi(int(context.get("stage", 0)), 0)
+	if RunDirector != null and RunDirector.has_method("get_state"):
+		var run_state := RunDirector.get_state()
+		if run_state is Dictionary:
+			return maxi(int((run_state as Dictionary).get("cleared_encounters", 0)), 0)
+	return 0
+
+func _offer_source_key(context: Dictionary, stage: int) -> String:
+	if bool(context.get("reroll", false)):
+		return "reroll"
+	var source_key := String(context.get("source", ""))
+	if not source_key.is_empty():
+		return source_key
+	if stage <= 0:
+		return "opening"
+	if stage >= 3:
+		return "boss"
+	return "route"
+
+func _base_offer_weight(accessory: Dictionary, offer_meta: Dictionary, stage: int, source_key: String) -> float:
+	var rarity_key := String(accessory.get("rarity_key", accessory.get("rarity", "Common")))
+	var stage_index := mini(stage, RARITY_STAGE_WEIGHTS.size() - 1)
+	var weight := float((RARITY_STAGE_WEIGHTS[stage_index] as Dictionary).get(rarity_key, 0.4))
+	weight += float(offer_meta.get("fit_score", 0.0)) * 0.26
+	weight += float(offer_meta.get("build_match", 0)) * 0.18
+	weight += float(offer_meta.get("hero_match", 0)) * 0.14
+	if recent_offer_ids.has(String(accessory.get("id", ""))):
+		weight *= 0.22
+	match source_key:
+		"opening":
+			if rarity_key == "Common" or rarity_key == "Uncommon":
+				weight += 0.22
+		"victory":
+			if rarity_key == "Rare" or rarity_key == "Epic":
+				weight += 0.14
+		"shop":
+			if rarity_key == "Rare":
+				weight += 0.20
+			elif rarity_key == "Epic":
+				weight += 0.16
+		"reroll":
+			if rarity_key == "Rare" or rarity_key == "Epic":
+				weight += 0.10
+		"boss":
+			if rarity_key == "Epic":
+				weight += 0.22
+			elif rarity_key == "Legendary":
+				weight += 0.14 + float(legendary_pity) * 0.05
+	if rarity_key == "Rare" or rarity_key == "Epic":
+		weight += float(rare_pity) * 0.05
+	if rarity_key == "Legendary":
+		weight += float(legendary_pity) * 0.06
+	return maxf(weight, 0.02)
+
+func _pick_weighted_entry(candidate_entries: Array[Dictionary], used_tags: Array[String], choices: Array[Dictionary]) -> int:
+	var total_weight := 0.0
+	var weights: Array[float] = []
+	for entry in candidate_entries:
+		var accessory := entry.get("data", {}) as Dictionary
+		var weight := float(entry.get("base_weight", 0.05))
+		var shared_used_tags := _intersection_count(_normalized_tags(accessory.get("tags", [])), used_tags)
+		if shared_used_tags > 0:
+			weight *= pow(0.72, float(shared_used_tags))
+		if _rarity_repeat_count(String(accessory.get("rarity_key", accessory.get("rarity", "Common"))), choices) > 0:
+			weight *= 0.88
+		weights.append(weight)
+		total_weight += weight
+	if total_weight <= 0.0:
+		return -1
+	var roll := rng.randf_range(0.0, total_weight)
+	for index in range(candidate_entries.size()):
+		roll -= weights[index]
+		if roll <= 0.0:
+			return index
+	return candidate_entries.size() - 1
+
+func _remember_offer_history(choices: Array[Dictionary]) -> void:
+	var saw_rare_plus := false
+	var saw_legendary := false
+	for choice in choices:
+		var choice_id := String(choice.get("id", ""))
+		if not choice_id.is_empty():
+			recent_offer_ids.append(choice_id)
+		var rarity_key := String(choice.get("rarity_key", choice.get("rarity", "Common")))
+		if rarity_key == "Rare" or rarity_key == "Epic" or rarity_key == "Legendary":
+			saw_rare_plus = true
+		if rarity_key == "Legendary":
+			saw_legendary = true
+	while recent_offer_ids.size() > 9:
+		recent_offer_ids.remove_at(0)
+	rare_pity = 0 if saw_rare_plus else mini(rare_pity + 1, 5)
+	legendary_pity = 0 if saw_legendary else mini(legendary_pity + 1, 6)
+
+func _preferred_tags_for_actor(actor: Node) -> Array[String]:
+	var actor_name := _actor_name(actor)
+	var tags_raw := HERO_TAG_PROFILES.get(actor_name, []) as Array
+	var tags: Array[String] = []
+	for tag in tags_raw:
+		tags.append(String(tag))
+	return tags
+
+func _actor_name(actor: Node) -> String:
+	if actor == null or not is_instance_valid(actor):
+		return ""
+	if actor.has_method("get_character_name"):
+		return String(actor.get_character_name())
+	return String(actor.name)
+
+func _localized_hero_name(hero_name: String) -> String:
+	match hero_name:
+		"Knight":
+			return _localized_phrase("Knight", "骑士", "騎士")
+		"Ranger":
+			return _localized_phrase("Ranger", "游侠", "遊俠")
+		"Mage":
+			return _localized_phrase("Mage", "法师", "法師")
+		_:
+			return hero_name
+
+func _normalized_tags(raw_tags: Array) -> Array[String]:
+	var tags: Array[String] = []
+	for tag in raw_tags:
+		var next_tag := String(tag)
+		if next_tag.is_empty() or tags.has(next_tag):
+			continue
+		tags.append(next_tag)
+	return tags
+
+func _intersection_tags(left_tags: Array[String], right_tags: Array[String]) -> Array[String]:
+	var output: Array[String] = []
+	for tag in left_tags:
+		if right_tags.has(tag) and not output.has(tag):
+			output.append(tag)
+	return output
+
+func _intersection_count(left_tags: Array[String], right_tags: Array[String]) -> int:
+	return _intersection_tags(left_tags, right_tags).size()
+
+func _effect_delta_parts(current_effects: Dictionary, next_effects: Dictionary, limit: int = 3) -> Array[String]:
+	var delta_entries: Array[Dictionary] = []
+	var seen_keys := {}
+	for key in current_effects.keys():
+		seen_keys[String(key)] = true
+	for key in next_effects.keys():
+		seen_keys[String(key)] = true
+	for raw_key in seen_keys.keys():
+		var effect_key := String(raw_key)
+		var delta := float(next_effects.get(effect_key, 0.0)) - float(current_effects.get(effect_key, 0.0))
+		if is_zero_approx(delta):
+			continue
+		delta_entries.append({
+			"key": effect_key,
+			"value": delta,
+			"sort": _effect_weight(effect_key, delta)
+		})
+	delta_entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return float(a.get("sort", 0.0)) > float(b.get("sort", 0.0))
+	)
+	var parts: Array[String] = []
+	for index in range(mini(limit, delta_entries.size())):
+		var entry := delta_entries[index]
+		parts.append(_format_effect(String(entry.get("key", "")), float(entry.get("value", 0.0))))
+	return parts
+
+func _effect_weight(effect_key: String, value: float) -> float:
+	if effect_key.ends_with("_pct") or effect_key == "crit_rate":
+		return absf(value) * 100.0
+	return absf(value)
+
+func _rarity_repeat_count(rarity_key: String, choices: Array[Dictionary]) -> int:
+	var repeat_count := 0
+	for choice in choices:
+		if String(choice.get("rarity_key", choice.get("rarity", "Common"))) == rarity_key:
+			repeat_count += 1
+	return repeat_count
+
+func _fit_label(fit_key: String) -> String:
+	var locale_map := FIT_LABELS_LOCALIZED.get(_current_locale(), {}) as Dictionary
+	return String(locale_map.get(fit_key, fit_key))
+
+func _fit_color(fit_key: String) -> Color:
+	match fit_key:
+		"Best Now":
+			return Color(0.98, 0.84, 0.58)
+		"Strong Fit":
+			return Color(0.66, 0.92, 0.70)
+		"Pivot":
+			return Color(0.86, 0.78, 1.0)
+		"Niche":
+			return Color(0.72, 0.78, 0.88)
+		_:
+			return Color(0.74, 0.88, 1.0)
+
+func _source_label(source_key: String, stage: int) -> String:
+	var locale_map := DROP_SOURCE_LABELS_LOCALIZED.get(_current_locale(), {}) as Dictionary
+	if locale_map.has(source_key):
+		return String(locale_map[source_key])
+	match source_key:
+		"opening":
+			return "Opening"
+		"victory":
+			return "Victory"
+		"shop":
+			return "Market"
+		"reroll":
+			return "Reroll"
+		"boss":
+			return "Boss Grade"
+		_:
+			return "Route" if stage > 0 else "Opening"
+
+func _source_hint(source_key: String, stage: int) -> String:
+	match source_key:
+		"opening":
+			return _localized_phrase(
+				"Opening offers lean stable and flexible so the route can form cleanly.",
+				"开局掉落更偏稳定和泛用，方便先把路线立起来。",
+				"開局掉落更偏穩定和泛用，方便先把路線立起來。"
+			)
+		"victory":
+			return _localized_phrase(
+				"Victory drops start leaning toward rare pieces and stronger route reinforcement.",
+				"战后掉落会更偏向稀有件和更明确的路线加深。",
+				"戰後掉落會更偏向稀有件和更明確的路線加深。"
+			)
+		"shop":
+			return _localized_phrase(
+				"Purchased relics bias sharper pivots and more expensive build spikes.",
+				"黑市补货更偏向有转向价值、也更舍得给高强度件。",
+				"黑市補貨更偏向有轉向價值，也更捨得給高強度件。"
+			)
+		"reroll":
+			return _localized_phrase(
+				"Rerolls avoid recent repeats and widen the current route before repeating tags.",
+				"重抽会先避开最近见过的饰品，再考虑重复同类标签。",
+				"重抽會先避開最近見過的飾品，再考慮重複同類標籤。"
+			)
+		"boss":
+			return _localized_phrase(
+				"Late drops lean rare, epic, and finisher pieces for the final checks.",
+				"后段掉落会更偏向稀有、史诗和收尾型部件。",
+				"後段掉落會更偏向稀有、史詩和收尾型部件。"
+			)
+		_:
+			if stage >= 2:
+				return _localized_phrase(
+					"Mid-run rewards bias sharper identity and higher rarity ceilings.",
+					"中后段奖励会更偏向明确构筑身份和更高稀有度上限。",
+					"中後段獎勵會更偏向明確構築身份和更高稀有度上限。"
+				)
+			return _localized_phrase(
+				"Route rewards still keep some flexibility while your build is taking shape.",
+				"路线奖励仍会保留一些弹性，让构筑还能继续调整。",
+				"路線獎勵仍會保留一些彈性，讓構築還能繼續調整。"
+			)
 
 func equip(accessory_id: String, actor: Node = null) -> Dictionary:
 	var accessory := get_accessory(accessory_id)
@@ -531,7 +1024,11 @@ func describe_effects(accessory: Dictionary) -> String:
 	if effects.is_empty():
 		return _localized_phrase("No active stat change.", "当前没有数值变化。", "當前沒有數值變化。")
 	var parts: Array[String] = []
-	for key in effects.keys():
+	var sorted_keys := effects.keys()
+	sorted_keys.sort_custom(func(a: Variant, b: Variant) -> bool:
+		return _effect_weight(String(a), float(effects.get(String(a), 0.0))) > _effect_weight(String(b), float(effects.get(String(b), 0.0)))
+	)
+	for key in sorted_keys:
 		var value := float(effects[key])
 		parts.append(_format_effect(String(key), value))
 	return ", ".join(parts)
@@ -655,13 +1152,15 @@ func _localize_accessory(source: Dictionary) -> Dictionary:
 	var accessory := source.duplicate(true)
 	var locale := _current_locale()
 	var id := String(accessory.get("id", ""))
+	var raw_rarity := String(accessory.get("rarity_key", accessory.get("rarity", "Common")))
+	accessory["rarity_key"] = raw_rarity
 	var locale_map := ACCESSORY_LOCALIZATION.get(locale, {}) as Dictionary
 	var localized := locale_map.get(id, {}) as Dictionary
 	if not localized.is_empty():
 		accessory["name"] = String(localized.get("name", accessory.get("name", "")))
 		accessory["summary"] = String(localized.get("summary", accessory.get("summary", "")))
 	var rarity_map := RARITY_LABELS_LOCALIZED.get(locale, {}) as Dictionary
-	accessory["rarity"] = String(rarity_map.get(String(accessory.get("rarity", "")), accessory.get("rarity", "")))
+	accessory["rarity"] = String(rarity_map.get(raw_rarity, raw_rarity))
 	return accessory
 
 func _current_locale() -> String:

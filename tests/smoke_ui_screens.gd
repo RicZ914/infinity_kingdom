@@ -67,8 +67,13 @@ func _run() -> void:
 		quit(1)
 		return
 	var start_button := world.character_select.get("primary_start_button") as Button
+	var audio_button := world.character_select.get("audio_button") as Button
 	if start_button == null or start_button.text != "Start":
 		push_error("Character select start button did not initialize")
+		quit(1)
+		return
+	if audio_button == null or audio_button.text != "Audio Mix":
+		push_error("Character select audio button did not initialize")
 		quit(1)
 		return
 	var background_rect := world.character_select.get("background_rect") as TextureRect
@@ -370,14 +375,29 @@ func _run() -> void:
 		var choices: Array = accessory_manager.generate_choices(3)
 		world.accessory_choice.open(choices, null, "Responsive Relic", 20, 50)
 		await process_frame
+		await process_frame
 		var accessory_panel := world.accessory_choice.get_node("Backdrop/CenterContainer/PanelContainer") as PanelContainer
 		if not _assert_control_fits(accessory_panel, test_size, "Accessory choice panel"):
 			quit(1)
 			return
+		var accessory_choice_row := world.accessory_choice.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ChoicesScroll/ChoicesRow") as GridContainer
+		if accessory_choice_row == null or accessory_choice_row.get_child_count() != 3:
+			push_error("Accessory choice panel did not rebuild all three choice cards")
+			quit(1)
+			return
 		var preview_detail := world.accessory_choice.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/PreviewPanel/MarginContainer/VBoxContainer/PreviewDetail") as Label
+		var preview_title := world.accessory_choice.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/PreviewPanel/MarginContainer/VBoxContainer/PreviewTitle") as Label
 		var accessory_footer := world.accessory_choice.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Footer") as Label
 		if preview_detail == null or preview_detail.text.is_empty():
 			push_error("Accessory choice preview detail is empty")
+			quit(1)
+			return
+		if preview_title == null or preview_title.text.find("Preview 1") == -1:
+			push_error("Accessory choice preview title did not initialize its slot label")
+			quit(1)
+			return
+		if preview_detail.text.find("Swap:") == -1:
+			push_error("Accessory choice preview detail is missing swap guidance")
 			quit(1)
 			return
 		if accessory_footer == null or accessory_footer.text.find("keep") == -1:

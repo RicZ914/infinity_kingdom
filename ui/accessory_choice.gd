@@ -4,10 +4,23 @@ signal accessory_choice_made(accessory_id: String, kept_current: bool)
 signal reroll_requested
 
 const UISkin := preload("res://ui/ui_skin.gd")
-const PANEL_MIN_SIZE := Vector2(340, 420)
-const PANEL_MAX_SIZE := Vector2(1120, 736)
+const PANEL_MIN_SIZE := Vector2(360, 440)
+const PANEL_MAX_SIZE := Vector2(1160, 780)
 const CARD_MIN_WIDTH := 296.0
 const CARD_GAP := 14.0
+const TAG_TINTS := {
+	"attack": Color(0.96, 0.76, 0.62),
+	"crit": Color(0.96, 0.68, 0.80),
+	"damage": Color(1.0, 0.66, 0.58),
+	"defense": Color(0.68, 0.82, 1.0),
+	"power": Color(0.88, 0.72, 1.0),
+	"resource": Color(0.70, 0.92, 0.86),
+	"risk": Color(1.0, 0.72, 0.66),
+	"skill": Color(0.80, 0.86, 1.0),
+	"speed": Color(0.74, 0.96, 0.74),
+	"survival": Color(0.70, 0.92, 0.70),
+	"tempo": Color(0.98, 0.84, 0.60)
+}
 
 @onready var backdrop: ColorRect = $Backdrop
 @onready var panel: PanelContainer = $Backdrop/CenterContainer/PanelContainer
@@ -68,24 +81,24 @@ func close() -> void:
 	get_tree().paused = false
 
 func _apply_skin() -> void:
-	backdrop.color = Color(0.015, 0.018, 0.026, 0.76)
+	backdrop.color = Color(0.015, 0.018, 0.026, 0.84)
 	panel.add_theme_stylebox_override("panel", UISkin.choice_panel_style())
 	current_row.add_theme_stylebox_override("panel", UISkin.content_panel_style())
 	preview_panel.add_theme_stylebox_override("panel", UISkin.content_panel_style())
 	var icon_slot := $Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/CurrentRow/CurrentMargin/CurrentContent/IconSlot as PanelContainer
 	icon_slot.add_theme_stylebox_override("panel", UISkin.icon_slot_style())
-	UISkin.label(title_label, 28, Color(0.98, 0.90, 0.67))
-	UISkin.label(subtitle_label, 15, Color(0.76, 0.80, 0.88))
-	UISkin.label(current_name_label, 18, Color.WHITE)
-	UISkin.label(current_summary_label, 14, Color(0.76, 0.82, 0.90))
-	UISkin.label(preview_title_label, 15, Color(0.98, 0.90, 0.67))
-	UISkin.label(preview_detail_label, 12, Color(0.84, 0.88, 0.96))
-	UISkin.label(footer_label, 12, Color(0.74, 0.80, 0.88))
+	UISkin.label(title_label, 30, Color(0.98, 0.90, 0.67))
+	UISkin.label(subtitle_label, 16, Color(0.76, 0.80, 0.88))
+	UISkin.label(current_name_label, 19, Color.WHITE)
+	UISkin.label(current_summary_label, 15, Color(0.76, 0.82, 0.90))
+	UISkin.label(preview_title_label, 16, Color(0.98, 0.90, 0.67))
+	UISkin.label(preview_detail_label, 13, Color(0.84, 0.88, 0.96))
+	UISkin.label(footer_label, 13, Color(0.74, 0.80, 0.88))
 	preview_title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	preview_detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	footer_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	UISkin.button_styles(keep_button, "thin")
-	UISkin.button_styles(reroll_button, "thin")
+	UISkin.button_styles(keep_button, "medium")
+	UISkin.button_styles(reroll_button, "medium")
 	current_icon.visible = true
 
 func _refresh_current() -> void:
@@ -98,9 +111,11 @@ func _refresh_current() -> void:
 	var summary_text := String(current.get("summary", ""))
 	if not summary_text.is_empty():
 		detail_parts.append(summary_text)
-	detail_parts.append(AccessoryManager.describe_effects(current))
+	var effects_text := AccessoryManager.describe_effects(current)
+	if not effects_text.is_empty():
+		detail_parts.append(effects_text)
 	if not tags_text.is_empty():
-		detail_parts.append(tags_text)
+		detail_parts.append("%s: %s" % [UIText.text("event_route_label"), tags_text])
 	if not playstyle_text.is_empty():
 		detail_parts.append(playstyle_text)
 	current_summary_label.text = "\n".join(detail_parts)
@@ -128,7 +143,7 @@ func _choice_card(accessory: Dictionary, choice_index: int) -> Button:
 	var button := Button.new()
 	button.text = ""
 	button.focus_mode = Control.FOCUS_ALL
-	button.custom_minimum_size = Vector2(296, 326)
+	button.custom_minimum_size = Vector2(300, 390)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	button.add_theme_stylebox_override("normal", UISkin.choice_panel_style())
@@ -145,9 +160,18 @@ func _choice_card(accessory: Dictionary, choice_index: int) -> Button:
 	button.add_child(margin)
 
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 7)
+	box.add_theme_constant_override("separation", 8)
 	box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	margin.add_child(box)
+
+	var meta := _offer_meta(accessory)
+	var badge_row := HBoxContainer.new()
+	badge_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	badge_row.add_theme_constant_override("separation", 6)
+	box.add_child(badge_row)
+	badge_row.add_child(_badge(String(accessory.get("rarity", "Common")), _rarity_color(String(accessory.get("rarity_key", accessory.get("rarity", "Common"))))))
+	badge_row.add_child(_badge(String(meta.get("source_label", "")), Color(0.74, 0.86, 0.98)))
+	badge_row.add_child(_badge(String(meta.get("fit_label", "")), meta.get("fit_color", Color(0.78, 0.88, 0.98))))
 
 	var slot := PanelContainer.new()
 	slot.custom_minimum_size = Vector2(86, 86)
@@ -183,8 +207,7 @@ func _choice_card(accessory: Dictionary, choice_index: int) -> Button:
 	summary_label.text = String(accessory.get("summary", ""))
 	summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	summary_label.custom_minimum_size = Vector2(0, 70)
-	summary_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	summary_label.custom_minimum_size = Vector2(0, 56)
 	UISkin.label(summary_label, 13, Color(0.78, 0.84, 0.92))
 	box.add_child(summary_label)
 
@@ -192,17 +215,25 @@ func _choice_card(accessory: Dictionary, choice_index: int) -> Button:
 	effects_label.text = AccessoryManager.describe_effects(accessory)
 	effects_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	effects_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	effects_label.custom_minimum_size = Vector2(0, 48)
+	effects_label.custom_minimum_size = Vector2(0, 44)
 	UISkin.label(effects_label, 12, Color(0.72, 0.92, 0.78))
 	box.add_child(effects_label)
 
-	var plan_label := Label.new()
-	plan_label.text = AccessoryManager.describe_playstyle(accessory.get("tags", []))
-	plan_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	plan_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	plan_label.custom_minimum_size = Vector2(0, 40)
-	UISkin.label(plan_label, 11, Color(0.92, 0.84, 0.66))
-	box.add_child(plan_label)
+	var compare_label := Label.new()
+	compare_label.text = String(meta.get("compare_line", ""))
+	compare_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	compare_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	compare_label.custom_minimum_size = Vector2(0, 50)
+	UISkin.label(compare_label, 11, Color(0.92, 0.84, 0.66))
+	box.add_child(compare_label)
+
+	var tag_flow := HFlowContainer.new()
+	tag_flow.alignment = FlowContainer.ALIGNMENT_CENTER
+	tag_flow.add_theme_constant_override("h_separation", 6)
+	tag_flow.add_theme_constant_override("v_separation", 6)
+	box.add_child(tag_flow)
+	for tag in accessory.get("tags", []):
+		tag_flow.add_child(_tag_chip(String(tag)))
 	UISkin.ignore_mouse_recursive(margin)
 	button.focus_entered.connect(func() -> void: _preview_accessory(choice_index))
 	button.mouse_entered.connect(func() -> void: _preview_accessory(choice_index))
@@ -258,25 +289,28 @@ func _preview_accessory(choice_index: int) -> void:
 		return
 	selected_choice_index = choice_index
 	var accessory := choice_data[choice_index]
+	var meta := _offer_meta(accessory)
 	var accessory_name := String(accessory.get("name", "Accessory"))
 	var tags_text := AccessoryManager.describe_tags(accessory.get("tags", []))
-	var summary_text := String(accessory.get("summary", ""))
-	var effect_text := AccessoryManager.describe_effects(accessory)
 	var playstyle_text := AccessoryManager.describe_playstyle(accessory.get("tags", []))
 	preview_title_label.text = "%s %d: %s%s" % [
 		UIText.text("accessory_preview"),
 		choice_index + 1,
 		accessory_name,
-		("  |  %s" % tags_text) if not tags_text.is_empty() else ""
+		("  |  %s" % String(meta.get("fit_label", ""))) if String(meta.get("fit_label", "")).length() > 0 else (("  |  %s" % tags_text) if not tags_text.is_empty() else "")
 	]
 	var detail_parts: Array[String] = []
-	if not summary_text.is_empty():
-		detail_parts.append(summary_text)
-	if not effect_text.is_empty():
-		detail_parts.append(effect_text)
+	if String(meta.get("source_line", "")).length() > 0:
+		detail_parts.append(String(meta.get("source_line", "")))
+	if String(meta.get("route_line", "")).length() > 0:
+		detail_parts.append(String(meta.get("route_line", "")))
+	if String(meta.get("compare_line", "")).length() > 0:
+		detail_parts.append(String(meta.get("compare_line", "")))
+	if String(meta.get("fit_reason", "")).length() > 0:
+		detail_parts.append(String(meta.get("fit_reason", "")))
 	if not playstyle_text.is_empty():
 		detail_parts.append(playstyle_text)
-	preview_detail_label.text = " ".join(detail_parts)
+	preview_detail_label.text = "\n".join(detail_parts)
 
 func _focus_first_choice() -> void:
 	if choice_buttons.is_empty():
@@ -305,6 +339,36 @@ func _rarity_color(rarity: String) -> Color:
 		_:
 			return Color(0.78, 0.80, 0.84)
 
+func _offer_meta(accessory: Dictionary) -> Dictionary:
+	return accessory.get("offer_meta", {}) as Dictionary
+
+func _badge(text_value: String, tint: Color) -> PanelContainer:
+	var panel_value := PanelContainer.new()
+	panel_value.add_theme_stylebox_override(
+		"panel",
+		UISkin.flat_style(tint.darkened(0.78), tint, 1, 5, Vector4(8, 4, 8, 4))
+	)
+	var label_value := Label.new()
+	label_value.text = text_value
+	label_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	UISkin.label(label_value, 10, tint.lightened(0.08))
+	panel_value.add_child(label_value)
+	return panel_value
+
+func _tag_chip(tag: String) -> PanelContainer:
+	var tint := TAG_TINTS.get(tag, Color(0.76, 0.82, 0.90)) as Color
+	var panel_value := PanelContainer.new()
+	panel_value.add_theme_stylebox_override(
+		"panel",
+		UISkin.flat_style(tint.darkened(0.80), tint.darkened(0.14), 1, 4, Vector4(8, 4, 8, 4))
+	)
+	var label_value := Label.new()
+	label_value.text = AccessoryManager.describe_tags([tag])
+	label_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	UISkin.label(label_value, 10, tint)
+	panel_value.add_child(label_value)
+	return panel_value
+
 func _queue_layout_refresh() -> void:
 	call_deferred("_refresh_layout")
 
@@ -330,27 +394,27 @@ func _refresh_layout() -> void:
 	current_margin.add_theme_constant_override("margin_top", 8 if very_compact else 10)
 	current_margin.add_theme_constant_override("margin_right", 10 if very_compact else 12)
 	current_margin.add_theme_constant_override("margin_bottom", 8 if very_compact else 10)
-	current_row.custom_minimum_size.y = 88.0 if very_compact else (96.0 if compact else 108.0)
+	current_row.custom_minimum_size.y = 98.0 if very_compact else (108.0 if compact else 122.0)
 	current_icon_slot.custom_minimum_size = Vector2(70, 70) if very_compact else (Vector2(78, 78) if compact else Vector2(90, 90))
 	current_icon.custom_minimum_size = Vector2(58, 58) if very_compact else (Vector2(66, 66) if compact else Vector2(78, 78))
-	preview_panel.custom_minimum_size.y = 82.0 if very_compact else (88.0 if compact else 96.0)
-	choices_scroll.custom_minimum_size.y = clampf(panel.custom_minimum_size.y * (0.34 if very_compact else 0.41), 188.0, 330.0)
-	UISkin.label(title_label, 22 if very_compact else (25 if compact else 28), Color(0.98, 0.90, 0.67))
-	UISkin.label(subtitle_label, 13 if very_compact else (14 if compact else 15), Color(0.76, 0.80, 0.88))
-	UISkin.label(current_name_label, 15 if very_compact else (17 if compact else 18), Color.WHITE)
-	UISkin.label(current_summary_label, 12 if very_compact else 13, Color(0.76, 0.82, 0.90))
-	UISkin.label(preview_title_label, 13 if very_compact else (14 if compact else 15), Color(0.98, 0.90, 0.67))
-	UISkin.label(preview_detail_label, 11 if compact else 12, Color(0.84, 0.88, 0.96))
-	UISkin.label(footer_label, 10 if very_compact else 11, Color(0.74, 0.80, 0.88))
-	var card_width := 220.0 if very_compact else (252.0 if compact else 296.0)
-	var card_height := 286.0 if very_compact else (314.0 if compact else 350.0)
+	preview_panel.custom_minimum_size.y = 112.0 if very_compact else (126.0 if compact else 144.0)
+	choices_scroll.custom_minimum_size.y = clampf(panel.custom_minimum_size.y * (0.38 if very_compact else 0.44), 210.0, 382.0)
+	UISkin.label(title_label, 23 if very_compact else (27 if compact else 30), Color(0.98, 0.90, 0.67))
+	UISkin.label(subtitle_label, 13 if very_compact else (15 if compact else 16), Color(0.76, 0.80, 0.88))
+	UISkin.label(current_name_label, 16 if very_compact else (18 if compact else 19), Color.WHITE)
+	UISkin.label(current_summary_label, 12 if very_compact else (14 if compact else 15), Color(0.76, 0.82, 0.90))
+	UISkin.label(preview_title_label, 14 if very_compact else (15 if compact else 16), Color(0.98, 0.90, 0.67))
+	UISkin.label(preview_detail_label, 12 if compact else 13, Color(0.84, 0.88, 0.96))
+	UISkin.label(footer_label, 11 if very_compact else 12, Color(0.74, 0.80, 0.88))
+	var card_width := 224.0 if very_compact else (256.0 if compact else 300.0)
+	var card_height := 334.0 if very_compact else (360.0 if compact else 390.0)
 	var available_width := maxf(choices_scroll.size.x, panel.custom_minimum_size.x - (56.0 if very_compact else 96.0))
 	var next_columns := clampi(int(floor((available_width + CARD_GAP) / (card_width + CARD_GAP))), 1, 3)
 	choices_row.columns = max(1, min(next_columns, max(active_choices.size(), 1)))
 	button_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	button_row.add_theme_constant_override("separation", 8 if compact else 12)
-	keep_button.custom_minimum_size = Vector2(0.0, 48.0 if compact else 54.0)
-	reroll_button.custom_minimum_size = Vector2(0.0, 48.0 if compact else 54.0)
+	keep_button.custom_minimum_size = Vector2(0.0, 50.0 if compact else 56.0)
+	reroll_button.custom_minimum_size = Vector2(0.0, 50.0 if compact else 56.0)
 	keep_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	reroll_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	keep_button.text = UIText.text("accessory_keep_short") if very_compact else UIText.text("accessory_keep")

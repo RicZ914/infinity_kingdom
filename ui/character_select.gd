@@ -96,6 +96,7 @@ var cards_grid: GridContainer
 var hero_buttons: Array[Button] = []
 var primary_start_button: Button
 var settings_button: Button
+var audio_button: Button
 var gallery_button: Button
 var about_button: Button
 var quit_button: Button
@@ -194,10 +195,11 @@ func _build_ui() -> void:
 
 	primary_start_button = _menu_button("", _on_primary_pressed, true)
 	settings_button = _menu_button("", func() -> void: settings_requested.emit())
+	audio_button = _menu_button("", func() -> void: audio_requested.emit())
 	gallery_button = _menu_button("", func() -> void: _show_gallery_placeholder())
 	about_button = _menu_button("", func() -> void: _show_about_placeholder())
 	quit_button = _menu_button("", func() -> void: quit_requested.emit())
-	for button in [primary_start_button, settings_button, gallery_button, about_button, quit_button]:
+	for button in [primary_start_button, settings_button, audio_button, gallery_button, about_button, quit_button]:
 		left_column.add_child(button)
 
 	left_hint_label = Label.new()
@@ -394,9 +396,9 @@ func _set_selected_hero(hero_index: int) -> void:
 	var summary_text := _hero_summary(hero)
 	var stats_text := " / ".join(_hero_stats(hero))
 	var action_text := _locale_text(
-		"Start a run with this hero." if screen_mode == "select" else "Open hero selection to enter the trial.",
-		"选择这名角色进入本局试炼。" if screen_mode == "select" else "点击开始，进入角色选择并开启试炼。",
-		"選擇這名角色進入本局試煉。" if screen_mode == "select" else "點擊開始，進入角色選擇並開啟試煉。"
+		"Press Enter to start with this hero." if screen_mode == "select" else "Open hero select and lock this hero.",
+		"按 Enter 用这名角色开始。" if screen_mode == "select" else "先打开选角，再锁定这名角色。",
+		"按 Enter 用這名角色開始。" if screen_mode == "select" else "先打開選角，再鎖定這名角色。"
 	)
 	hero_detail_desc.text = "%s\n%s\n%s" % [summary_text, stats_text, action_text]
 
@@ -434,12 +436,13 @@ func _refresh_copy(_locale: String = "") -> void:
 		"先選擇選單項，再確定要進入城鎮試煉的角色。"
 	)
 	left_blurb_label.text = _locale_text(
-		"Prototype art is back on the title screen first: background, hero portraits, and relic icons are now part of the flow again.",
-		"首屏已经先放回背景图、角色立绘和饰品图标，方便继续对菜单和战斗界面逐步打磨。",
-		"首屏已經先放回背景圖、角色立繪和飾品圖示，方便繼續對選單和戰鬥介面逐步打磨。"
+		"Start here, adjust audio or settings if needed, then lock a hero and shape the run with relics.",
+		"先从这里开始；要调音频或设置也能直接处理。选定角色后，再用饰品把路线做出来。",
+		"先從這裡開始；要調音訊或設定也能直接處理。選定角色後，再用飾品把路線做出來。"
 	)
 	primary_start_button.text = _locale_text("Start", "开始", "開始") if screen_mode != "select" else _locale_text("Enter Trial", "进入试炼", "進入試煉")
 	settings_button.text = UIText.text("menu_settings")
+	audio_button.text = UIText.text("audio_mix")
 	gallery_button.text = UIText.text("menu_gallery")
 	about_button.text = UIText.text("menu_about")
 	quit_button.text = UIText.text("menu_quit")
@@ -460,27 +463,27 @@ func _hint_text() -> String:
 	match screen_mode:
 		"select":
 			return _locale_text(
-				"1 / 2 / 3 choose hero  |  Enter begin  |  Esc menu  |  S settings  |  Q quit",
-				"1 / 2 / 3 选择角色  |  Enter 开始  |  Esc 返回菜单  |  S 设置  |  Q 退出",
-				"1 / 2 / 3 選擇角色  |  Enter 開始  |  Esc 返回選單  |  S 設定  |  Q 退出"
+				"1 / 2 / 3 choose hero  |  Enter begin  |  Esc menu  |  S settings  |  F10 audio  |  Q quit",
+				"1 / 2 / 3 选择角色  |  Enter 开始  |  Esc 返回菜单  |  S 设置  |  F10 音频  |  Q 退出",
+				"1 / 2 / 3 選擇角色  |  Enter 開始  |  Esc 返回選單  |  S 設定  |  F10 音訊  |  Q 退出"
 			)
 		"gallery":
 			return _locale_text(
-				"G reopen gallery  |  Esc menu  |  S settings  |  Q quit",
-				"G 重新打开图鉴  |  Esc 返回菜单  |  S 设置  |  Q 退出",
-				"G 重新打開圖鑑  |  Esc 返回選單  |  S 設定  |  Q 退出"
+				"G reopen gallery  |  Esc menu  |  S settings  |  F10 audio  |  Q quit",
+				"G 重新打开图鉴  |  Esc 返回菜单  |  S 设置  |  F10 音频  |  Q 退出",
+				"G 重新打開圖鑑  |  Esc 返回選單  |  S 設定  |  F10 音訊  |  Q 退出"
 			)
 		"about":
 			return _locale_text(
-				"A reopen about  |  Esc menu  |  S settings  |  Q quit",
-				"A 重新打开关于  |  Esc 返回菜单  |  S 设置  |  Q 退出",
-				"A 重新打開關於  |  Esc 返回選單  |  S 設定  |  Q 退出"
+				"A reopen about  |  Esc menu  |  S settings  |  F10 audio  |  Q quit",
+				"A 重新打开关于  |  Esc 返回菜单  |  S 设置  |  F10 音频  |  Q 退出",
+				"A 重新打開關於  |  Esc 返回選單  |  S 設定  |  F10 音訊  |  Q 退出"
 			)
 		_:
 			return _locale_text(
-				"Enter open start menu  |  S settings  |  G gallery  |  A about  |  Q quit",
-				"Enter 打开开始菜单  |  S 设置  |  G 图鉴  |  A 关于  |  Q 退出",
-				"Enter 打開開始選單  |  S 設定  |  G 圖鑑  |  A 關於  |  Q 退出"
+				"Enter open hero select  |  S settings  |  F10 audio  |  G gallery  |  A about  |  Q quit",
+				"Enter 打开选角菜单  |  S 设置  |  F10 音频  |  G 图鉴  |  A 关于  |  Q 退出",
+				"Enter 打開選角選單  |  S 設定  |  F10 音訊  |  G 圖鑑  |  A 關於  |  Q 退出"
 			)
 
 func _queue_layout_refresh() -> void:
@@ -504,13 +507,13 @@ func _refresh_layout() -> void:
 	panel_margin.add_theme_constant_override("margin_top", 16 if compact else 24)
 	panel_margin.add_theme_constant_override("margin_right", 18 if compact else 28)
 	panel_margin.add_theme_constant_override("margin_bottom", 16 if compact else 24)
-	UISkin.label(title_label, 26 if compact else 34, UISkin.COLOR_ACCENT)
-	UISkin.label(subtitle_label, 12 if compact else 14, UISkin.COLOR_MUTED)
-	UISkin.label(left_blurb_label, 11 if compact else 13, Color(0.90, 0.92, 0.98))
-	UISkin.label(hero_detail_title, 20 if compact else 24, Color.WHITE)
-	UISkin.label(hero_detail_role, 12 if compact else 14, UISkin.COLOR_ACCENT)
-	UISkin.label(hero_detail_desc, 11 if compact else 12, UISkin.COLOR_MUTED)
-	UISkin.label(left_hint_label, 10 if compact else 11, UISkin.COLOR_MUTED)
+	UISkin.label(title_label, 28 if compact else 34, UISkin.COLOR_ACCENT)
+	UISkin.label(subtitle_label, 13 if compact else 14, UISkin.COLOR_MUTED)
+	UISkin.label(left_blurb_label, 12 if compact else 13, Color(0.90, 0.92, 0.98))
+	UISkin.label(hero_detail_title, 21 if compact else 24, Color.WHITE)
+	UISkin.label(hero_detail_role, 13 if compact else 14, UISkin.COLOR_ACCENT)
+	UISkin.label(hero_detail_desc, 12 if compact else 13, UISkin.COLOR_MUTED)
+	UISkin.label(left_hint_label, 11 if compact else 12, UISkin.COLOR_MUTED)
 	cards_grid.columns = 1 if very_compact else (2 if compact else 3)
 	hero_portrait.custom_minimum_size = Vector2(200.0 if compact else 220.0, 240.0 if compact else 260.0)
 	for hero_button in hero_buttons:

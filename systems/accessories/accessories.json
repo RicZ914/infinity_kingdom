@@ -97,5 +97,95 @@
     "summary": "+20% attack and skill damage, +20 max defense.",
     "effects": {"attack_damage_pct": 0.20, "skill_damage_pct": 0.20, "max_defense": 20.0},
     "tags": ["damage", "skill", "defense"]
+  },
+  {
+    "id": "field_band",
+    "name": "Field Band",
+    "rarity": "Common",
+    "icon": "res://assets/ui/consumable/bandage_pack.png",
+    "summary": "+12 max hp and +6 max defense.",
+    "effects": {"max_hp": 12.0, "max_defense": 6.0},
+    "tags": ["survival", "defense"]
+  },
+  {
+    "id": "sparring_token",
+    "name": "Sparring Token",
+    "rarity": "Common",
+    "icon": "res://assets/ui/icon/stat_attack_pixel.png",
+    "summary": "+8% attack damage and slightly faster attacks.",
+    "effects": {"attack_damage_pct": 0.08, "attack_interval_pct": -0.04},
+    "tags": ["attack", "tempo"]
+  },
+  {
+    "id": "gleam_feather",
+    "name": "Gleam Feather",
+    "rarity": "Uncommon",
+    "icon": "res://assets/ui/icon/stat_speed_pixel.png",
+    "summary": "+16% move speed and +12 max inspiration.",
+    "effects": {"move_speed_pct": 0.16, "max_inspiration": 12.0},
+    "tags": ["speed", "resource"]
+  },
+  {
+    "id": "pilgrim_censer",
+    "name": "Pilgrim Censer",
+    "rarity": "Rare",
+    "icon": "res://assets/ui/icon/ui_ember_seed.png",
+    "summary": "+18 max inspiration and +10% skill damage.",
+    "effects": {"max_inspiration": 18.0, "skill_damage_pct": 0.10},
+    "tags": ["resource", "power"]
+  },
+  {
+    "id": "oathwire_loop",
+    "name": "Oathwire Loop",
+    "rarity": "Rare",
+    "icon": "res://assets/ui/trait/trait_echo.png",
+    "summary": "-10% skill cooldown, +8% critical chance.",
+    "effects": {"skill_cooldown_pct": -0.10, "crit_rate": 0.08},
+    "tags": ["skill", "crit"]
+  },
+  {
+    "id": "crimson_locket",
+    "name": "Crimson Locket",
+    "rarity": "Rare",
+    "icon": "res://assets/ui/accessory/laceration_icon.png",
+    "summary": "+12% attack damage and slightly faster attacks.",
+    "effects": {"attack_damage_pct": 0.12, "attack_interval_pct": -0.05},
+    "tags": ["attack", "damage"]
+  },
+  {
+    "id": "warden_vambrace",
+    "name": "Warden Vambrace",
+    "rarity": "Epic",
+    "icon": "res://assets/ui/icon/stat_defense_pixel.png",
+    "summary": "+24 max hp, +12 max defense, +8% move speed.",
+    "effects": {"max_hp": 24.0, "max_defense": 12.0, "move_speed_pct": 0.08},
+    "tags": ["survival", "defense", "speed"]
+  },
+  {
+    "id": "moonlit_quill",
+    "name": "Moonlit Quill",
+    "rarity": "Epic",
+    "icon": "res://assets/ui/trait/trait_crit.png",
+    "summary": "+14% critical chance, +10% attack damage, -10 max defense.",
+    "effects": {"crit_rate": 0.14, "attack_damage_pct": 0.10, "max_defense": -10.0},
+    "tags": ["crit", "risk", "damage"]
+  },
+  {
+    "id": "starvein_compass",
+    "name": "Starvein Compass",
+    "rarity": "Epic",
+    "icon": "res://assets/ui/icon/stat_mana_pixel.png",
+    "summary": "+20 max inspiration, -8% skill cost, +6% critical chance.",
+    "effects": {"max_inspiration": 20.0, "skill_cost_pct": -0.08, "crit_rate": 0.06},
+    "tags": ["resource", "crit", "tempo"]
+  },
+  {
+    "id": "crownwatch_sigil",
+    "name": "Crownwatch Sigil",
+    "rarity": "Legendary",
+    "icon": "res://assets/ui/accessory/old_king_crest.png",
+    "summary": "+15% attack damage, +15% skill damage, +15 max defense.",
+    "effects": {"attack_damage_pct": 0.15, "skill_damage_pct": 0.15, "max_defense": 15.0},
+    "tags": ["damage", "skill", "power"]
   }
 ]

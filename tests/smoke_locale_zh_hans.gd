@@ -21,6 +21,7 @@ func _run() -> void:
 
 	var start_button := world.character_select.get("primary_start_button") as Button
 	var settings_button := world.character_select.get("settings_button") as Button
+	var audio_button := world.character_select.get("audio_button") as Button
 	var quit_button := world.character_select.get("quit_button") as Button
 	if start_button == null or start_button.text != "开始":
 		push_error("Title start button did not switch to Simplified Chinese")
@@ -28,6 +29,10 @@ func _run() -> void:
 		return
 	if settings_button == null or settings_button.text != "设置":
 		push_error("Title settings button did not switch to Simplified Chinese")
+		quit(1)
+		return
+	if audio_button == null or audio_button.text != "音频混音":
+		push_error("Title audio button did not switch to Simplified Chinese")
 		quit(1)
 		return
 	if quit_button == null or quit_button.text != "退出游戏":
@@ -65,6 +70,25 @@ func _run() -> void:
 	var detail_label := world.run_event_panel.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Detail") as Label
 	if detail_label == null or detail_label.text.is_empty() or detail_label.text.find("Scout routes") != -1:
 		push_error("Scout event detail text did not switch to Simplified Chinese")
+		quit(1)
+		return
+
+	var accessory_manager := root.get_node_or_null("/root/AccessoryManager")
+	if accessory_manager == null:
+		push_error("AccessoryManager autoload missing for locale smoke")
+		quit(1)
+		return
+	var choices: Array = accessory_manager.generate_choices(3, world.player_character, {"source": "opening"})
+	world.accessory_choice.open(choices, world.player_character, "初始饰品", 20, 20)
+	await process_frame
+	await process_frame
+	var accessory_preview := world.accessory_choice.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/PreviewPanel/MarginContainer/VBoxContainer/PreviewDetail") as Label
+	if accessory_preview == null or accessory_preview.text.is_empty():
+		push_error("Accessory preview did not initialize in Simplified Chinese")
+		quit(1)
+		return
+	if accessory_preview.text.find("Swap:") != -1 or accessory_preview.text.find("Opening") != -1:
+		push_error("Accessory preview still contains English-only guidance in Simplified Chinese")
 		quit(1)
 		return
 
