@@ -18,6 +18,35 @@ const TAG_LABELS := {
 	"tempo": "Tempo"
 }
 
+const TAG_LABELS_LOCALIZED := {
+	"zh_Hans": {
+		"attack": "攻击",
+		"crit": "暴击",
+		"damage": "伤害",
+		"defense": "防御",
+		"power": "强能",
+		"resource": "资源",
+		"risk": "风险",
+		"skill": "技能",
+		"speed": "速度",
+		"survival": "生存",
+		"tempo": "节奏"
+	},
+	"zh_Hant": {
+		"attack": "攻擊",
+		"crit": "暴擊",
+		"damage": "傷害",
+		"defense": "防禦",
+		"power": "強能",
+		"resource": "資源",
+		"risk": "風險",
+		"skill": "技能",
+		"speed": "速度",
+		"survival": "生存",
+		"tempo": "節奏"
+	}
+}
+
 const TAG_PLAYSTYLE_HINTS := {
 	"attack": "Improves repeated basic pressure and rewards staying on target.",
 	"crit": "Raises burst variance and scales best with fast hit volume.",
@@ -30,6 +59,118 @@ const TAG_PLAYSTYLE_HINTS := {
 	"speed": "Makes dodges, flanks, and reposition checks easier to pass cleanly.",
 	"survival": "Stabilizes rough runs and softens recovery mistakes.",
 	"tempo": "Keeps momentum rolling once you start landing skills or kills."
+}
+
+const TAG_PLAYSTYLE_HINTS_LOCALIZED := {
+	"zh_Hans": {
+		"attack": "强化普攻压制力，适合持续贴身输出。",
+		"crit": "提高爆发上限，命中频率越高收益越明显。",
+		"damage": "直接提升斩杀速度，更容易通过精英与 Boss 检定。",
+		"defense": "补足护甲价值，让长线战斗容错更高。",
+		"power": "偏向技能爆发窗口，而不是拖长消耗。",
+		"resource": "改善灵感循环，让强技能更快转回来。",
+		"risk": "血线越低越敢打时，收益才会真正放大。",
+		"skill": "强化冷却、控制与技能本体转化。",
+		"speed": "更容易通过闪避、绕背和走位检查。",
+		"survival": "让逆风局更稳，也更容易修正失误。",
+		"tempo": "一旦打出节奏，就能把优势继续滚下去。"
+	},
+	"zh_Hant": {
+		"attack": "強化普攻壓制力，適合持續貼身輸出。",
+		"crit": "提高爆發上限，命中頻率越高收益越明顯。",
+		"damage": "直接提升斬殺速度，更容易通過精英與 Boss 檢定。",
+		"defense": "補足護甲價值，讓長線戰鬥容錯更高。",
+		"power": "偏向技能爆發窗口，而不是拖長消耗。",
+		"resource": "改善靈感循環，讓強技能更快轉回來。",
+		"risk": "血線越低越敢打時，收益才會真正放大。",
+		"skill": "強化冷卻、控制與技能本體轉化。",
+		"speed": "更容易通過閃避、繞背和走位檢查。",
+		"survival": "讓逆風局更穩，也更容易修正失誤。",
+		"tempo": "一旦打出節奏，就能把優勢繼續滾下去。"
+	}
+}
+
+const RARITY_LABELS_LOCALIZED := {
+	"zh_Hans": {
+		"Common": "普通",
+		"Uncommon": "精良",
+		"Rare": "稀有",
+		"Epic": "史诗",
+		"Legendary": "传说"
+	},
+	"zh_Hant": {
+		"Common": "普通",
+		"Uncommon": "精良",
+		"Rare": "稀有",
+		"Epic": "史詩",
+		"Legendary": "傳說"
+	}
+}
+
+const ACCESSORY_LOCALIZATION := {
+	"zh_Hans": {
+		"none": {"name": "无饰品", "summary": "选择一件饰品来决定这一局的构筑方向。"},
+		"ember_talisman": {"name": "余烬护符", "summary": "最大灵感 +20，每次命中额外恢复 1 点灵感。"},
+		"wind_knot": {"name": "风结", "summary": "移动速度 +18%，普通攻击节奏略微加快。"},
+		"wolf_pendant": {"name": "狼坠", "summary": "攻击伤害 +15%，暴击率 +6%。"},
+		"echo_silver_ring": {"name": "回响银戒", "summary": "技能冷却更快，普攻回灵更多。"},
+		"iron_branch_pendant": {"name": "铁枝坠饰", "summary": "最大生命 +18，最大护甲 +18。"},
+		"shadow_charm": {"name": "影咒", "summary": "移动速度 +12%，暴击率 +10%。"},
+		"fate_reversal_ring": {"name": "逆命之环", "summary": "最大生命 +30，攻击伤害 +12%，但技能消耗更高。"},
+		"old_king_crest": {"name": "旧王纹章", "summary": "最大护甲 +25，技能伤害 +18%。"},
+		"hunter_bone_charm": {"name": "猎骨符", "summary": "攻击伤害 +10%，移动速度 +14%。"},
+		"nameless_astrolabe": {"name": "无名星盘", "summary": "最大灵感 +25，技能冷却 -15%。"},
+		"throne_remnant": {"name": "王座残片", "summary": "攻击与技能伤害 +20%，最大护甲 +20。"}
+	},
+	"zh_Hant": {
+		"none": {"name": "無飾品", "summary": "選擇一件飾品來決定這一局的構築方向。"},
+		"ember_talisman": {"name": "餘燼護符", "summary": "最大靈感 +20，每次命中額外恢復 1 點靈感。"},
+		"wind_knot": {"name": "風結", "summary": "移動速度 +18%，普通攻擊節奏略微加快。"},
+		"wolf_pendant": {"name": "狼墜", "summary": "攻擊傷害 +15%，暴擊率 +6%。"},
+		"echo_silver_ring": {"name": "回響銀戒", "summary": "技能冷卻更快，普攻回靈更多。"},
+		"iron_branch_pendant": {"name": "鐵枝墜飾", "summary": "最大生命 +18，最大護甲 +18。"},
+		"shadow_charm": {"name": "影咒", "summary": "移動速度 +12%，暴擊率 +10%。"},
+		"fate_reversal_ring": {"name": "逆命之環", "summary": "最大生命 +30，攻擊傷害 +12%，但技能消耗更高。"},
+		"old_king_crest": {"name": "舊王紋章", "summary": "最大護甲 +25，技能傷害 +18%。"},
+		"hunter_bone_charm": {"name": "獵骨符", "summary": "攻擊傷害 +10%，移動速度 +14%。"},
+		"nameless_astrolabe": {"name": "無名星盤", "summary": "最大靈感 +25，技能冷卻 -15%。"},
+		"throne_remnant": {"name": "王座殘片", "summary": "攻擊與技能傷害 +20%，最大護甲 +20。"}
+	}
+}
+
+const EFFECT_LABELS_LOCALIZED := {
+	"zh_Hans": {
+		"max_hp": "最大生命",
+		"max_inspiration": "最大灵感",
+		"max_defense": "最大护甲",
+		"defense": "护甲",
+		"move_speed": "移动速度",
+		"attack_damage": "攻击伤害",
+		"attack_interval": "攻击间隔",
+		"crit_rate": "暴击率",
+		"inspiration_gain_on_attack_hit": "命中回灵",
+		"skill_cost": "技能消耗",
+		"skill_damage": "技能伤害",
+		"skill1_cooldown": "技能1冷却",
+		"skill2_cooldown": "技能2冷却",
+		"skill3_cooldown": "技能3冷却"
+	},
+	"zh_Hant": {
+		"max_hp": "最大生命",
+		"max_inspiration": "最大靈感",
+		"max_defense": "最大護甲",
+		"defense": "護甲",
+		"move_speed": "移動速度",
+		"attack_damage": "攻擊傷害",
+		"attack_interval": "攻擊間隔",
+		"crit_rate": "暴擊率",
+		"inspiration_gain_on_attack_hit": "命中回靈",
+		"skill_cost": "技能消耗",
+		"skill_damage": "技能傷害",
+		"skill1_cooldown": "技能1冷卻",
+		"skill2_cooldown": "技能2冷卻",
+		"skill3_cooldown": "技能3冷卻"
+	}
 }
 
 const EMPTY_ACCESSORY := {
@@ -189,7 +330,10 @@ func reload_catalog() -> void:
 func get_catalog() -> Array[Dictionary]:
 	if accessory_catalog.is_empty():
 		reload_catalog()
-	return accessory_catalog.duplicate(true)
+	var localized_catalog: Array[Dictionary] = []
+	for accessory in accessory_catalog:
+		localized_catalog.append(_localize_accessory(accessory))
+	return localized_catalog
 
 func reset_run() -> void:
 	equipped_accessory = EMPTY_ACCESSORY.duplicate(true)
@@ -197,10 +341,10 @@ func reset_run() -> void:
 	base_stats_by_actor.clear()
 	combat_proc_ready_at.clear()
 	choice_cursor = 0
-	accessory_equipped.emit(equipped_accessory)
+	accessory_equipped.emit(_localize_accessory(equipped_accessory))
 
 func get_equipped_accessory() -> Dictionary:
-	return equipped_accessory.duplicate(true)
+	return _localize_accessory(equipped_accessory)
 
 func get_equipped_tags() -> Array[String]:
 	var tags: Array[String] = []
@@ -216,11 +360,12 @@ func describe_tags(tags: Array = []) -> String:
 	if source_tags.is_empty():
 		source_tags = get_equipped_tags()
 	var parts: Array[String] = []
+	var locale_tags := TAG_LABELS_LOCALIZED.get(_current_locale(), {}) as Dictionary
 	for tag in source_tags:
 		var next_tag := String(tag)
 		if next_tag.is_empty():
 			continue
-		parts.append(String(TAG_LABELS.get(next_tag, next_tag.capitalize())))
+		parts.append(String(locale_tags.get(next_tag, TAG_LABELS.get(next_tag, next_tag.capitalize()))))
 	return ", ".join(parts)
 
 func describe_playstyle(tags: Array = []) -> String:
@@ -228,11 +373,12 @@ func describe_playstyle(tags: Array = []) -> String:
 	if source_tags.is_empty():
 		source_tags = get_equipped_tags()
 	var hints: Array[String] = []
+	var locale_hints := TAG_PLAYSTYLE_HINTS_LOCALIZED.get(_current_locale(), {}) as Dictionary
 	for tag in source_tags:
 		var next_tag := String(tag)
 		if next_tag.is_empty():
 			continue
-		var hint := String(TAG_PLAYSTYLE_HINTS.get(next_tag, ""))
+		var hint := String(locale_hints.get(next_tag, TAG_PLAYSTYLE_HINTS.get(next_tag, "")))
 		if hint.is_empty() or hints.has(hint):
 			continue
 		hints.append(hint)
@@ -337,10 +483,10 @@ func apply_on_hit_effects(actor: Node, attack_name: StringName, target: Node) ->
 
 func get_accessory(accessory_id: String) -> Dictionary:
 	if accessory_id == "none":
-		return EMPTY_ACCESSORY.duplicate(true)
+		return _localize_accessory(EMPTY_ACCESSORY)
 	for accessory in get_catalog():
 		if String(accessory.get("id", "")) == accessory_id:
-			return accessory.duplicate(true)
+			return _localize_accessory(accessory)
 	return {}
 
 func _load_catalog_from_json() -> Array[Dictionary]:
@@ -383,7 +529,7 @@ func apply_to_actor(actor: Node) -> void:
 func describe_effects(accessory: Dictionary) -> String:
 	var effects: Dictionary = accessory.get("effects", {})
 	if effects.is_empty():
-		return "No active stat change."
+		return _localized_phrase("No active stat change.", "当前没有数值变化。", "當前沒有數值變化。")
 	var parts: Array[String] = []
 	for key in effects.keys():
 		var value := float(effects[key])
@@ -479,7 +625,9 @@ func _ratio(actor: Node, current_field: String, max_field: String) -> float:
 	return clampf(float(actor.get(current_field)) / max_value, 0.0, 1.0)
 
 func _format_effect(key: String, value: float) -> String:
-	var label := key.replace("_pct", "").replace("_", " ").capitalize()
+	var normalized_key := key.replace("_pct", "")
+	var locale_labels := EFFECT_LABELS_LOCALIZED.get(_current_locale(), {}) as Dictionary
+	var label := String(locale_labels.get(normalized_key, normalized_key.replace("_", " ").capitalize()))
 	if key.ends_with("_pct"):
 		return "%s %+d%%" % [label, int(round(value * 100.0))]
 	if key == "crit_rate":
@@ -502,6 +650,33 @@ func _consume_combat_proc(actor: Node, proc_name: String, cooldown: float) -> bo
 		return false
 	combat_proc_ready_at[proc_key] = now + cooldown
 	return true
+
+func _localize_accessory(source: Dictionary) -> Dictionary:
+	var accessory := source.duplicate(true)
+	var locale := _current_locale()
+	var id := String(accessory.get("id", ""))
+	var locale_map := ACCESSORY_LOCALIZATION.get(locale, {}) as Dictionary
+	var localized := locale_map.get(id, {}) as Dictionary
+	if not localized.is_empty():
+		accessory["name"] = String(localized.get("name", accessory.get("name", "")))
+		accessory["summary"] = String(localized.get("summary", accessory.get("summary", "")))
+	var rarity_map := RARITY_LABELS_LOCALIZED.get(locale, {}) as Dictionary
+	accessory["rarity"] = String(rarity_map.get(String(accessory.get("rarity", "")), accessory.get("rarity", "")))
+	return accessory
+
+func _current_locale() -> String:
+	if UISettings != null and UISettings.has_method("get_locale"):
+		return String(UISettings.get_locale())
+	return "zh_Hans"
+
+func _localized_phrase(en_text: String, zh_hans_text: String, zh_hant_text: String) -> String:
+	match _current_locale():
+		"zh_Hant":
+			return zh_hant_text
+		"zh_Hans":
+			return zh_hans_text
+		_:
+			return en_text
 
 func _grant_inspiration(actor: Node, amount: float) -> void:
 	if amount <= 0.0:

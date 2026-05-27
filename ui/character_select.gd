@@ -6,27 +6,79 @@ signal settings_requested
 signal quit_requested
 
 const UISkin := preload("res://ui/ui_skin.gd")
+
 const HEROES := [
 	{
 		"id": &"knight",
-		"name": "Knight",
-		"role": "Frontline",
-		"stats": ["HP", "Armor", "Melee"],
-		"summary": "Stable opener, heavy sustain, slower reposition."
+		"portrait": "res://assets/heroes/knight.png",
+		"name": {
+			"en": "Knight",
+			"zh_Hans": "骑士",
+			"zh_Hant": "騎士"
+		},
+		"role": {
+			"en": "Frontline",
+			"zh_Hans": "前线",
+			"zh_Hant": "前線"
+		},
+		"stats": {
+			"en": ["HP", "Armor", "Melee"],
+			"zh_Hans": ["生命", "护甲", "近战"],
+			"zh_Hant": ["生命", "護甲", "近戰"]
+		},
+		"summary": {
+			"en": "Stable opener, heavy sustain, slower reposition.",
+			"zh_Hans": "开局最稳，续航厚实，但转位节奏偏慢。",
+			"zh_Hant": "開局最穩，續航厚實，但轉位節奏偏慢。"
+		}
 	},
 	{
 		"id": &"ranger",
-		"name": "Ranger",
-		"role": "Agile",
-		"stats": ["Crit", "Speed", "Burst"],
-		"summary": "Fast target picks, high tempo, lower fault tolerance."
+		"portrait": "res://assets/heroes/ranger.png",
+		"name": {
+			"en": "Ranger",
+			"zh_Hans": "游侠",
+			"zh_Hant": "遊俠"
+		},
+		"role": {
+			"en": "Agile",
+			"zh_Hans": "灵巧",
+			"zh_Hant": "靈巧"
+		},
+		"stats": {
+			"en": ["Crit", "Speed", "Burst"],
+			"zh_Hans": ["暴击", "速度", "爆发"],
+			"zh_Hant": ["暴擊", "速度", "爆發"]
+		},
+		"summary": {
+			"en": "Fast target picks, high tempo, lower fault tolerance.",
+			"zh_Hans": "点杀速度最快，节奏很高，但失误空间最小。",
+			"zh_Hant": "點殺速度最快，節奏很高，但失誤空間最小。"
+		}
 	},
 	{
 		"id": &"mage",
-		"name": "Mage",
-		"role": "Control",
-		"stats": ["Range", "Skill", "Crowd"],
-		"summary": "Safest spacing, strong area control, lightest body."
+		"portrait": "res://assets/heroes/mage.png",
+		"name": {
+			"en": "Mage",
+			"zh_Hans": "法师",
+			"zh_Hant": "法師"
+		},
+		"role": {
+			"en": "Control",
+			"zh_Hans": "控场",
+			"zh_Hant": "控場"
+		},
+		"stats": {
+			"en": ["Range", "Skill", "Control"],
+			"zh_Hans": ["射程", "技能", "控制"],
+			"zh_Hant": ["射程", "技能", "控制"]
+		},
+		"summary": {
+			"en": "Safest spacing, strong area control, lightest body.",
+			"zh_Hans": "最安全的拉扯距离，范围控制强，但身板最薄。",
+			"zh_Hant": "最安全的拉扯距離，範圍控制強，但身板最薄。"
+		}
 	}
 ]
 
@@ -34,9 +86,12 @@ var panel: PanelContainer
 var panel_margin: MarginContainer
 var title_label: Label
 var subtitle_label: Label
+var background_rect: TextureRect
+var hero_portrait: TextureRect
 var hero_detail_title: Label
 var hero_detail_role: Label
 var hero_detail_desc: Label
+var cards_panel: PanelContainer
 var cards_grid: GridContainer
 var hero_buttons: Array[Button] = []
 var primary_start_button: Button
@@ -45,15 +100,18 @@ var gallery_button: Button
 var about_button: Button
 var quit_button: Button
 var left_hint_label: Label
+var left_blurb_label: Label
 var layout_size_override: Vector2 = Vector2.ZERO
 var selected_hero_index: int = 0
 var detail_mode: String = "hero"
+var screen_mode: String = "menu"
 
 func _ready() -> void:
 	_build_ui()
 	if UISettings != null and UISettings.has_signal("locale_changed") and not UISettings.locale_changed.is_connected(_refresh_copy):
 		UISettings.locale_changed.connect(_refresh_copy)
 	_set_selected_hero(0)
+	_show_menu()
 	_refresh_copy()
 	if get_viewport() != null and not get_viewport().size_changed.is_connected(_queue_layout_refresh):
 		get_viewport().size_changed.connect(_queue_layout_refresh)
@@ -62,10 +120,17 @@ func _ready() -> void:
 func _build_ui() -> void:
 	layer = 10
 
-	var backdrop := ColorRect.new()
-	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
-	backdrop.color = Color(0.04, 0.05, 0.06, 1.0)
-	add_child(backdrop)
+	background_rect = TextureRect.new()
+	background_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	background_rect.texture = load("res://assets/ui/background/title_screen_bg.png") as Texture2D
+	background_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	background_rect.modulate = Color(1.0, 1.0, 1.0, 0.96)
+	add_child(background_rect)
+
+	var overlay := ColorRect.new()
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.color = Color(0.03, 0.04, 0.05, 0.44)
+	add_child(overlay)
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -73,7 +138,7 @@ func _build_ui() -> void:
 
 	panel = PanelContainer.new()
 	panel.name = "CharacterSelectPanel"
-	panel.custom_minimum_size = Vector2(1120, 640)
+	panel.custom_minimum_size = Vector2(1180, 690)
 	panel.add_theme_stylebox_override("panel", UISkin.menu_panel_style())
 	center.add_child(panel)
 
@@ -91,7 +156,7 @@ func _build_ui() -> void:
 	title_label = Label.new()
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	UISkin.label(title_label, 32, UISkin.COLOR_ACCENT)
+	UISkin.label(title_label, 34, UISkin.COLOR_ACCENT)
 	root_column.add_child(title_label)
 
 	subtitle_label = Label.new()
@@ -106,7 +171,7 @@ func _build_ui() -> void:
 	root_column.add_child(main_row)
 
 	var left_panel := PanelContainer.new()
-	left_panel.custom_minimum_size = Vector2(260, 0)
+	left_panel.custom_minimum_size = Vector2(286, 0)
 	left_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	left_panel.add_theme_stylebox_override("panel", UISkin.content_panel_style())
 	main_row.add_child(left_panel)
@@ -122,14 +187,16 @@ func _build_ui() -> void:
 	left_column.add_theme_constant_override("separation", 12)
 	left_margin.add_child(left_column)
 
-	var logo_box := UISkin.placeholder_box(Vector2(0, 84), UIText.text("placeholder_panel"))
-	left_column.add_child(logo_box)
+	left_blurb_label = Label.new()
+	left_blurb_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UISkin.label(left_blurb_label, 13, Color(0.90, 0.92, 0.98))
+	left_column.add_child(left_blurb_label)
 
-	primary_start_button = _menu_button(UIText.text("menu_start"), func() -> void: _activate_selected_hero(), true)
-	settings_button = _menu_button(UIText.text("menu_settings"), func() -> void: settings_requested.emit())
-	gallery_button = _menu_button(UIText.text("menu_gallery"), func() -> void: _show_gallery_placeholder())
-	about_button = _menu_button(UIText.text("menu_about"), func() -> void: _show_about_placeholder())
-	quit_button = _menu_button(UIText.text("quit_game"), func() -> void: quit_requested.emit())
+	primary_start_button = _menu_button("", _on_primary_pressed, true)
+	settings_button = _menu_button("", func() -> void: settings_requested.emit())
+	gallery_button = _menu_button("", func() -> void: _show_gallery_placeholder())
+	about_button = _menu_button("", func() -> void: _show_about_placeholder())
+	quit_button = _menu_button("", func() -> void: quit_requested.emit())
 	for button in [primary_start_button, settings_button, gallery_button, about_button, quit_button]:
 		left_column.add_child(button)
 
@@ -160,12 +227,21 @@ func _build_ui() -> void:
 	hero_top_row.add_theme_constant_override("separation", 16)
 	right_column.add_child(hero_top_row)
 
-	var portrait_box := UISkin.placeholder_box(Vector2(180, 180), UIText.text("placeholder_portrait"))
-	hero_top_row.add_child(portrait_box)
+	var portrait_frame := PanelContainer.new()
+	portrait_frame.custom_minimum_size = Vector2(220, 260)
+	portrait_frame.add_theme_stylebox_override("panel", UISkin.icon_slot_style())
+	hero_top_row.add_child(portrait_frame)
+
+	hero_portrait = TextureRect.new()
+	hero_portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hero_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	hero_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	hero_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	portrait_frame.add_child(hero_portrait)
 
 	var hero_info_panel := PanelContainer.new()
 	hero_info_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hero_info_panel.add_theme_stylebox_override("panel", UISkin.placeholder_box_style())
+	hero_info_panel.add_theme_stylebox_override("panel", UISkin.choice_panel_style())
 	hero_top_row.add_child(hero_info_panel)
 
 	var hero_info_margin := MarginContainer.new()
@@ -192,9 +268,9 @@ func _build_ui() -> void:
 	UISkin.label(hero_detail_desc, 12, UISkin.COLOR_MUTED)
 	hero_info_column.add_child(hero_detail_desc)
 
-	var cards_panel := PanelContainer.new()
+	cards_panel = PanelContainer.new()
 	cards_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	cards_panel.add_theme_stylebox_override("panel", UISkin.placeholder_box_style())
+	cards_panel.add_theme_stylebox_override("panel", UISkin.choice_panel_style())
 	right_column.add_child(cards_panel)
 
 	var cards_margin := MarginContainer.new()
@@ -219,9 +295,9 @@ func _hero_card(hero: Dictionary, hero_index: int) -> Button:
 	var button := Button.new()
 	button.text = ""
 	button.focus_mode = Control.FOCUS_ALL
-	button.custom_minimum_size = Vector2(0, 180)
+	button.custom_minimum_size = Vector2(0, 200)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	button.add_theme_stylebox_override("normal", UISkin.placeholder_box_style())
+	button.add_theme_stylebox_override("normal", UISkin.choice_panel_style())
 	button.add_theme_stylebox_override("hover", UISkin.flat_style(Color(0.22, 0.23, 0.27), UISkin.COLOR_ACCENT, 2, 3))
 	button.add_theme_stylebox_override("pressed", UISkin.flat_style(Color(0.14, 0.15, 0.18), UISkin.COLOR_ACCENT.darkened(0.2), 2, 3))
 	button.focus_entered.connect(func() -> void: _set_selected_hero(hero_index))
@@ -240,22 +316,33 @@ func _hero_card(hero: Dictionary, hero_index: int) -> Button:
 	column.add_theme_constant_override("separation", 8)
 	margin.add_child(column)
 
-	column.add_child(UISkin.placeholder_box(Vector2(0, 72), UIText.text("placeholder_card")))
+	var portrait_frame := PanelContainer.new()
+	portrait_frame.custom_minimum_size = Vector2(0, 96)
+	portrait_frame.add_theme_stylebox_override("panel", UISkin.icon_slot_style())
+	column.add_child(portrait_frame)
+
+	var portrait := TextureRect.new()
+	portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	portrait.texture = load(String(hero["portrait"])) as Texture2D
+	portrait_frame.add_child(portrait)
 
 	var name_label := Label.new()
-	name_label.text = "%s  [%d]" % [String(hero["name"]), hero_index + 1]
+	name_label.text = "%s  [%d]" % [_hero_name(hero), hero_index + 1]
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	UISkin.label(name_label, 16, Color.WHITE)
 	column.add_child(name_label)
 
 	var role_label := Label.new()
-	role_label.text = String(hero["role"])
+	role_label.text = _hero_role(hero)
 	role_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	UISkin.label(role_label, 12, UISkin.COLOR_ACCENT)
 	column.add_child(role_label)
 
 	var stats_label := Label.new()
-	stats_label.text = " / ".join(hero["stats"])
+	stats_label.text = " / ".join(_hero_stats(hero))
 	stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	UISkin.label(stats_label, 11, UISkin.COLOR_MUTED)
@@ -264,21 +351,54 @@ func _hero_card(hero: Dictionary, hero_index: int) -> Button:
 	UISkin.ignore_mouse_recursive(margin)
 	return button
 
-func _menu_button(text: String, callback: Callable, highlighted: bool = false) -> Button:
+func _menu_button(text_value: String, callback: Callable, highlighted: bool = false) -> Button:
 	var button := Button.new()
-	button.text = text
+	button.text = text_value
 	button.custom_minimum_size = Vector2(0, 46)
 	UISkin.button_styles(button, "large" if highlighted else "medium")
 	button.pressed.connect(callback)
 	return button
 
+func _on_primary_pressed() -> void:
+	if screen_mode == "select":
+		_activate_selected_hero()
+		return
+	_show_hero_select()
+
+func _show_menu() -> void:
+	screen_mode = "menu"
+	detail_mode = "hero"
+	cards_panel.visible = false
+	_set_selected_hero(selected_hero_index)
+	_refresh_copy()
+
+func _show_hero_select() -> void:
+	screen_mode = "select"
+	detail_mode = "hero"
+	cards_panel.visible = true
+	_set_selected_hero(selected_hero_index)
+	_refresh_copy()
+	call_deferred("_focus_selected_card")
+
+func _focus_selected_card() -> void:
+	if selected_hero_index >= 0 and selected_hero_index < hero_buttons.size():
+		hero_buttons[selected_hero_index].grab_focus()
+
 func _set_selected_hero(hero_index: int) -> void:
 	detail_mode = "hero"
 	selected_hero_index = clampi(hero_index, 0, HEROES.size() - 1)
 	var hero: Dictionary = HEROES[selected_hero_index]
-	hero_detail_title.text = String(hero["name"])
-	hero_detail_role.text = String(hero["role"])
-	hero_detail_desc.text = "%s\n%s" % [String(hero["summary"]), UIText.text("char_actions")]
+	hero_portrait.texture = load(String(hero["portrait"])) as Texture2D
+	hero_detail_title.text = _hero_name(hero)
+	hero_detail_role.text = _hero_role(hero)
+	var summary_text := _hero_summary(hero)
+	var stats_text := " / ".join(_hero_stats(hero))
+	var action_text := _locale_text(
+		"Start a run with this hero." if screen_mode == "select" else "Open hero selection to enter the trial.",
+		"选择这名角色进入本局试炼。" if screen_mode == "select" else "点击开始，进入角色选择并开启试炼。",
+		"選擇這名角色進入本局試煉。" if screen_mode == "select" else "點擊開始，進入角色選擇並開啟試煉。"
+	)
+	hero_detail_desc.text = "%s\n%s\n%s" % [summary_text, stats_text, action_text]
 
 func _activate_selected_hero() -> void:
 	_activate_hero(selected_hero_index)
@@ -289,33 +409,79 @@ func _activate_hero(hero_index: int) -> void:
 	character_selected.emit(HEROES[safe_index]["id"])
 
 func _show_about_placeholder() -> void:
+	screen_mode = "about"
 	detail_mode = "about"
+	cards_panel.visible = false
 	hero_detail_title.text = UIText.text("about_title")
 	hero_detail_role.text = UIText.text("placeholder_panel")
 	hero_detail_desc.text = UIText.text("char_about_placeholder")
+	_refresh_copy()
 
 func _show_gallery_placeholder() -> void:
+	screen_mode = "gallery"
 	detail_mode = "gallery"
+	cards_panel.visible = false
 	hero_detail_title.text = UIText.text("gallery_title")
 	hero_detail_role.text = UIText.text("placeholder_panel")
 	hero_detail_desc.text = UIText.text("char_gallery_placeholder")
+	_refresh_copy()
 
 func _refresh_copy(_locale: String = "") -> void:
 	title_label.text = UIText.text("menu_title")
-	subtitle_label.text = UIText.text("char_select_subtitle")
-	primary_start_button.text = UIText.text("menu_start")
+	subtitle_label.text = _locale_text(
+		"Choose a menu entry first, then lock in a hero for the town trial.",
+		"先选择菜单项，再确定要进入城镇试炼的角色。",
+		"先選擇選單項，再確定要進入城鎮試煉的角色。"
+	)
+	left_blurb_label.text = _locale_text(
+		"Prototype art is back on the title screen first: background, hero portraits, and relic icons are now part of the flow again.",
+		"首屏已经先放回背景图、角色立绘和饰品图标，方便继续对菜单和战斗界面逐步打磨。",
+		"首屏已經先放回背景圖、角色立繪和飾品圖示，方便繼續對選單和戰鬥介面逐步打磨。"
+	)
+	primary_start_button.text = _locale_text("Start", "开始", "開始") if screen_mode != "select" else _locale_text("Enter Trial", "进入试炼", "進入試煉")
 	settings_button.text = UIText.text("menu_settings")
 	gallery_button.text = UIText.text("menu_gallery")
 	about_button.text = UIText.text("menu_about")
 	quit_button.text = UIText.text("menu_quit")
-	left_hint_label.text = UIText.text("char_hint")
+	left_hint_label.text = _hint_text()
 	match detail_mode:
 		"gallery":
-			_show_gallery_placeholder()
+			hero_detail_title.text = UIText.text("gallery_title")
+			hero_detail_role.text = UIText.text("placeholder_panel")
+			hero_detail_desc.text = UIText.text("char_gallery_placeholder")
 		"about":
-			_show_about_placeholder()
+			hero_detail_title.text = UIText.text("about_title")
+			hero_detail_role.text = UIText.text("placeholder_panel")
+			hero_detail_desc.text = UIText.text("char_about_placeholder")
 		_:
 			_set_selected_hero(selected_hero_index)
+
+func _hint_text() -> String:
+	match screen_mode:
+		"select":
+			return _locale_text(
+				"1 / 2 / 3 choose hero  |  Enter begin  |  Esc menu  |  S settings  |  Q quit",
+				"1 / 2 / 3 选择角色  |  Enter 开始  |  Esc 返回菜单  |  S 设置  |  Q 退出",
+				"1 / 2 / 3 選擇角色  |  Enter 開始  |  Esc 返回選單  |  S 設定  |  Q 退出"
+			)
+		"gallery":
+			return _locale_text(
+				"G reopen gallery  |  Esc menu  |  S settings  |  Q quit",
+				"G 重新打开图鉴  |  Esc 返回菜单  |  S 设置  |  Q 退出",
+				"G 重新打開圖鑑  |  Esc 返回選單  |  S 設定  |  Q 退出"
+			)
+		"about":
+			return _locale_text(
+				"A reopen about  |  Esc menu  |  S settings  |  Q quit",
+				"A 重新打开关于  |  Esc 返回菜单  |  S 设置  |  Q 退出",
+				"A 重新打開關於  |  Esc 返回選單  |  S 設定  |  Q 退出"
+			)
+		_:
+			return _locale_text(
+				"Enter open start menu  |  S settings  |  G gallery  |  A about  |  Q quit",
+				"Enter 打开开始菜单  |  S 设置  |  G 图鉴  |  A 关于  |  Q 退出",
+				"Enter 打開開始選單  |  S 設定  |  G 圖鑑  |  A 關於  |  Q 退出"
+			)
 
 func _queue_layout_refresh() -> void:
 	call_deferred("_refresh_layout")
@@ -329,22 +495,26 @@ func _refresh_layout() -> void:
 	if viewport_size == Vector2.ZERO and get_window() != null:
 		viewport_size = Vector2(get_window().size)
 	var compact := viewport_size.x < 1100.0 or viewport_size.y < 760.0
+	var very_compact := viewport_size.x < 860.0 or viewport_size.y < 640.0
 	panel.custom_minimum_size = Vector2(
-		clampf(viewport_size.x - (48.0 if compact else 96.0), 680.0, 1320.0),
-		clampf(viewport_size.y - (48.0 if compact else 96.0), 500.0, 760.0)
+		clampf(viewport_size.x - (48.0 if compact else 96.0), 720.0, 1360.0),
+		clampf(viewport_size.y - (48.0 if compact else 96.0), 540.0, 820.0)
 	)
 	panel_margin.add_theme_constant_override("margin_left", 18 if compact else 28)
 	panel_margin.add_theme_constant_override("margin_top", 16 if compact else 24)
 	panel_margin.add_theme_constant_override("margin_right", 18 if compact else 28)
 	panel_margin.add_theme_constant_override("margin_bottom", 16 if compact else 24)
-	UISkin.label(title_label, 24 if compact else 32, UISkin.COLOR_ACCENT)
+	UISkin.label(title_label, 26 if compact else 34, UISkin.COLOR_ACCENT)
 	UISkin.label(subtitle_label, 12 if compact else 14, UISkin.COLOR_MUTED)
+	UISkin.label(left_blurb_label, 11 if compact else 13, Color(0.90, 0.92, 0.98))
 	UISkin.label(hero_detail_title, 20 if compact else 24, Color.WHITE)
 	UISkin.label(hero_detail_role, 12 if compact else 14, UISkin.COLOR_ACCENT)
 	UISkin.label(hero_detail_desc, 11 if compact else 12, UISkin.COLOR_MUTED)
-	cards_grid.columns = 1 if viewport_size.x < 860.0 else 3
+	UISkin.label(left_hint_label, 10 if compact else 11, UISkin.COLOR_MUTED)
+	cards_grid.columns = 1 if very_compact else (2 if compact else 3)
+	hero_portrait.custom_minimum_size = Vector2(200.0 if compact else 220.0, 240.0 if compact else 260.0)
 	for hero_button in hero_buttons:
-		hero_button.custom_minimum_size.y = 156.0 if compact else 180.0
+		hero_button.custom_minimum_size.y = 172.0 if compact else 200.0
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
@@ -352,13 +522,24 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
 			KEY_1, KEY_KP_1:
+				_show_hero_select()
 				_set_selected_hero(0)
 			KEY_2, KEY_KP_2:
+				_show_hero_select()
 				_set_selected_hero(1)
 			KEY_3, KEY_KP_3:
+				_show_hero_select()
 				_set_selected_hero(2)
 			KEY_ENTER, KEY_KP_ENTER, KEY_SPACE:
-				_activate_selected_hero()
+				if screen_mode == "select":
+					_activate_selected_hero()
+				else:
+					_show_hero_select()
+			KEY_ESCAPE:
+				if screen_mode != "menu":
+					_show_menu()
+				else:
+					return
 			KEY_S:
 				settings_requested.emit()
 			KEY_G:
@@ -370,3 +551,41 @@ func _unhandled_input(event: InputEvent) -> void:
 			_:
 				return
 		get_viewport().set_input_as_handled()
+
+func _hero_name(hero: Dictionary) -> String:
+	return _localized_hero_field(hero, "name")
+
+func _hero_role(hero: Dictionary) -> String:
+	return _localized_hero_field(hero, "role")
+
+func _hero_summary(hero: Dictionary) -> String:
+	return _localized_hero_field(hero, "summary")
+
+func _hero_stats(hero: Dictionary) -> Array[String]:
+	var locale := _current_locale()
+	var localized := hero.get("stats", {}) as Dictionary
+	var raw: Variant = localized.get(locale, localized.get("en", []))
+	var output: Array[String] = []
+	if raw is Array:
+		for entry in raw:
+			output.append(String(entry))
+	return output
+
+func _localized_hero_field(hero: Dictionary, field: String) -> String:
+	var locale := _current_locale()
+	var localized := hero.get(field, {}) as Dictionary
+	return String(localized.get(locale, localized.get("en", "")))
+
+func _current_locale() -> String:
+	if UISettings != null and UISettings.has_method("get_locale"):
+		return String(UISettings.get_locale())
+	return "zh_Hans"
+
+func _locale_text(en_text: String, zh_hans_text: String, zh_hant_text: String) -> String:
+	match _current_locale():
+		"zh_Hant":
+			return zh_hant_text
+		"zh_Hans":
+			return zh_hans_text
+		_:
+			return en_text

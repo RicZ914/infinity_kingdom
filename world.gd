@@ -10,7 +10,6 @@ const ENCOUNTER_SCENES := [
 	preload("res://actors/bosses/town/royal_guard_formation.tscn"),
 	preload("res://actors/bosses/town/twin_princes_boss.tscn")
 ]
-const CONTROL_HINT := "Controls: WASD move, J attack, K / L / I skills. F10 audio mix."
 const RELIC_REROLL_COST := 20
 const HIT_FEEDBACK_COOLDOWN_MSEC := 55
 
@@ -77,10 +76,11 @@ func _ready() -> void:
 	if debug_panel != null and debug_panel.has_method("bind_world"):
 		debug_panel.bind_world(self)
 	_refresh_battle_status(
-		"Town Boss Trial",
-		"Pick a champion, then claim relics between encounters.",
-		_detail_text("")
+		_ui_text("Town Boss Trial", "城镇王战试炼", "城鎮王戰試煉"),
+		_ui_text("Pick a champion, then claim relics between encounters.", "先选择角色，再在战斗间隙领取饰品。", "先選擇角色，再在戰鬥間隙領取飾品。"),
+		_localized_detail_text("")
 	)
+	_update_screen_layers()
 	if Music != null:
 		Music.play_profile(&"title", true)
 	if audio_shortcut_hint != null and audio_shortcut_hint.has_method("show_hint"):
@@ -164,6 +164,7 @@ func _on_character_selected(character_id: StringName) -> void:
 	player_character.z_index = 3
 	if character_select != null:
 		character_select.visible = false
+	_update_screen_layers()
 	if character_hud != null and character_hud.has_method("bind_character"):
 		character_hud.bind_character(player_character)
 	AccessoryManager.apply_to_actor(player_character)
@@ -172,7 +173,7 @@ func _on_character_selected(character_id: StringName) -> void:
 	if player_character.has_signal("died"):
 		player_character.died.connect(_on_player_died)
 	encounter_index = -1
-	_offer_accessory("First Relic")
+	_offer_accessory(_ui_text("First Relic", "初始饰品", "初始飾品"))
 
 func _start_next_encounter() -> void:
 	waiting_for_accessory_choice = false
@@ -212,9 +213,9 @@ func _on_encounter_defeated() -> void:
 	var defeated_final_encounter := encounter_index >= ENCOUNTER_SCENES.size() - 1
 	active_encounter_prep.clear()
 	_refresh_battle_status(
-		"Trial Complete" if defeated_final_encounter else "Encounter Cleared",
-		"+%d gold earned." % reward,
-		_detail_text("Gold: %d" % int(RunDirector.gold))
+		_ui_text("Trial Complete", "试炼阶段完成", "試煉階段完成") if defeated_final_encounter else _ui_text("Encounter Cleared", "遭遇完成", "遭遇完成"),
+		_ui_text("+%d gold earned.", "获得 +%d 金币。", "獲得 +%d 金幣。") % reward,
+		_localized_detail_text("%s: %d" % [_ui_text("Gold", "金币", "金幣"), int(RunDirector.gold)])
 	)
 	var timer := get_tree().create_timer(1.1)
 	timer.timeout.connect(func() -> void:
@@ -238,18 +239,19 @@ func _on_player_died() -> void:
 		Music.play_profile(&"defeat")
 	_schedule_title_music(2.4)
 	_refresh_battle_status(
-		"Defeated",
-		"The town boss rush resets after death.",
-		_detail_text("Pick a champion to restart.")
+		_ui_text("Defeated", "挑战失败", "挑戰失敗"),
+		_ui_text("The town boss rush resets after death.", "阵亡后，本轮城镇王战会重新开始。", "陣亡後，本輪城鎮王戰會重新開始。"),
+		_localized_detail_text(_ui_text("Pick a champion to restart.", "重新选择角色后可再次挑战。", "重新選擇角色後可再次挑戰。"))
 	)
 	if character_select != null:
 		character_select.visible = true
+	_update_screen_layers()
 	if result_screen != null and result_screen.has_method("show_result"):
 		result_screen.show_result(
 			"defeat",
-			"Defeated",
-			"The town boss rush resets after death.",
-			"Continue to return to champion selection and try a different relic path.",
+			_ui_text("Defeated", "挑战失败", "挑戰失敗"),
+			_ui_text("The town boss rush resets after death.", "阵亡后，本轮城镇王战会重新开始。", "陣亡後，本輪城鎮王戰會重新開始。"),
+			_ui_text("Continue to return to champion selection and try a different relic path.", "继续后回到选角界面，换一条饰品路线重新尝试。", "繼續後回到選角介面，換一條飾品路線重新嘗試。"),
 			_build_result_summary()
 		)
 	_refresh_battle_status()
@@ -268,21 +270,24 @@ func _offer_accessory(reason: String) -> void:
 	accessory_choice.open(choices, player_character, reason, RELIC_REROLL_COST, int(RunDirector.gold))
 	_refresh_battle_status(
 		reason,
-		"Choose a relic before the next fight.",
-		_detail_text("Current: %s" % String(AccessoryManager.get_equipped_accessory().get("name", "No Accessory")))
+		_ui_text("Choose a relic before the next fight.", "在下一场战斗前选择一件饰品。", "在下一場戰鬥前選擇一件飾品。"),
+		_localized_detail_text("%s: %s" % [
+			_ui_text("Current", "当前", "當前"),
+			String(AccessoryManager.get_equipped_accessory().get("name", _ui_text("No Accessory", "无饰品", "無飾品")))
+		])
 	)
 
 func _offer_next_run_event() -> void:
 	var kind := RunDirector.next_event_kind()
 	if kind == "relic" or run_event_panel == null or not run_event_panel.has_method("open"):
-		_offer_accessory("Victory Relic")
+		_offer_accessory(_ui_text("Victory Relic", "胜利饰品", "勝利飾品"))
 		return
 	active_run_event_kind = kind
 	run_event_panel.open(kind, int(RunDirector.gold))
 	_refresh_battle_status(
-		"Run Event",
-		"Choose a reward before the next fight.",
-		_detail_text("Gold: %d" % int(RunDirector.gold))
+		_ui_text("Run Event", "流程事件", "流程事件"),
+		_ui_text("Choose a reward before the next fight.", "在下一场战斗前选择一项奖励。", "在下一場戰鬥前選擇一項獎勵。"),
+		_localized_detail_text("%s: %d" % [_ui_text("Gold", "金币", "金幣"), int(RunDirector.gold)])
 	)
 
 func _on_accessory_choice_made(_accessory_id: String, kept_current: bool) -> void:
@@ -292,11 +297,11 @@ func _on_accessory_choice_made(_accessory_id: String, kept_current: bool) -> voi
 		RunEffects.refresh_persistent_modifiers(player_character)
 	if Sfx != null:
 		_play_ui_feedback(true)
-	var accessory_name := String(AccessoryManager.get_equipped_accessory().get("name", "No Accessory"))
+	var accessory_name := String(AccessoryManager.get_equipped_accessory().get("name", _ui_text("No Accessory", "无饰品", "無飾品")))
 	_refresh_battle_status(
-		"Relic Kept" if kept_current else "Relic Equipped",
+		_ui_text("Relic Kept", "保留饰品", "保留飾品") if kept_current else _ui_text("Relic Equipped", "装备饰品", "裝備飾品"),
 		accessory_name,
-		_detail_text("The next encounter begins now.")
+		_localized_detail_text(_ui_text("The next encounter begins now.", "下一场遭遇即将开始。", "下一場遭遇即將開始。"))
 	)
 	_start_next_encounter()
 
@@ -309,13 +314,13 @@ func _on_accessory_reroll_requested() -> void:
 		return
 	if Sfx != null:
 		_play_ui_feedback(true)
-	var reason := active_accessory_reason if not active_accessory_reason.is_empty() else "Relic Offering"
+	var reason := active_accessory_reason if not active_accessory_reason.is_empty() else _ui_text("Relic Offering", "饰品赐予", "飾品賜予")
 	var choices := AccessoryManager.generate_choices(3)
 	accessory_choice.open(choices, player_character, reason, RELIC_REROLL_COST, int(RunDirector.gold))
 	_refresh_battle_status(
-		"Relic Rerolled",
-		"New relic choices are available.",
-		_detail_text("Gold: %d" % int(RunDirector.gold))
+		_ui_text("Relic Rerolled", "饰品重抽", "飾品重抽"),
+		_ui_text("New relic choices are available.", "新的饰品选项已经出现。", "新的飾品選項已經出現。"),
+		_localized_detail_text("%s: %d" % [_ui_text("Gold", "金币", "金幣"), int(RunDirector.gold)])
 	)
 
 func _on_run_event_choice_made(choice_id: String) -> void:
@@ -326,15 +331,15 @@ func _on_run_event_choice_made(choice_id: String) -> void:
 		if active_run_event_kind != "" and run_event_panel != null and run_event_panel.has_method("open"):
 			run_event_panel.open(active_run_event_kind, int(RunDirector.gold))
 		_refresh_battle_status(
-			"Not Enough Gold",
-			"Choose another reward or skip the event.",
-			_detail_text("Gold: %d" % int(RunDirector.gold))
+			_ui_text("Not Enough Gold", "金币不足", "金幣不足"),
+			_ui_text("Choose another reward or skip the event.", "请改选别的奖励，或直接跳过事件。", "請改選別的獎勵，或直接跳過事件。"),
+			_localized_detail_text("%s: %d" % [_ui_text("Gold", "金币", "金幣"), int(RunDirector.gold)])
 		)
 		return
 	_refresh_battle_status(
-		"Event Complete",
+		_ui_text("Event Complete", "事件完成", "事件完成"),
 		_run_event_summary(choice_id),
-		_detail_text("Gold: %d" % int(RunDirector.gold))
+		_localized_detail_text("%s: %d" % [_ui_text("Gold", "金币", "金幣"), int(RunDirector.gold)])
 	)
 	RunDirector.record_event_choice(
 		active_run_event_kind,
@@ -344,7 +349,7 @@ func _on_run_event_choice_made(choice_id: String) -> void:
 	)
 	active_run_event_kind = ""
 	if choice_id == "shop_relic" and applied:
-		_offer_accessory("Purchased Relic")
+		_offer_accessory(_ui_text("Purchased Relic", "购买饰品", "購買飾品"))
 	else:
 		_start_next_encounter()
 
@@ -362,18 +367,18 @@ func _run_event_summary(choice_id: String) -> String:
 
 func _build_result_summary() -> Dictionary:
 	var run_state := RunDirector.get_state()
-	var hero_name := "No Champion"
+	var hero_name := _ui_text("No Champion", "未选择角色", "未選擇角色")
 	if player_character != null and is_instance_valid(player_character) and player_character.has_method("get_character_name"):
-		hero_name = String(player_character.get_character_name())
+		hero_name = _hero_display_name(String(player_character.get_character_name()))
 	var accessory := AccessoryManager.get_equipped_accessory()
-	var accessory_name := String(accessory.get("name", "No Accessory"))
+	var accessory_name := String(accessory.get("name", _ui_text("No Accessory", "无饰品", "無飾品")))
 	var reward_entries := run_state.get("reward_history", []) as Array
 	var total_reward_value := 0
 	for reward_entry in reward_entries:
 		total_reward_value += int(reward_entry)
 	var average_reward := int(round(float(total_reward_value) / float(reward_entries.size()))) if not reward_entries.is_empty() else 0
 	var event_history := run_state.get("event_history", []) as Array
-	var timeline_text := "No event choices recorded."
+	var timeline_text := _ui_text("No event choices recorded.", "没有记录到事件选择。", "沒有記錄到事件選擇。")
 	if not event_history.is_empty():
 		var parts: Array[String] = []
 		for entry in event_history:
@@ -381,19 +386,13 @@ func _build_result_summary() -> Dictionary:
 				continue
 			var step := entry as Dictionary
 			parts.append("%s -> %s" % [
-				String(step.get("event_name", "Event")),
-				String(step.get("choice_name", "Choice"))
+				String(step.get("event_name", _ui_text("Event", "事件", "事件"))),
+				String(step.get("choice_name", _ui_text("Choice", "选择", "選擇")))
 			])
 		if not parts.is_empty():
 			timeline_text = "  /  ".join(parts)
 	return {
-		"stats": "Hero %s  |  Relic %s  |  Gold %d  |  Cleared %d  |  Avg reward %d" % [
-			hero_name,
-			accessory_name,
-			int(run_state.get("gold", 0)),
-			int(run_state.get("cleared_encounters", 0)),
-			average_reward
-		],
+		"stats": _ui_text("Hero", "角色", "角色") + " %s  |  " % hero_name + _ui_text("Relic", "饰品", "飾品") + " %s  |  " % accessory_name + _ui_text("Gold", "金币", "金幣") + " %d  |  " % int(run_state.get("gold", 0)) + _ui_text("Cleared", "完成", "完成") + " %d  |  " % int(run_state.get("cleared_encounters", 0)) + _ui_text("Avg reward", "平均奖励", "平均獎勵") + " %d" % average_reward,
 		"timeline": timeline_text
 	}
 
@@ -413,18 +412,19 @@ func _complete_run_victory() -> void:
 		Music.play_profile(&"victory")
 	_schedule_title_music(2.8)
 	_refresh_battle_status(
-		"Town Cleared",
-		"All enemy waves and town boss encounters are defeated.",
-		_detail_text("Pick another champion to restart the sequence.")
+		_ui_text("Town Cleared", "城镇试炼完成", "城鎮試煉完成"),
+		_ui_text("All enemy waves and town boss encounters are defeated.", "所有敌军波次与城镇 Boss 都已击破。", "所有敵軍波次與城鎮 Boss 都已擊破。"),
+		_localized_detail_text(_ui_text("Pick another champion to restart the sequence.", "重新选择角色即可再次开始这一轮试炼。", "重新選擇角色即可再次開始這一輪試煉。"))
 	)
 	if character_select != null:
 		character_select.visible = true
+	_update_screen_layers()
 	if result_screen != null and result_screen.has_method("show_result"):
 		result_screen.show_result(
 			"victory",
-			"Town Cleared",
-			"All enemy waves and bosses are defeated.",
-			"Your relic build survived the trial. Continue to select a new champion.",
+			_ui_text("Town Cleared", "城镇试炼完成", "城鎮試煉完成"),
+			_ui_text("All enemy waves and bosses are defeated.", "所有敌军波次与 Boss 都已击破。", "所有敵軍波次與 Boss 都已擊破。"),
+			_ui_text("Your relic build survived the trial. Continue to select a new champion.", "你的饰品构筑撑过了整场试炼。继续后可重新选择角色。", "你的飾品構築撐過了整場試煉。繼續後可重新選擇角色。"),
 			_build_result_summary()
 		)
 	_refresh_battle_status()
@@ -524,9 +524,24 @@ func _schedule_title_music(delay: float) -> void:
 	)
 
 func _detail_text(extra: String) -> String:
+	var control_hint := _ui_text(
+		"Controls: WASD move, J attack, K / L / I skills. F10 audio mix.",
+		"操作：WASD 移动，J 普攻，K / L / I 技能，F10 音频混音。",
+		"操作：WASD 移動，J 普攻，K / L / I 技能，F10 音訊混音。"
+	)
 	if extra.is_empty():
-		return CONTROL_HINT
-	return "%s\n%s" % [extra, CONTROL_HINT]
+		return control_hint
+	return "%s\n%s" % [extra, control_hint]
+
+func _localized_detail_text(extra: String) -> String:
+	var control_hint := _ui_text(
+		"Controls: WASD move, J attack, K / L / I skills. F10 audio mix.",
+		"操作：WASD 移动，J 普攻，K / L / I 技能。F10 混音。",
+		"操作：WASD 移動，J 普攻，K / L / I 技能。F10 混音。"
+	)
+	if extra.is_empty():
+		return control_hint
+	return "%s\n%s" % [extra, control_hint]
 
 func _refresh_battle_status(override_title: String = "", override_subtitle: String = "", override_detail: String = "") -> void:
 	if battle_status == null or not battle_status.has_method("set_message"):
@@ -537,7 +552,11 @@ func _refresh_battle_status(override_title: String = "", override_subtitle: Stri
 		battle_status.set_message(
 			current_encounter.get_status_title(),
 			current_encounter.get_status_text(),
-			_detail_text("Encounter order: Town Enemies -> Judicator -> Guard Formation -> Twin Princes")
+			_localized_detail_text(_ui_text(
+				"Encounter order: Town Enemies -> Judicator -> Guard Formation -> Twin Princes",
+				"遭遇顺序：城镇敌群 -> 审判官 -> 近卫方阵 -> 双子王子",
+				"遭遇順序：城鎮敵群 -> 審判官 -> 近衛方陣 -> 雙子王子"
+			))
 		)
 	if battle_status.has_method("set_context"):
 		battle_status.set_context(_build_battle_status_context())
@@ -552,49 +571,54 @@ func _build_battle_status_context() -> Dictionary:
 
 func _objective_status_text() -> String:
 	if result_screen != null and result_screen.visible:
-		return "Review the result and return to champion select."
+		return _ui_text("Review the result and return to champion select.", "查看结算后回到选角界面。", "查看結算後回到選角介面。")
 	if pause_menu != null and pause_menu.visible:
-		return "Resume, tune options, restart, or quit cleanly."
+		return _ui_text("Resume, tune options, restart, or quit cleanly.", "可以继续、调整设置、重开本局或退出游戏。", "可以繼續、調整設定、重開本局或退出遊戲。")
 	if audio_settings_panel != null and audio_settings_panel.has_method("is_open") and bool(audio_settings_panel.is_open()):
-		return "Adjust the mix without leaving the current run."
+		return _ui_text("Adjust the mix without leaving the current run.", "无需离开本局即可调整混音。", "無需離開本局即可調整混音。")
 	if settings_panel != null and settings_panel.visible:
-		return "Adjust display options, then return to the run."
+		return _ui_text("Adjust display options, then return to the run.", "调整显示选项后返回本局。", "調整顯示選項後返回本局。")
 	if accessory_choice != null and accessory_choice.visible:
-		var accessory_title := active_accessory_reason if not active_accessory_reason.is_empty() else "Relic Offering"
-		return "%s: choose one relic before the next fight." % accessory_title
+		var accessory_title := active_accessory_reason if not active_accessory_reason.is_empty() else _ui_text("Relic Offering", "饰品赐予", "飾品賜予")
+		return _ui_text("%s: choose one relic before the next fight.", "%s：在下一场战斗前选择一件饰品。", "%s：在下一場戰鬥前選擇一件飾品。") % accessory_title
 	if run_event_panel != null and run_event_panel.visible:
 		var event_name := RunDirector.describe_event_kind(active_run_event_kind if not active_run_event_kind.is_empty() else RunDirector.peek_next_event_kind())
-		return "%s: choose one reward." % event_name
+		return _ui_text("%s: choose one reward.", "%s：选择一项奖励。", "%s：選擇一項獎勵。") % event_name
 	if character_select != null and character_select.visible and player_character == null:
-		return "Select a champion to begin the town trial."
+		return _ui_text("Select a champion to begin the town trial.", "选择角色，开始城镇试炼。", "選擇角色，開始城鎮試煉。")
 	if current_encounter != null and is_instance_valid(current_encounter):
-		var objective_text := "Encounter %d / %d: clear the arena." % [encounter_index + 1, ENCOUNTER_SCENES.size()]
+		var objective_text := _ui_text("Encounter %d / %d: clear the arena.", "第 %d / %d 场：清空战场。", "第 %d / %d 場：清空戰場。") % [encounter_index + 1, ENCOUNTER_SCENES.size()]
 		if not active_encounter_prep.is_empty():
-			objective_text += " Prep %s is active." % _prep_title(active_encounter_prep)
+			objective_text += _ui_text(" Prep %s is active.", " 已生效准备：%s。", " 已生效準備：%s。") % _prep_title(active_encounter_prep)
 		return objective_text
 	if player_character != null and is_instance_valid(player_character):
 		var pending_prep := RunDirector.peek_pending_encounter_prep()
 		if not pending_prep.is_empty():
-			return "Prepare for the next encounter. Prep %s is queued." % _prep_title(pending_prep)
-		return "Prepare for the next encounter. Next event: %s." % RunDirector.describe_event_kind(RunDirector.peek_next_event_kind())
-	return "Pick a champion, then shape the run with relics."
+			return _ui_text("Prepare for the next encounter. Prep %s is queued.", "准备下一场战斗，已排队准备：%s。", "準備下一場戰鬥，已排隊準備：%s。") % _prep_title(pending_prep)
+		return _ui_text("Prepare for the next encounter. Next event: %s.", "准备下一场战斗。下一事件：%s。", "準備下一場戰鬥。下一事件：%s。") % RunDirector.describe_event_kind(RunDirector.peek_next_event_kind())
+	return _ui_text("Pick a champion, then shape the run with relics.", "先选择角色，再用饰品塑造本局路线。", "先選擇角色，再用飾品塑造本局路線。")
 
 func _threat_status_text() -> String:
 	if result_screen != null and result_screen.visible:
-		return "Try a different relic route or hero opener on the next run."
+		return _ui_text("Try a different relic route or hero opener on the next run.", "下次可以换一条饰品路线或改用别的角色开局。", "下次可以換一條飾品路線或改用別的角色開局。")
 	if pause_menu != null and pause_menu.visible:
-		return "Run state is frozen while paused."
+		return _ui_text("Run state is frozen while paused.", "暂停期间，本局状态会被冻结。", "暫停期間，本局狀態會被凍結。")
 	if audio_settings_panel != null and audio_settings_panel.has_method("is_open") and bool(audio_settings_panel.is_open()):
-		return "Audio changes save locally and do not affect combat pacing."
+		return _ui_text("Audio changes save locally and do not affect combat pacing.", "音频修改只保存在本地，不会影响战斗节奏。", "音訊修改只保存在本地，不會影響戰鬥節奏。")
 	if settings_panel != null and settings_panel.visible:
-		return "Fullscreen and VSync change immediately once selected."
+		return _ui_text("Fullscreen and VSync change immediately once selected.", "全屏和垂直同步会在切换后立即生效。", "全螢幕和垂直同步會在切換後立即生效。")
 	if accessory_choice != null and accessory_choice.visible:
-		return "Relic swaps are permanent. Cover a weakness or double down on your build."
+		return _ui_text("Relic swaps are permanent. Cover a weakness or double down on your build.", "饰品替换是永久性的，优先补短板或继续放大当前构筑。", "飾品替換是永久性的，優先補短板或繼續放大當前構築。")
 	if run_event_panel != null and run_event_panel.visible:
 		return _event_status_hint(active_run_event_kind)
 	if character_select != null and character_select.visible and player_character == null:
-		return "Knight is safest, Ranger snowballs tempo, Mage controls space and range."
+		return _ui_text("Knight is safest, Ranger snowballs tempo, Mage controls space and range.", "骑士最稳，游侠滚节奏最快，法师最擅长控场和拉扯。", "騎士最穩，遊俠滾節奏最快，法師最擅長控場和拉扯。")
 	if current_encounter != null and is_instance_valid(current_encounter):
+		if _current_locale() != "en":
+			var pending_text := ""
+			if not active_encounter_prep.is_empty():
+				pending_text = _ui_text(" 当前准备：%s。", " 当前准备：%s。", " 當前準備：%s。") % _prep_title(active_encounter_prep)
+			return _ui_text("Arena pressure is rising. Prioritize ranged and control threats.", "当前战斗压力正在上升，优先处理远程与控制目标。", "當前戰鬥壓力正在上升，優先處理遠程與控制目標。") + pending_text
 		var threat_text := _encounter_threat_hint(current_encounter)
 		if not active_encounter_prep.is_empty():
 			threat_text += " Prep %s." % _prep_summary(active_encounter_prep)
@@ -604,39 +628,39 @@ func _threat_status_text() -> String:
 		var hp_ratio := _property_ratio(player_character, "hp", "max_hp")
 		var defense_ratio := _property_ratio(player_character, "defense", "max_defense")
 		if hp_ratio <= 0.40:
-			var low_hp_text := "Low health. Safe relics or recovery events are worth more than greed here."
+			var low_hp_text := _ui_text("Low health. Safe relics or recovery events are worth more than greed here.", "血量偏低，稳健饰品和恢复事件的价值已经高于贪收益。", "血量偏低，穩健飾品和恢復事件的價值已經高於貪收益。")
 			if not pending_prep.is_empty():
-				low_hp_text += " Queued prep: %s." % _prep_title(pending_prep)
+				low_hp_text += _ui_text(" Queued prep: %s.", " 已排队准备：%s。", " 已排隊準備：%s。") % _prep_title(pending_prep)
 			return low_hp_text
 		if defense_ratio <= 0.25:
-			var low_defense_text := "Defense is low. Clean dodges matter until armor is rebuilt."
+			var low_defense_text := _ui_text("Defense is low. Clean dodges matter until armor is rebuilt.", "护甲偏低，在回稳之前要更重视走位和闪避。", "護甲偏低，在回穩之前要更重視走位和閃避。")
 			if not pending_prep.is_empty():
-				low_defense_text += " Queued prep: %s." % _prep_title(pending_prep)
+				low_defense_text += _ui_text(" Queued prep: %s.", " 已排队准备：%s。", " 已排隊準備：%s。") % _prep_title(pending_prep)
 			return low_defense_text
 		if not pending_prep.is_empty():
-			return "Queued prep: %s." % _prep_summary(pending_prep)
-	return "The route ramps from mixed enemy waves into three boss checks."
+			return _ui_text("Queued prep: %s.", "已排队准备：%s。", "已排隊準備：%s。") % _prep_summary(pending_prep)
+	return _ui_text("The route ramps from mixed enemy waves into three boss checks.", "路线会从普通敌群逐步推进到三场 Boss 检定。", "路線會從普通敵群逐步推進到三場 Boss 檢定。")
 
 func _hero_status_text() -> String:
 	if player_character == null or not is_instance_valid(player_character):
-		return "No champion selected."
-	var hero_name := String(player_character.get_character_name()) if player_character.has_method("get_character_name") else "Champion"
+		return _ui_text("No champion selected.", "未选择角色。", "未選擇角色。")
+	var hero_name := _hero_display_name(String(player_character.get_character_name())) if player_character.has_method("get_character_name") else _ui_text("Champion", "角色", "角色")
 	var stats: Array[String] = []
 	if _has_property(player_character, "hp") and _has_property(player_character, "max_hp"):
-		stats.append("HP %d/%d" % [int(round(float(player_character.get("hp")))), int(round(float(player_character.get("max_hp"))))])
+		stats.append("%s %d/%d" % [_ui_text("HP", "生命", "生命"), int(round(float(player_character.get("hp")))), int(round(float(player_character.get("max_hp"))))])
 	if _has_property(player_character, "defense") and _has_property(player_character, "max_defense"):
-		stats.append("DEF %d/%d" % [int(round(float(player_character.get("defense")))), int(round(float(player_character.get("max_defense"))))])
+		stats.append("%s %d/%d" % [_ui_text("DEF", "护甲", "護甲"), int(round(float(player_character.get("defense")))), int(round(float(player_character.get("max_defense"))))])
 	if _has_property(player_character, "inspiration") and _has_property(player_character, "max_inspiration"):
-		stats.append("Insp %d/%d" % [int(round(float(player_character.get("inspiration")))), int(round(float(player_character.get("max_inspiration"))))])
+		stats.append("%s %d/%d" % [_ui_text("Insp", "灵感", "靈感"), int(round(float(player_character.get("inspiration")))), int(round(float(player_character.get("max_inspiration"))))])
 	return "%s\n%s" % [hero_name, "  |  ".join(stats)] if not stats.is_empty() else hero_name
 
 func _relic_status_text() -> String:
 	var equipped_accessory: Dictionary = AccessoryManager.get_equipped_accessory()
-	var accessory_name := String(equipped_accessory.get("name", "No Accessory"))
+	var accessory_name := String(equipped_accessory.get("name", _ui_text("No Accessory", "无饰品", "無飾品")))
 	var tags_text := AccessoryManager.describe_tags(equipped_accessory.get("tags", []))
 	var summary := String(equipped_accessory.get("summary", ""))
-	if accessory_name == "No Accessory":
-		return "No Accessory\nChoose a relic to shape this run."
+	if accessory_name == _ui_text("No Accessory", "无饰品", "無飾品"):
+		return _ui_text("No Accessory\nChoose a relic to shape this run.", "无饰品\n选择一件饰品来决定这一局的构筑方向。", "無飾品\n選擇一件飾品來決定這一局的構築方向。")
 	var detail_parts: Array[String] = []
 	if not tags_text.is_empty():
 		detail_parts.append(tags_text)
@@ -647,27 +671,27 @@ func _relic_status_text() -> String:
 func _event_status_hint(kind: String) -> String:
 	match kind:
 		"shop":
-			return "Spend gold only where it sharpens the next boss check or patches a real weakness."
+			return _ui_text("Spend gold only where it sharpens the next boss check or patches a real weakness.", "只在能改善下一场 Boss 检定，或能补真实短板的地方花金币。", "只在能改善下一場 Boss 檢定，或能補真實短板的地方花金幣。")
 		"bounty":
-			return "Cash now is best before rerolls or shop buys. Contracts are strongest while multiple fights remain."
+			return _ui_text("Cash now is best before rerolls or shop buys. Contracts are strongest while multiple fights remain.", "如果后面要重抽或购物，现钱最值；剩余战斗越多，长期契约越强。", "如果後面要重抽或購物，現錢最值；剩餘戰鬥越多，長期契約越強。")
 		"rest":
-			return "Recovery is immediate. Heal if survival is shaky, or refill defense and inspiration if stable."
+			return _ui_text("Recovery is immediate. Heal if survival is shaky, or refill defense and inspiration if stable.", "恢复会立刻生效。生存吃紧就补血，稳定时就回护甲和灵感。", "恢復會立刻生效。生存吃緊就補血，穩定時就回護甲和靈感。")
 		"training":
-			return "Training is permanent. Reinforce the lane your hero and relic already reward."
+			return _ui_text("Training is permanent. Reinforce the lane your hero and relic already reward.", "训练是永久收益，优先强化角色与饰品已经在奖励的方向。", "訓練是永久收益，優先強化角色與飾品已經在獎勵的方向。")
 		"pact":
-			return "Pacts are permanent tradeoffs. Take only the drawback your current hero can absorb."
+			return _ui_text("Pacts are permanent tradeoffs. Take only the drawback your current hero can absorb.", "契约是永久交换，只拿当前角色扛得住的代价。", "契約是永久交換，只拿當前角色扛得住的代價。")
 		"attunement":
-			return "Attunement is the cleanest way to reinforce the relic identity you already built."
+			return _ui_text("Attunement is the cleanest way to reinforce the relic identity you already built.", "共鸣最适合继续放大你已经成型的饰品路线。", "共鳴最適合繼續放大你已經成型的飾品路線。")
 		"scout":
-			return "Scout routes are one-fight spikes. Pick the opener that solves the next encounter best."
+			return _ui_text("Scout routes are one-fight spikes. Pick the opener that solves the next encounter best.", "侦查路线只强化下一战，优先选择最能解决眼前战局的开局。", "偵查路線只強化下一戰，優先選擇最能解決眼前戰局的開局。")
 		_:
-			return "Choose the cleanest upgrade and keep the route moving."
+			return _ui_text("Choose the cleanest upgrade and keep the route moving.", "选择最顺手的强化，继续推进路线。", "選擇最順手的強化，繼續推進路線。")
 
 func _prep_title(prep: Dictionary) -> String:
-	return String(prep.get("title", "Battle Plan"))
+	return RunEffects.prep_title(prep)
 
 func _prep_summary(prep: Dictionary) -> String:
-	return String(prep.get("summary", "Temporary opener active."))
+	return RunEffects.prep_summary(prep)
 
 func _encounter_threat_hint(encounter: Node) -> String:
 	var script_path := _script_path(encounter)
@@ -880,13 +904,48 @@ func _reset_to_character_select() -> void:
 	RunDirector.reset_run()
 	if character_select != null:
 		character_select.visible = true
+	_update_screen_layers()
 	_refresh_battle_status(
-		"Town Boss Trial",
-		"Pick a champion, then claim relics between encounters.",
-		_detail_text("")
+		_ui_text("Town Boss Trial", "城镇王战试炼", "城鎮王戰試煉"),
+		_ui_text("Pick a champion, then claim relics between encounters.", "先选择角色，再在战斗间隙领取饰品。", "先選擇角色，再在戰鬥間隙領取飾品。"),
+		_localized_detail_text("")
 	)
 	if Music != null:
 		Music.play_profile(&"title")
+
+func _update_screen_layers() -> void:
+	var in_title_menu := character_select != null and character_select.visible and player_character == null and (result_screen == null or not result_screen.visible)
+	if character_hud != null:
+		character_hud.visible = not in_title_menu
+	if battle_status != null:
+		battle_status.visible = not in_title_menu
+	if pause_menu != null and in_title_menu and pause_menu.visible:
+		pause_menu.close()
+
+func _current_locale() -> String:
+	if UISettings != null and UISettings.has_method("get_locale"):
+		return String(UISettings.get_locale())
+	return "zh_Hans"
+
+func _ui_text(en_text: String, zh_hans_text: String, zh_hant_text: String) -> String:
+	match _current_locale():
+		"zh_Hant":
+			return zh_hant_text
+		"zh_Hans":
+			return zh_hans_text
+		_:
+			return en_text
+
+func _hero_display_name(hero_name: String) -> String:
+	match hero_name:
+		"Knight":
+			return _ui_text("Knight", "骑士", "騎士")
+		"Ranger":
+			return _ui_text("Ranger", "游侠", "遊俠")
+		"Mage":
+			return _ui_text("Mage", "法师", "法師")
+		_:
+			return hero_name
 
 func _spawn_attack_hit_feedback(world_position: Vector2, strong: bool, defeated: bool) -> void:
 	var scene_root := get_tree().current_scene

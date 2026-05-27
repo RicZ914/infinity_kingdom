@@ -57,6 +57,30 @@ func _run() -> void:
 		push_error("Character select did not initialize")
 		quit(1)
 		return
+	if String(world.character_select.get("screen_mode")) != "menu":
+		push_error("Character select did not boot into the start menu")
+		quit(1)
+		return
+	var cards_panel := world.character_select.get("cards_panel") as PanelContainer
+	if cards_panel == null or cards_panel.visible:
+		push_error("Character select showed hero cards before opening the start menu")
+		quit(1)
+		return
+	var start_button := world.character_select.get("primary_start_button") as Button
+	if start_button == null or start_button.text != "Start":
+		push_error("Character select start button did not initialize")
+		quit(1)
+		return
+	var background_rect := world.character_select.get("background_rect") as TextureRect
+	var hero_portrait := world.character_select.get("hero_portrait") as TextureRect
+	if background_rect == null or background_rect.texture == null:
+		push_error("Character select background art did not initialize")
+		quit(1)
+		return
+	if hero_portrait == null or hero_portrait.texture == null:
+		push_error("Character select hero portrait did not initialize")
+		quit(1)
+		return
 	if world.battle_status == null or not world.battle_status.has_method("set_context"):
 		push_error("Battle status did not initialize its context API")
 		quit(1)

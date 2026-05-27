@@ -1,5 +1,6 @@
 extends CanvasLayer
 
+const RunEffects := preload("res://systems/run/run_effects.gd")
 const UISkin := preload("res://ui/ui_skin.gd")
 
 var player_character: Node = null
@@ -21,7 +22,6 @@ var control_label: Label
 var combat_feed_label: Label
 var run_state_label: Label
 var accessory_icon: TextureRect
-var accessory_badge_label: Label
 var accessory_name_label: Label
 var accessory_tags_label: Label
 var accessory_summary_label: Label
@@ -32,25 +32,22 @@ var meter_bars: Array[TextureProgressBar] = []
 var combat_feed_tween: Tween = null
 var last_control_summary: String = ""
 var layout_size_override: Vector2 = Vector2.ZERO
-var skill_badge_text := {
-	"Knight": {
-		"attack": "ATK",
-		"skill1": "SLASH",
-		"skill2": "GUARD",
-		"skill3": "FIELD"
-	},
-	"Ranger": {
-		"attack": "ATK",
-		"skill1": "ARROW",
-		"skill2": "STEP",
-		"skill3": "HUNT"
-	},
-	"Mage": {
-		"attack": "ATK",
-		"skill1": "BLADE",
-		"skill2": "BURST",
-		"skill3": "SEAL"
-	}
+var skill_icon_paths := {
+	"Knight": [
+		"res://assets/ui/skill/knight_charge_slash.png",
+		"res://assets/ui/skill/knight_counter_shock.png",
+		"res://assets/ui/skill/knight_holy_field.png"
+	],
+	"Ranger": [
+		"res://assets/ui/skill/ranger_wind_arrow.png",
+		"res://assets/ui/skill/ranger_shadow_step.png",
+		"res://assets/ui/skill/ranger_hunt_rush.png"
+	],
+	"Mage": [
+		"res://assets/ui/skill/mage_blade_whirl.png",
+		"res://assets/ui/skill/mage_arcane_burst.png",
+		"res://assets/ui/skill/mage_silence_decree.png"
+	]
 }
 
 func _ready() -> void:
@@ -59,6 +56,8 @@ func _ready() -> void:
 		AccessoryManager.accessory_equipped.connect(_on_accessory_equipped)
 	if RunDirector != null and not RunDirector.state_changed.is_connected(_on_run_state_changed):
 		RunDirector.state_changed.connect(_on_run_state_changed)
+	if UISettings != null and UISettings.has_signal("locale_changed") and not UISettings.locale_changed.is_connected(_on_locale_changed):
+		UISettings.locale_changed.connect(_on_locale_changed)
 	if get_viewport() != null and not get_viewport().size_changed.is_connected(_queue_layout_refresh):
 		get_viewport().size_changed.connect(_queue_layout_refresh)
 	_on_accessory_equipped(AccessoryManager.get_equipped_accessory())
@@ -70,7 +69,7 @@ func bind_character(target: Node) -> void:
 	if player_character == null:
 		return
 	last_control_summary = ""
-	title_label.text = "%s Combat Frame" % String(player_character.get_character_name())
+	title_label.text = "%s %s" % [_hero_display_name(String(player_character.get_character_name())), _locale_text("Combat Frame", "战斗面板", "戰鬥面板")]
 	_refresh_skill_icons()
 	_connect_character_signal("hp_changed", _on_hp_changed)
 	_connect_character_signal("defense_changed", _on_defense_changed)
@@ -95,7 +94,7 @@ func bind_knight(target: Node) -> void:
 func _process(_delta: float) -> void:
 	if player_character == null or not is_instance_valid(player_character):
 		return
-	state_label.text = "State %s" % String(player_character.state_machine.get_state_name())
+	state_label.text = "%s %s" % [_locale_text("State", "状态", "狀態"), String(player_character.state_machine.get_state_name())]
 	_update_skill_slots()
 	_update_danger_visuals()
 	_refresh_run_state_label(RunDirector.get_state())
@@ -131,33 +130,33 @@ func _build_ui() -> void:
 	inner_margin.add_child(content)
 
 	title_label = Label.new()
-	title_label.text = "Character Combat Frame"
+	title_label.text = _locale_text("Character Combat Frame", "角色战斗面板", "角色戰鬥面板")
 	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	UISkin.label(title_label, 20, Color(0.98, 0.90, 0.66))
 	content.add_child(title_label)
 
-	content.add_child(_meter("hp", "HP", Color(0.82, 0.22, 0.20)))
-	content.add_child(_meter("defense", "Defense", Color(0.34, 0.68, 0.82)))
-	content.add_child(_meter("inspiration", "Inspiration", Color(0.30, 0.52, 0.95)))
+	content.add_child(_meter("hp", _locale_text("HP", "生命", "生命"), Color(0.82, 0.22, 0.20)))
+	content.add_child(_meter("defense", _locale_text("Defense", "护甲", "護甲"), Color(0.34, 0.68, 0.82)))
+	content.add_child(_meter("inspiration", _locale_text("Inspiration", "灵感", "靈感"), Color(0.30, 0.52, 0.95)))
 
 	status_grid = GridContainer.new()
 	status_grid.columns = 2
 	status_grid.add_theme_constant_override("h_separation", 10)
 	status_grid.add_theme_constant_override("v_separation", 4)
 	content.add_child(status_grid)
-	shield_label = _make_label("Shield 0", 13, Color(0.82, 0.90, 0.98))
-	state_label = _make_label("State Idle", 13, Color(0.82, 0.90, 0.98))
+	shield_label = _make_label(_locale_text("Shield 0", "护盾 0", "護盾 0"), 13, Color(0.82, 0.90, 0.98))
+	state_label = _make_label(_locale_text("State Idle", "状态 Idle", "狀態 Idle"), 13, Color(0.82, 0.90, 0.98))
 	shield_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	state_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	state_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	status_grid.add_child(shield_label)
 	status_grid.add_child(state_label)
 
-	control_label = _make_label("Status Stable", 12, Color(0.72, 0.88, 1.0))
+	control_label = _make_label(_locale_text("Status Stable", "状态 稳定", "狀態 穩定"), 12, Color(0.72, 0.88, 1.0))
 	control_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	content.add_child(control_label)
 
-	combat_feed_label = _make_label("Combat feed ready.", 12, Color(0.90, 0.94, 1.0))
+	combat_feed_label = _make_label(_locale_text("Combat feed ready.", "战斗播报已就绪。", "戰鬥播報已就緒。"), 12, Color(0.90, 0.94, 1.0))
 	combat_feed_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	combat_feed_label.custom_minimum_size.y = 22.0
 	content.add_child(combat_feed_label)
@@ -201,24 +200,16 @@ func _build_ui() -> void:
 	accessory_icon.custom_minimum_size = Vector2(52, 52)
 	accessory_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	accessory_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	accessory_icon.texture = null
 	slot.add_child(accessory_icon)
-	accessory_badge_label = Label.new()
-	accessory_badge_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	accessory_badge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	accessory_badge_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	accessory_badge_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	UISkin.label(accessory_badge_label, 11, Color(0.88, 0.92, 0.98))
-	accessory_icon.add_child(accessory_badge_label)
 
 	var accessory_text := VBoxContainer.new()
 	accessory_text.name = "AccessoryText"
 	accessory_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	accessory_text.add_theme_constant_override("separation", 4)
 	accessory_grid.add_child(accessory_text)
-	accessory_name_label = _make_label("No Accessory", 15, Color.WHITE)
-	accessory_tags_label = _make_label("Tags: None", 11, Color(0.88, 0.84, 0.66))
-	accessory_summary_label = _make_label("Win encounters to claim relics.", 12, Color(0.72, 0.78, 0.86))
+	accessory_name_label = _make_label(_locale_text("No Accessory", "无饰品", "無飾品"), 15, Color.WHITE)
+	accessory_tags_label = _make_label(_locale_text("Tags: None", "标签：无", "標籤：無"), 11, Color(0.88, 0.84, 0.66))
+	accessory_summary_label = _make_label(_locale_text("Win encounters to claim relics.", "通过战斗来获取饰品。", "通過戰鬥來獲取飾品。"), 12, Color(0.72, 0.78, 0.86))
 	accessory_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	accessory_text.add_child(accessory_name_label)
 	accessory_text.add_child(accessory_tags_label)
@@ -228,7 +219,7 @@ func _build_ui() -> void:
 	run_panel.add_theme_stylebox_override("panel", UISkin.content_panel_style())
 	content.add_child(run_panel)
 
-	run_state_label = _make_label("Gold 0 | Next Black Market", 12, Color(0.84, 0.90, 0.98))
+	run_state_label = _make_label(_locale_text("Gold 0 | Next Black Market", "金币 0 | 下一步 黑市", "金幣 0 | 下一步 黑市"), 12, Color(0.84, 0.90, 0.98))
 	run_state_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	run_panel.add_child(run_state_label)
 
@@ -254,7 +245,7 @@ func _meter(meter_id: String, label_text: String, _fill_color: Color) -> VBoxCon
 			inspiration_label = label
 	return box
 
-func _skill_slot(key: String, hotkey: String, _icon_path: String) -> Dictionary:
+func _skill_slot(key: String, hotkey: String, icon_path: String) -> Dictionary:
 	var root := PanelContainer.new()
 	root.custom_minimum_size = Vector2(84, 76)
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -267,26 +258,19 @@ func _skill_slot(key: String, hotkey: String, _icon_path: String) -> Dictionary:
 	var icon := TextureRect.new()
 	icon.custom_minimum_size = Vector2(44, 44)
 	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	icon.texture = null
+	icon.texture = load(icon_path) as Texture2D
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	stack.add_child(icon)
-	var badge_label := Label.new()
-	badge_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	badge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	badge_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	badge_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	UISkin.label(badge_label, 10, Color(0.88, 0.92, 0.98))
-	icon.add_child(badge_label)
 
 	var label := Label.new()
-	label.text = "%s Ready" % hotkey
+	label.text = _skill_ready_text(hotkey)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	UISkin.label(label, 11, Color(0.86, 0.88, 0.92))
 	stack.add_child(label)
 
-	return {"root": root, "icon": icon, "badge": badge_label, "label": label, "hotkey": hotkey, "key": key}
+	return {"root": root, "icon": icon, "label": label, "hotkey": hotkey, "key": key}
 
 func _make_label(text: String, size: int, color: Color) -> Label:
 	var label := Label.new()
@@ -302,18 +286,18 @@ func _connect_character_signal(signal_name: String, callable: Callable) -> void:
 
 func _on_hp_changed(current_hp: float, max_hp_value: float) -> void:
 	hp_bar.value = 0.0 if max_hp_value <= 0.0 else clampf(current_hp / max_hp_value, 0.0, 1.0)
-	hp_label.text = "HP %d / %d" % [int(round(current_hp)), int(round(max_hp_value))]
+	hp_label.text = "%s %d / %d" % [_locale_text("HP", "生命", "生命"), int(round(current_hp)), int(round(max_hp_value))]
 
 func _on_inspiration_changed(current_inspiration: float, max_inspiration_value: float) -> void:
 	inspiration_bar.value = 0.0 if max_inspiration_value <= 0.0 else clampf(current_inspiration / max_inspiration_value, 0.0, 1.0)
-	inspiration_label.text = "Inspiration %d / %d" % [int(round(current_inspiration)), int(round(max_inspiration_value))]
+	inspiration_label.text = "%s %d / %d" % [_locale_text("Inspiration", "灵感", "靈感"), int(round(current_inspiration)), int(round(max_inspiration_value))]
 
 func _on_defense_changed(current_defense: float, max_defense_value: float) -> void:
 	defense_bar.value = 0.0 if max_defense_value <= 0.0 else clampf(current_defense / max_defense_value, 0.0, 1.0)
-	defense_label.text = "Defense %d / %d" % [int(round(current_defense)), int(round(max_defense_value))]
+	defense_label.text = "%s %d / %d" % [_locale_text("Defense", "护甲", "護甲"), int(round(current_defense)), int(round(max_defense_value))]
 
 func _on_shield_changed(current_shield: float) -> void:
-	shield_label.text = "Shield %d" % int(round(current_shield))
+	shield_label.text = "%s %d" % [_locale_text("Shield", "护盾", "護盾"), int(round(current_shield))]
 
 func _on_took_damage(amount: float, remaining_hp: float) -> void:
 	if player_character != null and is_instance_valid(player_character):
@@ -322,21 +306,21 @@ func _on_took_damage(amount: float, remaining_hp: float) -> void:
 	var hp_ratio := 0.0 if max_hp_value <= 0.0 else clampf(remaining_hp / max_hp_value, 0.0, 1.0)
 	if amount > 0.0:
 		if hp_ratio <= 0.25:
-			_set_combat_feed("Danger %.0f HP" % remaining_hp, Color(1.0, 0.72, 0.68), 1.06)
+			_set_combat_feed(_locale_text("Danger %.0f HP", "危险血量 %.0f", "危險血量 %.0f") % remaining_hp, Color(1.0, 0.72, 0.68), 1.06)
 		else:
-			_set_combat_feed("Took %.0f damage" % amount, Color(1.0, 0.84, 0.76), 1.04)
+			_set_combat_feed(_locale_text("Took %.0f damage", "受到 %.0f 伤害", "受到 %.0f 傷害") % amount, Color(1.0, 0.84, 0.76), 1.04)
 
 func _on_control_status_changed(summary: String) -> void:
 	if control_label == null:
 		return
 	if summary.is_empty():
-		control_label.text = "Status Stable"
+		control_label.text = "%s %s" % [_locale_text("Status", "状态", "狀態"), _locale_text("Stable", "稳定", "穩定")]
 		control_label.modulate = Color(0.72, 0.88, 1.0)
 		if not last_control_summary.is_empty():
-			_set_combat_feed("Steady", Color(0.98, 0.90, 0.68), 1.05)
+			_set_combat_feed(_locale_text("Steady", "已稳定", "已穩定"), Color(0.98, 0.90, 0.68), 1.05)
 		last_control_summary = ""
 		return
-	control_label.text = "Status %s" % summary
+	control_label.text = "%s %s" % [_locale_text("Status", "状态", "狀態"), summary]
 	control_label.modulate = Color(1.0, 0.84, 0.64)
 	if summary != last_control_summary:
 		_set_combat_feed(summary, Color(0.90, 0.82, 1.0), 1.04)
@@ -345,28 +329,25 @@ func _on_control_status_changed(summary: String) -> void:
 func _on_attack_started(attack_name: StringName) -> void:
 	if attack_name == &"attack":
 		return
-	_set_combat_feed("%s ready" % _attack_display_name(attack_name), Color(0.84, 0.90, 1.0), 1.04)
+	_set_combat_feed(_locale_text("%s ready", "%s 就绪", "%s 就緒") % _attack_display_name(attack_name), Color(0.84, 0.90, 1.0), 1.04)
 
 func _on_attack_hit(attack_name: StringName, target: Node) -> void:
 	var action_label := _attack_display_name(attack_name)
 	var target_defeated := _is_target_defeated(target)
 	if target_defeated:
-		_set_combat_feed("%s finished the target" % action_label, Color(1.0, 0.86, 0.66), 1.08)
+		_set_combat_feed(_locale_text("%s finished the target", "%s 完成击杀", "%s 完成擊殺") % action_label, Color(1.0, 0.86, 0.66), 1.08)
 	elif attack_name == &"attack":
-		_set_combat_feed("Hit confirmed", Color(0.86, 0.96, 1.0), 1.03)
+		_set_combat_feed(_locale_text("Hit confirmed", "命中确认", "命中確認"), Color(0.86, 0.96, 1.0), 1.03)
 	else:
-		_set_combat_feed("%s landed" % action_label, Color(0.88, 1.0, 0.82), 1.05)
+		_set_combat_feed(_locale_text("%s landed", "%s 命中", "%s 命中") % action_label, Color(0.88, 1.0, 0.82), 1.05)
 
 func _on_accessory_equipped(accessory: Dictionary) -> void:
 	if accessory_icon == null:
 		return
-	accessory_icon.texture = null
-	if accessory_badge_label != null:
-		var tag_text := AccessoryManager.describe_tags(accessory.get("tags", []))
-		accessory_badge_label.text = _compact_badge_text(tag_text if not tag_text.is_empty() else String(accessory.get("name", UIText.text("hud_accessory"))))
-	accessory_name_label.text = String(accessory.get("name", "No Accessory"))
+	accessory_icon.texture = load(String(accessory.get("icon", "res://assets/ui/icon/ui_unknown.png"))) as Texture2D
+	accessory_name_label.text = String(accessory.get("name", _locale_text("No Accessory", "无饰品", "無飾品")))
 	var tags := AccessoryManager.describe_tags(accessory.get("tags", []))
-	accessory_tags_label.text = "Tags: %s" % (tags if not tags.is_empty() else "None")
+	accessory_tags_label.text = "%s %s" % [_locale_text("Tags:", "标签：", "標籤："), tags if not tags.is_empty() else _locale_text("None", "无", "無")]
 	var playstyle_text := AccessoryManager.describe_playstyle(accessory.get("tags", []))
 	var summary_parts: Array[String] = []
 	var summary_text := String(accessory.get("summary", ""))
@@ -385,7 +366,7 @@ func _refresh_run_state_label(state: Dictionary) -> void:
 	if run_state_label == null:
 		return
 	var next_kind := String(state.get("next_event_kind", ""))
-	var next_label := RunDirector.describe_event_kind(next_kind) if not next_kind.is_empty() else "Victory"
+	var next_label := RunDirector.describe_event_kind(next_kind) if not next_kind.is_empty() else _locale_text("Victory", "胜利", "勝利")
 	var reward_flat_bonus := int(state.get("reward_flat_bonus", 0))
 	var reward_multiplier := float(state.get("reward_multiplier", 1.0))
 	var pending_prep := state.get("pending_encounter_prep", {}) as Dictionary
@@ -393,38 +374,52 @@ func _refresh_run_state_label(state: Dictionary) -> void:
 	if reward_flat_bonus > 0 or reward_multiplier > 1.001:
 		var parts: Array[String] = []
 		if reward_flat_bonus > 0:
-			parts.append("+%d gold" % reward_flat_bonus)
+			parts.append(_locale_text("+%d gold", "+%d 金币", "+%d 金幣") % reward_flat_bonus)
 		if reward_multiplier > 1.001:
-			parts.append("x%.2f reward" % reward_multiplier)
+			parts.append(_locale_text("x%.2f reward", "x%.2f 奖励", "x%.2f 獎勵") % reward_multiplier)
 		reward_bonus_text = "  |  %s" % " ".join(parts)
 	var prep_text := ""
 	var current_scene := get_tree().current_scene
 	if current_scene != null:
 		var active_prep := current_scene.get("active_encounter_prep") as Dictionary
 		if not active_prep.is_empty():
-			prep_text = "  |  Prep %s" % String(active_prep.get("title", "Active"))
+			prep_text = _locale_text("  |  Prep %s", "  |  准备 %s", "  |  準備 %s") % String(active_prep.get("title", _locale_text("Active", "生效中", "生效中")))
 	if prep_text.is_empty() and not pending_prep.is_empty():
-		prep_text = "  |  Prep %s" % String(pending_prep.get("title", "Queued"))
-	run_state_label.text = "Gold %d  |  Last +%d  |  Next %s%s%s" % [
+		prep_text = _locale_text("  |  Prep %s", "  |  准备 %s", "  |  準備 %s") % String(pending_prep.get("title", _locale_text("Queued", "已排队", "已排隊")))
+	prep_text = _prep_run_text(current_scene, pending_prep)
+	run_state_label.text = "%s %d  |  %s +%d  |  %s %s%s%s" % [
+		_locale_text("Gold", "金币", "金幣"),
 		int(state.get("gold", 0)),
+		_locale_text("Last", "上次", "上次"),
 		int(state.get("last_reward_gold", 0)),
+		_locale_text("Next", "下一步", "下一步"),
 		next_label,
 		prep_text,
 		reward_bonus_text
 	]
 
+func _on_locale_changed(_locale: String) -> void:
+	if player_character != null and is_instance_valid(player_character):
+		title_label.text = "%s %s" % [_hero_display_name(String(player_character.get_character_name())), _locale_text("Combat Frame", "战斗面板", "戰鬥面板")]
+		_on_hp_changed(player_character.hp, player_character.max_hp)
+		_on_defense_changed(player_character.defense, player_character.max_defense)
+		_on_inspiration_changed(player_character.inspiration, player_character.max_inspiration)
+		_on_shield_changed(player_character.shield)
+	_on_accessory_equipped(AccessoryManager.get_equipped_accessory())
+	_refresh_run_state_label(RunDirector.get_state())
+
 func _refresh_skill_icons() -> void:
 	if player_character == null or not is_instance_valid(player_character):
 		return
 	var character_name := String(player_character.get_character_name())
-	var badge_map := skill_badge_text.get(character_name, {}) as Dictionary
-	for slot_key in skill_slots.keys():
+	var icons: Array = skill_icon_paths.get(character_name, [])
+	for index in range(icons.size()):
+		var slot_key := "skill%d" % (index + 1)
+		if not skill_slots.has(slot_key):
+			continue
 		var slot: Dictionary = skill_slots[slot_key]
 		var icon: TextureRect = slot["icon"]
-		var badge: Label = slot["badge"]
-		icon.texture = null
-		if badge != null:
-			badge.text = _compact_badge_text(String(badge_map.get(slot_key, String(slot["hotkey"]))))
+		icon.texture = load(String(icons[index])) as Texture2D
 
 func _update_skill_slots() -> void:
 	if player_character == null or not is_instance_valid(player_character):
@@ -434,11 +429,21 @@ func _update_skill_slots() -> void:
 		var label: Label = slot["label"]
 		var cooldown := float(player_character.cooldowns.get(key, 0.0))
 		if cooldown <= 0.05:
-			label.text = "%s Ready" % String(slot["hotkey"])
+			label.text = _skill_ready_text(String(slot["hotkey"]))
 			label.modulate = Color(0.78, 1.0, 0.78)
 		else:
 			label.text = "%s %.1f" % [String(slot["hotkey"]), cooldown]
 			label.modulate = Color(1.0, 0.80, 0.62)
+
+func _prep_run_text(current_scene: Node, pending_prep: Dictionary) -> String:
+	var active_prep: Dictionary = {}
+	if current_scene != null:
+		active_prep = current_scene.get("active_encounter_prep") as Dictionary
+	if not active_prep.is_empty():
+		return _locale_text("  |  Prep %s", "  |  准备 %s", "  |  準備 %s") % RunEffects.prep_title(active_prep)
+	if not pending_prep.is_empty():
+		return _locale_text("  |  Prep %s", "  |  准备 %s", "  |  準備 %s") % RunEffects.prep_title(pending_prep)
+	return ""
 
 func _update_danger_visuals() -> void:
 	if player_character == null or not is_instance_valid(player_character):
@@ -470,34 +475,37 @@ func _attack_display_name(attack_name: StringName) -> String:
 		"Knight":
 			match attack_name:
 				&"skill1":
-					return "Charge Slash"
+					return _locale_text("Charge Slash", "冲锋斩", "衝鋒斬")
 				&"skill2":
-					return "Counter Shock"
+					return _locale_text("Counter Shock", "反震冲击", "反震衝擊")
 				&"skill3":
-					return "Holy Field"
+					return _locale_text("Holy Field", "圣域", "聖域")
 		"Ranger":
 			match attack_name:
 				&"skill1":
-					return "Piercing Arrow"
+					return _locale_text("Piercing Arrow", "穿刺箭", "穿刺箭")
 				&"skill2":
-					return "Shadow Step"
+					return _locale_text("Shadow Step", "影步", "影步")
 				&"skill3":
-					return "Hunt Rush"
+					return _locale_text("Hunt Rush", "猎袭", "獵襲")
 		"Mage":
 			match attack_name:
 				&"skill1":
-					return "Arcane Blades"
+					return _locale_text("Arcane Blades", "奥术刃群", "奧術刃群")
 				&"skill2":
-					return "Arcane Burst"
+					return _locale_text("Arcane Burst", "奥术爆裂", "奧術爆裂")
 				&"skill3":
-					return "Silence Decree"
+					return _locale_text("Silence Decree", "沉默敕令", "沉默敕令")
 	match attack_name:
 		&"attack":
-			return "Attack"
+			return _locale_text("Attack", "普攻", "普攻")
 		&"skill1_bonus":
-			return "Blade Echo"
+			return _locale_text("Blade Echo", "刃响回声", "刃響回聲")
 		_:
 			return String(attack_name).capitalize()
+
+func _skill_ready_text(hotkey: String) -> String:
+	return _locale_text("%s Ready", "%s 就绪", "%s 就緒") % hotkey
 
 func _is_target_defeated(target: Node) -> bool:
 	if target == null or not is_instance_valid(target):
@@ -506,6 +514,31 @@ func _is_target_defeated(target: Node) -> bool:
 		if String(property.get("name", "")) == "hp":
 			return float(target.get("hp")) <= 0.0
 	return false
+
+func _current_locale() -> String:
+	if UISettings != null and UISettings.has_method("get_locale"):
+		return String(UISettings.get_locale())
+	return "zh_Hans"
+
+func _locale_text(en_text: String, zh_hans_text: String, zh_hant_text: String) -> String:
+	match _current_locale():
+		"zh_Hant":
+			return zh_hant_text
+		"zh_Hans":
+			return zh_hans_text
+		_:
+			return en_text
+
+func _hero_display_name(hero_name: String) -> String:
+	match hero_name:
+		"Knight":
+			return _locale_text("Knight", "骑士", "騎士")
+		"Ranger":
+			return _locale_text("Ranger", "游侠", "遊俠")
+		"Mage":
+			return _locale_text("Mage", "法师", "法師")
+		_:
+			return hero_name
 
 func _queue_layout_refresh() -> void:
 	call_deferred("_refresh_layout")
@@ -561,30 +594,11 @@ func _refresh_layout() -> void:
 	for slot_data in skill_slots.values():
 		var root: PanelContainer = slot_data["root"]
 		var icon: TextureRect = slot_data["icon"]
-		var badge: Label = slot_data["badge"]
 		var label: Label = slot_data["label"]
 		root.custom_minimum_size = Vector2(slot_width, slot_height)
 		icon.custom_minimum_size = Vector2(34.0 if very_compact else 40.0, 34.0 if very_compact else 40.0)
-		if badge != null:
-			UISkin.label(badge, 9 if very_compact else 10, Color(0.88, 0.92, 0.98))
 		UISkin.label(label, 9 if very_compact else 11, Color(0.86, 0.88, 0.92))
 	var accessory_slot := accessory_grid.get_node("AccessorySlot") as PanelContainer
 	if accessory_slot != null:
 		accessory_slot.custom_minimum_size = Vector2(56.0 if compact else 64.0, 56.0 if compact else 64.0)
 	accessory_icon.custom_minimum_size = Vector2(44.0 if compact else 52.0, 44.0 if compact else 52.0)
-	if accessory_badge_label != null:
-		UISkin.label(accessory_badge_label, 9 if compact else 11, Color(0.88, 0.92, 0.98))
-
-func _compact_badge_text(source: String) -> String:
-	var trimmed := source.strip_edges()
-	if trimmed.is_empty():
-		return "UI"
-	if trimmed.contains(" "):
-		var initials := ""
-		for word in trimmed.split(" ", false):
-			if initials.length() >= 4:
-				break
-			initials += word.substr(0, 1).to_upper()
-		if not initials.is_empty():
-			return initials
-	return trimmed.replace("\n", " ").substr(0, mini(trimmed.length(), 6)).to_upper()

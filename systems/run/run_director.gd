@@ -13,6 +13,51 @@ const EVENT_POOL := [
 
 const DEFAULT_EVENTS_PER_RUN := 3
 
+const EVENT_KIND_LABELS := {
+	"en": {
+		"shop": "Black Market",
+		"bounty": "Bounty Board",
+		"rest": "Church Refuge",
+		"training": "Training Drill",
+		"pact": "Forbidden Pact",
+		"attunement": "Relic Resonance",
+		"scout": "Scout Report",
+		"victory": "Victory",
+		"unknown": "Unknown",
+		"event": "Event",
+		"choice": "Choice",
+		"history_empty": "No event choices yet."
+	},
+	"zh_Hans": {
+		"shop": "黑市",
+		"bounty": "悬赏榜",
+		"rest": "教堂避难所",
+		"training": "训练项目",
+		"pact": "禁忌契约",
+		"attunement": "饰品共鸣",
+		"scout": "侦查报告",
+		"victory": "胜利",
+		"unknown": "未知",
+		"event": "事件",
+		"choice": "选择",
+		"history_empty": "暂时还没有事件选择记录。"
+	},
+	"zh_Hant": {
+		"shop": "黑市",
+		"bounty": "懸賞榜",
+		"rest": "教堂避難所",
+		"training": "訓練項目",
+		"pact": "禁忌契約",
+		"attunement": "飾品共鳴",
+		"scout": "偵查報告",
+		"victory": "勝利",
+		"unknown": "未知",
+		"event": "事件",
+		"choice": "選擇",
+		"history_empty": "暫時還沒有事件選擇記錄。"
+	}
+}
+
 var gold: int = 0
 var cleared_encounters: int = 0
 var event_cursor: int = 0
@@ -95,27 +140,11 @@ func describe_event_route(limit: int = 4, include_victory: bool = true) -> Strin
 	for event_kind in get_upcoming_events(limit):
 		parts.append(describe_event_kind(event_kind))
 	if include_victory:
-		parts.append("Victory")
+		parts.append(_locale_text("victory"))
 	return " -> ".join(parts)
 
 func describe_event_kind(kind: String) -> String:
-	match kind:
-		"shop":
-			return "Black Market"
-		"bounty":
-			return "Bounty Board"
-		"rest":
-			return "Church Refuge"
-		"training":
-			return "Training Drill"
-		"pact":
-			return "Forbidden Pact"
-		"attunement":
-			return "Relic Resonance"
-		"scout":
-			return "Scout Report"
-		_:
-			return "Unknown"
+	return _locale_text(kind if EVENT_KIND_LABELS["en"].has(kind) else "unknown")
 
 func configure_event_count(count: int) -> void:
 	events_per_run = maxi(count, 1)
@@ -198,14 +227,14 @@ func get_reward_history() -> Array[int]:
 
 func describe_event_history(limit: int = 3) -> String:
 	if event_history.is_empty():
-		return "No event choices yet."
+		return _locale_text("history_empty")
 	var parts: Array[String] = []
 	var start_index := maxi(event_history.size() - maxi(limit, 1), 0)
 	for index in range(start_index, event_history.size()):
 		var entry := event_history[index]
 		parts.append("%s: %s" % [
-			String(entry.get("event_name", "Event")),
-			String(entry.get("choice_name", "Choice"))
+			String(entry.get("event_name", _locale_text("event"))),
+			String(entry.get("choice_name", _locale_text("choice")))
 		])
 	return "  /  ".join(parts)
 
@@ -279,3 +308,12 @@ func _ratio(actor: Node, current_field: String, max_field: String) -> float:
 	if max_value <= 0.0:
 		return 0.0
 	return clampf(float(actor.get(current_field)) / max_value, 0.0, 1.0)
+
+func _current_locale() -> String:
+	if UISettings != null and UISettings.has_method("get_locale"):
+		return String(UISettings.get_locale())
+	return "zh_Hans"
+
+func _locale_text(key: String) -> String:
+	var locale_map := EVENT_KIND_LABELS.get(_current_locale(), EVENT_KIND_LABELS["en"]) as Dictionary
+	return String(locale_map.get(key, EVENT_KIND_LABELS["en"].get(key, key)))

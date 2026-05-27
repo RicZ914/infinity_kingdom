@@ -55,15 +55,20 @@ func _ready() -> void:
 func show_result(kind: String, title: String, subtitle: String, detail: String, summary: Dictionary = {}) -> void:
 	var accent := Color(0.92, 0.88, 0.64)
 	var badge_text := UIText.text("result_badge")
+	var backdrop_path := "res://assets/ui/background/result_success_bg.png"
 	if kind == "defeat":
 		accent = Color(0.98, 0.70, 0.64)
 		badge_text = UIText.text("result_defeat_badge")
+		backdrop_path = "res://assets/ui/background/result_failure_bg.png"
 	elif kind == "relic":
 		accent = Color(0.82, 0.94, 0.76)
 		badge_text = UIText.text("result_relic_badge")
+		backdrop_path = "res://assets/ui/background/result_reincarnation_bg.png"
 	else:
 		badge_text = UIText.text("result_victory_badge")
 	panel.add_theme_stylebox_override("panel", UISkin.menu_panel_style())
+	backdrop.texture = load(backdrop_path) as Texture2D
+	backdrop.modulate = Color(1.0, 1.0, 1.0, 0.78)
 	decoration.texture = null
 	decoration.modulate = Color.WHITE
 	decoration.tooltip_text = ""

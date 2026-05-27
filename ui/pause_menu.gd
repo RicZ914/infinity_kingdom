@@ -6,6 +6,7 @@ signal settings_requested
 signal restart_requested
 signal quit_requested
 
+const RunEffects := preload("res://systems/run/run_effects.gd")
 const UISkin := preload("res://ui/ui_skin.gd")
 const PANEL_MIN_SIZE := Vector2(340, 360)
 const PANEL_MAX_SIZE := Vector2(460, 590)
@@ -199,7 +200,7 @@ func _refresh_subtitle() -> void:
 		subtitle_label.text = UIText.text("pause_resume_desc")
 
 func _refresh_context() -> void:
-	var hero_name := "No Champion"
+	var hero_name := _locale_text("No Champion", "未选择角色", "未選擇角色")
 	var run_state := RunDirector.get_state()
 	var gold_value := int(run_state.get("gold", 0))
 	var cleared_value := int(run_state.get("cleared_encounters", 0))
@@ -209,14 +210,14 @@ func _refresh_context() -> void:
 	var route_preview := RunDirector.describe_event_route(3)
 	var pending_prep := run_state.get("pending_encounter_prep", {}) as Dictionary
 	var recent_events_text := RunDirector.describe_event_history(2)
-	var encounter_name := "No active encounter"
+	var encounter_name := _locale_text("No active encounter", "当前没有战斗", "當前沒有戰鬥")
 	var active_prep: Dictionary = {}
 	if target_world != null and is_instance_valid(target_world):
 		var player: Node = target_world.get("player_character")
 		if player != null and is_instance_valid(player) and player.has_method("get_character_name"):
-			hero_name = String(player.get_character_name())
+			hero_name = _hero_display_name(String(player.get_character_name()))
 		if bool(target_world.get("waiting_for_accessory_choice")):
-			encounter_name = "Relic offering in progress"
+			encounter_name = _locale_text("Relic offering in progress", "正在选择饰品", "正在選擇飾品")
 		else:
 			var encounter: Node = target_world.get("current_encounter")
 			if encounter != null and is_instance_valid(encounter):
@@ -227,32 +228,61 @@ func _refresh_context() -> void:
 		active_prep = target_world.get("active_encounter_prep") as Dictionary
 	var bounty_text := ""
 	if reward_flat_bonus > 0:
-		bounty_text += "  |  +%d gold" % reward_flat_bonus
+		bounty_text += _locale_text("  |  +%d gold", "  |  +%d 金币", "  |  +%d 金幣") % reward_flat_bonus
 	if reward_multiplier > 1.001:
-		bounty_text += "  |  x%.2f reward" % reward_multiplier
-	run_summary_label.text = "Hero %s  |  Gold %d  |  Cleared %d%s" % [hero_name, gold_value, cleared_value, bounty_text]
+		bounty_text += _locale_text("  |  x%.2f reward", "  |  x%.2f 奖励", "  |  x%.2f 獎勵") % reward_multiplier
+	run_summary_label.text = "%s %s  |  %s %d  |  %s %d%s" % [_locale_text("Hero", "角色", "角色"), hero_name, _locale_text("Gold", "金币", "金幣"), gold_value, _locale_text("Cleared", "完成", "完成"), cleared_value, bounty_text]
 	var prep_parts: Array[String] = []
 	if not active_prep.is_empty():
-		prep_parts.append("Active prep %s" % String(active_prep.get("title", "Battle Plan")))
+		prep_parts.append(_locale_text("Active prep %s", "已生效准备：%s", "已生效準備：%s") % RunEffects.prep_title(active_prep))
 	elif not pending_prep.is_empty():
-		prep_parts.append("Queued prep %s" % String(pending_prep.get("title", "Battle Plan")))
-	encounter_summary_label.text = "Current %s  |  Next %s\nRoute %s%s" % [
+		prep_parts.append(_locale_text("Queued prep %s", "已排队准备：%s", "已排隊準備：%s") % RunEffects.prep_title(pending_prep))
+	encounter_summary_label.text = "%s %s  |  %s %s\n%s %s%s" % [
+		_locale_text("Current", "当前", "當前"),
 		encounter_name,
-		next_kind if not next_kind.is_empty() else "Victory",
+		_locale_text("Next", "下一步", "下一步"),
+		next_kind if not next_kind.is_empty() else _locale_text("Victory", "胜利", "勝利"),
+		UIText.text("event_route_label"),
 		route_preview,
 		("\n%s" % "  |  ".join(prep_parts)) if not prep_parts.is_empty() else ""
 	]
 	var equipped_accessory: Dictionary = AccessoryManager.get_equipped_accessory()
-	var accessory_name := String(equipped_accessory.get("name", "No Accessory"))
+	var accessory_name := String(equipped_accessory.get("name", _locale_text("No Accessory", "无饰品", "無飾品")))
 	var accessory_tags := AccessoryManager.describe_tags(equipped_accessory.get("tags", []))
-	relic_summary_label.text = "Relic %s%s" % [
+	relic_summary_label.text = "%s %s%s" % [
+		_locale_text("Relic", "饰品", "飾品"),
 		accessory_name,
 		("  |  %s" % accessory_tags) if not accessory_tags.is_empty() else ""
 	]
-	if recent_events_text != "No event choices yet.":
-		relic_summary_label.text += "\nRecent %s" % recent_events_text
+	if not (run_state.get("event_history", []) as Array).is_empty():
+		relic_summary_label.text += "\n%s %s" % [_locale_text("Recent", "最近", "最近"), recent_events_text]
 	title_label.text = UIText.text("pause_title")
 	hint_label.text = UIText.text("pause_hint")
+
+func _current_locale() -> String:
+	if UISettings != null and UISettings.has_method("get_locale"):
+		return String(UISettings.get_locale())
+	return "zh_Hans"
+
+func _locale_text(en_text: String, zh_hans_text: String, zh_hant_text: String) -> String:
+	match _current_locale():
+		"zh_Hant":
+			return zh_hant_text
+		"zh_Hans":
+			return zh_hans_text
+		_:
+			return en_text
+
+func _hero_display_name(hero_name: String) -> String:
+	match hero_name:
+		"Knight":
+			return _locale_text("Knight", "骑士", "騎士")
+		"Ranger":
+			return _locale_text("Ranger", "游侠", "遊俠")
+		"Mage":
+			return _locale_text("Mage", "法师", "法師")
+		_:
+			return hero_name
 
 func _queue_layout_refresh() -> void:
 	call_deferred("_refresh_layout")

@@ -86,14 +86,11 @@ func _apply_skin() -> void:
 	footer_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	UISkin.button_styles(keep_button, "thin")
 	UISkin.button_styles(reroll_button, "thin")
-	current_icon.visible = false
-	_ensure_slot_placeholder(current_icon_slot)
+	current_icon.visible = true
 
 func _refresh_current() -> void:
 	var current := AccessoryManager.get_equipped_accessory()
-	current_icon.texture = null
-	var current_placeholder := _ensure_slot_placeholder(current_icon_slot)
-	current_placeholder.text = _accessory_placeholder_text(current, UIText.text("status_relic"))
+	current_icon.texture = load(String(current.get("icon", "res://assets/ui/icon/ui_unknown.png"))) as Texture2D
 	current_name_label.text = "%s: %s" % [UIText.text("accessory_current"), String(current.get("name", UIText.text("accessory_none")))]
 	var tags_text := AccessoryManager.describe_tags(current.get("tags", []))
 	var playstyle_text := AccessoryManager.describe_playstyle(current.get("tags", []))
@@ -157,8 +154,12 @@ func _choice_card(accessory: Dictionary, choice_index: int) -> Button:
 	slot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	slot.add_theme_stylebox_override("panel", UISkin.icon_slot_style())
 	box.add_child(slot)
-	var slot_label := _ensure_slot_placeholder(slot)
-	slot_label.text = _accessory_placeholder_text(accessory, str(choice_index + 1))
+	var icon := TextureRect.new()
+	icon.custom_minimum_size = Vector2(72, 72)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.texture = load(String(accessory.get("icon", "res://assets/ui/icon/ui_unknown.png"))) as Texture2D
+	slot.add_child(icon)
 	var name_label := Label.new()
 	name_label.text = String(accessory.get("name", "Accessory"))
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -303,34 +304,6 @@ func _rarity_color(rarity: String) -> Color:
 			return Color(1.0, 0.72, 0.35)
 		_:
 			return Color(0.78, 0.80, 0.84)
-
-func _ensure_slot_placeholder(slot: PanelContainer) -> Label:
-	var placeholder := slot.get_node_or_null("PlaceholderLabel") as Label
-	if placeholder == null:
-		placeholder = Label.new()
-		placeholder.name = "PlaceholderLabel"
-		placeholder.set_anchors_preset(Control.PRESET_FULL_RECT)
-		placeholder.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		placeholder.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		placeholder.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		slot.add_child(placeholder)
-	UISkin.label(placeholder, 12, Color(0.90, 0.92, 0.98))
-	return placeholder
-
-func _accessory_placeholder_text(accessory: Dictionary, fallback: String) -> String:
-	var tags := accessory.get("tags", []) as Array
-	if not tags.is_empty():
-		var primary_tag := str(tags[0]).replace("_", " ").to_upper()
-		return primary_tag.substr(0, mini(primary_tag.length(), 6))
-	var name := String(accessory.get("name", ""))
-	var initials := ""
-	for word in name.split(" ", false):
-		if initials.length() >= 3:
-			break
-		initials += word.substr(0, 1).to_upper()
-	if not initials.is_empty():
-		return initials
-	return fallback
 
 func _queue_layout_refresh() -> void:
 	call_deferred("_refresh_layout")

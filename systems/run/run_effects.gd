@@ -96,6 +96,63 @@ const SCOUT_CHOICE_DATA := {
 	}
 }
 
+const CHOICE_LOCALIZATION := {
+	"zh_Hans": {
+		"shop_attack": {"title": "磨锋油", "card": "本局攻击伤害 +10%。", "result": "已涂抹磨锋油。"},
+		"shop_defense": {"title": "轻甲包", "card": "恢复护甲，并提升 12 点最大护甲。", "result": "护甲已经加固。"},
+		"shop_relic": {"title": "饰品地图", "card": "在下一场战斗前额外获得一次饰品选择。", "result": "已标记隐藏饰品点。"},
+		"bounty_cache": {"title": "打开钱袋", "card": "立刻获得 40 金币。", "result": "已领取即时金币。"},
+		"bounty_contract": {"title": "稳定契约", "card": "之后的战斗额外奖励 18 金币。", "result": "后续悬赏收益提高。"},
+		"bounty_tithe": {"title": "高风险契约", "card": "之后的战斗金币 +28%，但失去 10 点最大生命。", "result": "已签下高风险契约。"},
+		"rest_heal": {"title": "医疗包", "card": "恢复 45% 生命。", "result": "生命已恢复。"},
+		"rest_focus": {"title": "守护蜡烛", "card": "恢复灵感与护甲。", "result": "灵感与护甲已恢复。"},
+		"rest_repair": {"title": "野战修整", "card": "恢复护甲，并提升 8 点最大生命。", "result": "护甲已修复，体力上限提升。"},
+		"train_crit": {"title": "精准训练", "card": "暴击率 +5%。", "result": "精准训练完成。"},
+		"train_speed": {"title": "步法训练", "card": "移动速度 +8%。", "result": "步法训练完成。"},
+		"train_cooldown": {"title": "节奏训练", "card": "技能冷却 -6%。", "result": "技能节奏得到优化。"},
+		"train_resource": {"title": "专注演练", "card": "最大灵感 +12。", "result": "灵感容量已经扩大。"},
+		"pact_power": {"title": "血价", "card": "攻击 +18%，技能伤害 +10%，但技能消耗更高。", "result": "已接受血价。"},
+		"pact_guard": {"title": "铁誓", "card": "获得大量护甲并恢复防御，但移动速度下降。", "result": "已接受铁誓。"},
+		"pact_focus": {"title": "星债", "card": "提升灵感与冷却效率，但失去最大生命。", "result": "已接受星债。"},
+		"skip": {"title": "跳过", "card": "保持当前构筑，继续前进。", "result": "你选择了继续前进。"},
+		"attune_offense": {"title": "战意锻火", "card": "攻击伤害 +12%，暴击率 +4%。", "result": "已共鸣战意锻火。"},
+		"attune_focus": {"title": "回声回路", "card": "最大灵感 +10，技能恢复更快。", "result": "已共鸣回声回路。"},
+		"attune_guard": {"title": "守望封印", "card": "最大护甲 +16，最大生命 +6，并恢复护甲。", "result": "已共鸣守望封印。"},
+		"attune_flow": {"title": "风律", "card": "移动速度 +10%，攻速更快，命中回灵更多。", "result": "已共鸣风律。"},
+		"attune_gambit": {"title": "末线神经", "card": "暴击率 +8%，技能伤害 +10%，但技能消耗更高。", "result": "已共鸣末线神经。"},
+		"scout_assault": {"title": "强袭路线", "card": "下一战：攻击伤害 +14%，暴击率 +6%，胜利后额外 +30 金币。", "result": "已准备强袭路线。"},
+		"scout_bulwark": {"title": "壁垒路线", "card": "下一战：护甲回满，获得 45 点护盾，移动速度 +10%。", "result": "已准备壁垒路线。"},
+		"scout_focus": {"title": "专注路线", "card": "下一战：灵感回满，技能冷却额外缩短 18%。", "result": "已准备专注路线。"}
+	},
+	"zh_Hant": {
+		"shop_attack": {"title": "磨鋒油", "card": "本局攻擊傷害 +10%。", "result": "已塗抹磨鋒油。"},
+		"shop_defense": {"title": "輕甲包", "card": "恢復護甲，並提升 12 點最大護甲。", "result": "護甲已經加固。"},
+		"shop_relic": {"title": "飾品地圖", "card": "在下一場戰鬥前額外獲得一次飾品選擇。", "result": "已標記隱藏飾品點。"},
+		"bounty_cache": {"title": "打開錢袋", "card": "立刻獲得 40 金幣。", "result": "已領取即時金幣。"},
+		"bounty_contract": {"title": "穩定契約", "card": "之後的戰鬥額外獎勵 18 金幣。", "result": "後續懸賞收益提高。"},
+		"bounty_tithe": {"title": "高風險契約", "card": "之後的戰鬥金幣 +28%，但失去 10 點最大生命。", "result": "已簽下高風險契約。"},
+		"rest_heal": {"title": "醫療包", "card": "恢復 45% 生命。", "result": "生命已恢復。"},
+		"rest_focus": {"title": "守護蠟燭", "card": "恢復靈感與護甲。", "result": "靈感與護甲已恢復。"},
+		"rest_repair": {"title": "野戰修整", "card": "恢復護甲，並提升 8 點最大生命。", "result": "護甲已修復，體力上限提升。"},
+		"train_crit": {"title": "精準訓練", "card": "暴擊率 +5%。", "result": "精準訓練完成。"},
+		"train_speed": {"title": "步法訓練", "card": "移動速度 +8%。", "result": "步法訓練完成。"},
+		"train_cooldown": {"title": "節奏訓練", "card": "技能冷卻 -6%。", "result": "技能節奏得到優化。"},
+		"train_resource": {"title": "專注演練", "card": "最大靈感 +12。", "result": "靈感容量已經擴大。"},
+		"pact_power": {"title": "血價", "card": "攻擊 +18%，技能傷害 +10%，但技能消耗更高。", "result": "已接受血價。"},
+		"pact_guard": {"title": "鐵誓", "card": "獲得大量護甲並恢復防禦，但移動速度下降。", "result": "已接受鐵誓。"},
+		"pact_focus": {"title": "星債", "card": "提升靈感與冷卻效率，但失去最大生命。", "result": "已接受星債。"},
+		"skip": {"title": "跳過", "card": "保持當前構築，繼續前進。", "result": "你選擇了繼續前進。"},
+		"attune_offense": {"title": "戰意鍛火", "card": "攻擊傷害 +12%，暴擊率 +4%。", "result": "已共鳴戰意鍛火。"},
+		"attune_focus": {"title": "回聲迴路", "card": "最大靈感 +10，技能恢復更快。", "result": "已共鳴回聲迴路。"},
+		"attune_guard": {"title": "守望封印", "card": "最大護甲 +16，最大生命 +6，並恢復護甲。", "result": "已共鳴守望封印。"},
+		"attune_flow": {"title": "風律", "card": "移動速度 +10%，攻速更快，命中回靈更多。", "result": "已共鳴風律。"},
+		"attune_gambit": {"title": "末線神經", "card": "暴擊率 +8%，技能傷害 +10%，但技能消耗更高。", "result": "已共鳴末線神經。"},
+		"scout_assault": {"title": "強襲路線", "card": "下一戰：攻擊傷害 +14%，暴擊率 +6%，勝利後額外 +30 金幣。", "result": "已準備強襲路線。"},
+		"scout_bulwark": {"title": "壁壘路線", "card": "下一戰：護甲回滿，獲得 45 點護盾，移動速度 +10%。", "result": "已準備壁壘路線。"},
+		"scout_focus": {"title": "專注路線", "card": "下一戰：靈感回滿，技能冷卻額外縮短 18%。", "result": "已準備專注路線。"}
+	}
+}
+
 const HERO_TAG_PROFILES := {
 	"Knight": ["defense", "survival", "power"],
 	"Ranger": ["crit", "speed", "tempo", "damage"],
@@ -248,6 +305,9 @@ static func cost_for(choice_id: String) -> int:
 			return 0
 
 static func summary(choice_id: String) -> String:
+	var localized := _localized_choice_value(choice_id, "result")
+	if not localized.is_empty():
+		return localized
 	match choice_id:
 		"shop_attack":
 			return "Sharpening Oil applied."
@@ -301,6 +361,9 @@ static func summary(choice_id: String) -> String:
 			return "You move on."
 
 static func display_name(choice_id: String) -> String:
+	var localized := _localized_choice_value(choice_id, "title")
+	if not localized.is_empty():
+		return localized
 	match choice_id:
 		"shop_attack":
 			return "Sharpening Oil"
@@ -342,6 +405,16 @@ static func display_name(choice_id: String) -> String:
 		return String((SCOUT_CHOICE_DATA.get(choice_id, {}) as Dictionary).get("title", choice_id))
 	return choice_id.capitalize()
 
+static func card_summary(choice_id: String) -> String:
+	var localized := _localized_choice_value(choice_id, "card")
+	if not localized.is_empty():
+		return localized
+	if ATTUNEMENT_CHOICE_DATA.has(choice_id):
+		return String((ATTUNEMENT_CHOICE_DATA.get(choice_id, {}) as Dictionary).get("summary", ""))
+	if SCOUT_CHOICE_DATA.has(choice_id):
+		return String((SCOUT_CHOICE_DATA.get(choice_id, {}) as Dictionary).get("summary", ""))
+	return ""
+
 static func attunement_choices() -> Array[Dictionary]:
 	var categories: Array[String] = []
 	for tag in AccessoryManager.get_equipped_tags():
@@ -364,6 +437,8 @@ static func attunement_choices() -> Array[Dictionary]:
 			continue
 		data["id"] = choice_id
 		data["cost"] = 0
+		data["title"] = display_name(choice_id)
+		data["summary"] = card_summary(choice_id)
 		choices.append(data)
 	return choices
 
@@ -375,6 +450,8 @@ static func scout_choices() -> Array[Dictionary]:
 			continue
 		data["id"] = choice_id
 		data["cost"] = 0
+		data["title"] = display_name(choice_id)
+		data["summary"] = card_summary(choice_id)
 		choices.append(data)
 	return choices
 
@@ -392,7 +469,11 @@ static func evaluate_choice(choice_id: String, actor: Node = null) -> Dictionary
 		return {
 			"label": "Hold",
 			"color": Color(0.76, 0.82, 0.90),
-			"reason": "Passing keeps the current route and build unchanged."
+			"reason": _localized_text(
+				"Passing keeps the current route and build unchanged.",
+				"跳过后会保持当前路线与构筑不变。",
+				"跳過後會保持當前路線與構築不變。"
+			)
 		}
 	var relic_tags := AccessoryManager.get_equipped_tags()
 	var hero_name := _hero_name(actor)
@@ -417,39 +498,87 @@ static func evaluate_choice(choice_id: String, actor: Node = null) -> Dictionary
 	var score := relic_matches.size() * 2 + hero_matches.size()
 	var reasons: Array[String] = []
 	if not relic_matches.is_empty():
-		reasons.append("Matches relic tags: %s." % AccessoryManager.describe_tags(relic_matches))
+		reasons.append(_localized_text(
+			"Matches relic tags: %s.",
+			"契合当前饰品标签：%s。",
+			"契合當前飾品標籤：%s。"
+		) % AccessoryManager.describe_tags(relic_matches))
 	if not hero_matches.is_empty() and not hero_name.is_empty():
-		reasons.append("Plays well with %s's preferred lane." % hero_name)
+		reasons.append(_localized_text(
+			"Plays well with %s's preferred lane.",
+			"很适合 %s 当前偏好的战斗路线。",
+			"很適合 %s 當前偏好的戰鬥路線。"
+		) % _localized_hero_name(hero_name))
 	if choice_id == "rest_heal" and hp_ratio <= 0.55:
 		score += 3
-		reasons.append("Your health margin is low enough that raw healing is premium.")
+		reasons.append(_localized_text(
+			"Your health margin is low enough that raw healing is premium.",
+			"当前血量压力偏高，直接治疗的价值很高。",
+			"當前血量壓力偏高，直接治療的價值很高。"
+		))
 	if choice_id == "rest_focus" and (defense_ratio <= 0.35 or inspiration_ratio <= 0.35):
 		score += 2
-		reasons.append("You are short on armor or inspiration for the next check.")
+		reasons.append(_localized_text(
+			"You are short on armor or inspiration for the next check.",
+			"你在下一场检定前已经缺护甲或灵感了。",
+			"你在下一場檢定前已經缺護甲或靈感了。"
+		))
 	if choice_id == "scout_assault" and hp_ratio >= 0.70:
 		score += 2
-		reasons.append("Your health buffer is healthy enough to cash in on a fast opener.")
+		reasons.append(_localized_text(
+			"Your health buffer is healthy enough to cash in on a fast opener.",
+			"你的血线足够健康，可以兑现强势开局收益。",
+			"你的血線足夠健康，可以兌現強勢開局收益。"
+		))
 	if choice_id == "scout_bulwark" and (hp_ratio <= 0.55 or defense_ratio <= 0.35):
 		score += 3
-		reasons.append("This covers a weak defensive start and buys room to stabilize.")
+		reasons.append(_localized_text(
+			"This covers a weak defensive start and buys room to stabilize.",
+			"这能补足偏弱的防守开局，并争取稳定空间。",
+			"這能補足偏弱的防守開局，並爭取穩定空間。"
+		))
 	if choice_id == "scout_focus" and inspiration_ratio <= 0.45:
 		score += 2
-		reasons.append("Your inspiration economy is low enough that a reset is meaningful.")
+		reasons.append(_localized_text(
+			"Your inspiration economy is low enough that a reset is meaningful.",
+			"你的灵感循环已经偏紧，这次重置会很有价值。",
+			"你的靈感循環已經偏緊，這次重置會很有價值。"
+		))
 	if choice_id == "shop_defense" and defense_ratio <= 0.40:
 		score += 2
-		reasons.append("Defense is already thin, so armor value is immediate.")
+		reasons.append(_localized_text(
+			"Defense is already thin, so armor value is immediate.",
+			"当前护甲已经偏薄，补防御能立刻见效。",
+			"當前護甲已經偏薄，補防禦能立刻見效。"
+		))
 	if choice_id == "train_resource" and inspiration_ratio <= 0.40:
 		score += 2
-		reasons.append("Your hero is running close to inspiration pressure.")
+		reasons.append(_localized_text(
+			"Your hero is running close to inspiration pressure.",
+			"你当前角色已经接近灵感压力线。",
+			"你當前角色已經接近靈感壓力線。"
+		))
 	if choice_id == "shop_relic" and AccessoryManager.get_equipped_tags().is_empty():
 		score += 2
-		reasons.append("An extra relic is strongest when your build identity is still thin.")
+		reasons.append(_localized_text(
+			"An extra relic is strongest when your build identity is still thin.",
+			"当构筑方向还不够明确时，额外饰品最有价值。",
+			"當構築方向還不夠明確時，額外飾品最有價值。"
+		))
 	if choice_id in ["bounty_tithe", "pact_power", "attune_gambit"] and hp_ratio <= 0.42:
 		score -= 3
-		reasons.append("This stacks risk while your current health buffer is already narrow.")
+		reasons.append(_localized_text(
+			"This stacks risk while your current health buffer is already narrow.",
+			"你当前血量缓冲已经偏窄，再叠风险会很危险。",
+			"你當前血量緩衝已經偏窄，再疊風險會很危險。"
+		))
 	if choice_id == "pact_guard" and hero_name == "Ranger":
 		score -= 1
-		reasons.append("The move-speed tax cuts into Ranger's cleanest advantage.")
+		reasons.append(_localized_text(
+			"The move-speed tax cuts into Ranger's cleanest advantage.",
+			"移速惩罚会削弱游侠最明显的优势。",
+			"移速懲罰會削弱遊俠最明顯的優勢。"
+		))
 
 	var label := "Flexible"
 	var color := Color(0.80, 0.88, 1.0)
@@ -469,7 +598,11 @@ static func evaluate_choice(choice_id: String, actor: Node = null) -> Dictionary
 	return {
 		"label": label,
 		"color": color,
-		"reason": reasons[0] if not reasons.is_empty() else "Keeps the run moving without a special synergy hook."
+		"reason": reasons[0] if not reasons.is_empty() else _localized_text(
+			"Keeps the run moving without a special synergy hook.",
+			"能稳定推进流程，但没有特别明显的联动。",
+			"能穩定推進流程，但沒有特別明顯的聯動。"
+		)
 	}
 
 static func activate_encounter_prep(actor: Node, prep: Dictionary) -> void:
@@ -585,6 +718,54 @@ static func _hero_name(actor: Node) -> String:
 		return ""
 	return String(actor.get_character_name())
 
+static func _current_locale() -> String:
+	if UISettings != null and UISettings.has_method("get_locale"):
+		return String(UISettings.get_locale())
+	return "zh_Hans"
+
+static func prep_title(prep: Dictionary) -> String:
+	if prep.is_empty():
+		return _localized_text("Battle Plan", "战斗方案", "戰鬥方案")
+	var choice_id := String(prep.get("choice_id", ""))
+	var localized := _localized_choice_value(choice_id, "title")
+	if not localized.is_empty():
+		return localized
+	return String(prep.get("title", _localized_text("Battle Plan", "战斗方案", "戰鬥方案")))
+
+static func prep_summary(prep: Dictionary) -> String:
+	if prep.is_empty():
+		return _localized_text("Temporary opener active.", "临时开局增益生效。", "臨時開局增益生效。")
+	var choice_id := String(prep.get("choice_id", ""))
+	var localized := _localized_choice_value(choice_id, "card")
+	if not localized.is_empty():
+		return localized
+	return String(prep.get("summary", _localized_text("Temporary opener active.", "临时开局增益生效。", "臨時開局增益生效。")))
+
+static func _localized_choice_value(choice_id: String, field: String) -> String:
+	var locale_map := CHOICE_LOCALIZATION.get(_current_locale(), {}) as Dictionary
+	var entry := locale_map.get(choice_id, {}) as Dictionary
+	return String(entry.get(field, ""))
+
+static func _localized_text(en_text: String, zh_hans_text: String, zh_hant_text: String) -> String:
+	match _current_locale():
+		"zh_Hant":
+			return zh_hant_text
+		"zh_Hans":
+			return zh_hans_text
+		_:
+			return en_text
+
+static func _localized_hero_name(hero_name: String) -> String:
+	match hero_name:
+		"Knight":
+			return _localized_text("Knight", "骑士", "騎士")
+		"Ranger":
+			return _localized_text("Ranger", "游侠", "遊俠")
+		"Mage":
+			return _localized_text("Mage", "法师", "法師")
+		_:
+			return hero_name
+
 static func _health_component(actor: Node) -> Node:
 	if actor == null:
 		return null
@@ -594,4 +775,8 @@ static func _scout_prep_for_choice(choice_id: String) -> Dictionary:
 	var data := SCOUT_CHOICE_DATA.get(choice_id, {}) as Dictionary
 	if data.is_empty():
 		return {}
-	return (data.get("prep", {}) as Dictionary).duplicate(true)
+	var prep := (data.get("prep", {}) as Dictionary).duplicate(true)
+	if prep.is_empty():
+		return prep
+	prep["choice_id"] = choice_id
+	return prep

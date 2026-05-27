@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://d1aya10kl4ab4"]
+[gd_scene load_steps=16 format=3 uid="uid://d1aya10kl4ab4"]
 
 [ext_resource type="PackedScene" path="res://ui/knight_hud.tscn" id="1"]
 [ext_resource type="Script" path="res://world.gd" id="2"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://ui/run_event_panel.tscn" id="10"]
 [ext_resource type="PackedScene" path="res://ui/debug_panel.tscn" id="11"]
 [ext_resource type="PackedScene" path="res://ui/settings_panel.tscn" id="12"]
+[ext_resource type="Texture2D" path="res://assets/ui/background/church_bg.png" id="13"]
 
 [sub_resource type="RectangleShape2D" id="1"]
 size = Vector2(1380, 12)
@@ -21,6 +22,12 @@ size = Vector2(12, 820)
 
 [node name="World" type="Node2D" unique_id=2028030178]
 script = ExtResource("2")
+
+[node name="BackdropImage" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.9)
+position = Vector2(700, 420)
+scale = Vector2(0.83732, 0.89267)
+texture = ExtResource("13")
 
 [node name="Backdrop" type="Polygon2D" parent="." unique_id=606320743]
 color = Color(0.08, 0.09, 0.12, 1)
