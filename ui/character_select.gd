@@ -212,6 +212,7 @@ var menu_overview_buttons: Array[Button] = []
 var cards_panel: PanelContainer
 var cards_grid: GridContainer
 var hero_buttons: Array[Button] = []
+var menu_action_buttons: Array[Button] = []
 var primary_start_button: Button
 var settings_button: Button
 var audio_button: Button
@@ -226,6 +227,7 @@ var active_gallery_entry_id: String = "gallery_hero_knight"
 var active_about_entry_id: String = "about_overview"
 var detail_mode: String = "hero"
 var screen_mode: String = "menu"
+var menu_preview_key: StringName = &""
 
 func _ready() -> void:
 	_build_ui()
@@ -313,13 +315,14 @@ func _build_ui() -> void:
 	UISkin.label(left_blurb_label, 13, Color(0.90, 0.92, 0.98))
 	left_column.add_child(left_blurb_label)
 
-	primary_start_button = _menu_button("", _on_primary_pressed, true)
-	settings_button = _menu_button("", func() -> void: settings_requested.emit())
-	audio_button = _menu_button("", func() -> void: audio_requested.emit())
-	gallery_button = _menu_button("", _show_gallery)
-	about_button = _menu_button("", _show_about)
-	quit_button = _menu_button("", func() -> void: quit_requested.emit())
-	for button in [primary_start_button, settings_button, audio_button, gallery_button, about_button, quit_button]:
+	primary_start_button = _menu_button(&"start", "", _on_primary_pressed, true)
+	settings_button = _menu_button(&"settings", "", func() -> void: settings_requested.emit())
+	audio_button = _menu_button(&"audio", "", func() -> void: audio_requested.emit())
+	gallery_button = _menu_button(&"gallery", "", _show_gallery)
+	about_button = _menu_button(&"about", "", _show_about)
+	quit_button = _menu_button(&"quit", "", func() -> void: quit_requested.emit())
+	menu_action_buttons = [primary_start_button, settings_button, audio_button, gallery_button, about_button, quit_button]
+	for button in menu_action_buttons:
 		left_column.add_child(button)
 
 	left_hint_label = Label.new()
@@ -474,10 +477,12 @@ func _hero_card(hero: Dictionary, hero_index: int) -> Button:
 	tilt_root.add_child(margin)
 
 	var column := VBoxContainer.new()
+	column.name = "CardColumn"
 	column.add_theme_constant_override("separation", 8)
 	margin.add_child(column)
 
 	var portrait_frame := PanelContainer.new()
+	portrait_frame.name = "PortraitFrame"
 	portrait_frame.custom_minimum_size = Vector2(0, 96)
 	portrait_frame.add_theme_stylebox_override("panel", UISkin.icon_slot_style())
 	column.add_child(portrait_frame)
@@ -491,21 +496,27 @@ func _hero_card(hero: Dictionary, hero_index: int) -> Button:
 	portrait_frame.add_child(portrait)
 
 	var name_label := Label.new()
+	name_label.name = "NameLabel"
 	name_label.text = "%s  [%d]" % [_hero_name(hero), hero_index + 1]
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.custom_minimum_size.y = 18.0
 	UISkin.label(name_label, 16, Color.WHITE)
 	column.add_child(name_label)
 
 	var role_label := Label.new()
+	role_label.name = "RoleLabel"
 	role_label.text = _hero_role(hero)
 	role_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	role_label.custom_minimum_size.y = 16.0
 	UISkin.label(role_label, 12, UISkin.COLOR_ACCENT)
 	column.add_child(role_label)
 
 	var stats_label := Label.new()
+	stats_label.name = "StatsLabel"
 	stats_label.text = " / ".join(_hero_stats(hero))
 	stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	stats_label.custom_minimum_size.y = 30.0
 	UISkin.label(stats_label, 11, UISkin.COLOR_MUTED)
 	column.add_child(stats_label)
 
@@ -586,11 +597,28 @@ func _overview_entry_card(entry: Dictionary, pressed_callback: Callable, preview
 	UISkin.ignore_mouse_recursive(margin)
 	return button
 
-func _menu_button(text_value: String, callback: Callable, highlighted: bool = false) -> Button:
+func _menu_button(menu_key: StringName, text_value: String, callback: Callable, highlighted: bool = false) -> Button:
 	var button := Button.new()
 	button.text = text_value
+	button.set_meta("menu_key", String(menu_key))
 	button.custom_minimum_size = Vector2(0, 46)
 	UISkin.button_styles(button, "large" if highlighted else "medium")
+	UICardFx.install_text_button(button, {
+		"font_size": 15 if highlighted else 14,
+		"active_scale": 1.022 if highlighted else 1.018,
+		"rotation_max": 1.7 if highlighted else 1.3,
+		"float_offset": Vector2(4.0, 2.4) if highlighted else Vector2(3.0, 1.8),
+		"sheen_alpha": 0.07 if highlighted else 0.05
+	})
+	UICardFx.bind(button, func() -> void: _set_menu_preview(menu_key))
+	button.focus_exited.connect(func() -> void:
+		if not button.is_hovered():
+			call_deferred("_sync_menu_preview")
+	)
+	button.mouse_exited.connect(func() -> void:
+		if not button.has_focus():
+			call_deferred("_sync_menu_preview")
+	)
 	button.pressed.connect(callback)
 	return button
 
@@ -603,6 +631,7 @@ func _on_primary_pressed() -> void:
 func _show_menu() -> void:
 	screen_mode = "menu"
 	detail_mode = "hero"
+	menu_preview_key = &""
 	menu_overview_panel.visible = true
 	cards_panel.visible = false
 	_refresh_menu_overview_copy()
@@ -613,6 +642,7 @@ func _show_menu() -> void:
 func _show_hero_select() -> void:
 	screen_mode = "select"
 	detail_mode = "hero"
+	menu_preview_key = &""
 	menu_overview_panel.visible = false
 	cards_panel.visible = true
 	_set_selected_hero(selected_hero_index)
@@ -622,6 +652,7 @@ func _show_hero_select() -> void:
 func _show_gallery() -> void:
 	screen_mode = "gallery"
 	detail_mode = "gallery"
+	menu_preview_key = &""
 	menu_overview_panel.visible = true
 	cards_panel.visible = false
 	_refresh_menu_overview_copy()
@@ -632,6 +663,7 @@ func _show_gallery() -> void:
 func _show_about() -> void:
 	screen_mode = "about"
 	detail_mode = "about"
+	menu_preview_key = &""
 	menu_overview_panel.visible = true
 	cards_panel.visible = false
 	_refresh_menu_overview_copy()
@@ -662,6 +694,7 @@ func _focus_current_overview_entry() -> void:
 func _refresh_card_focus_states() -> void:
 	for hero_index in range(hero_buttons.size()):
 		UICardFx.pin(hero_buttons[hero_index], hero_index == selected_hero_index)
+	_refresh_menu_button_fx_states()
 	var active_entry_id := ""
 	match screen_mode:
 		"gallery":
@@ -672,6 +705,127 @@ func _refresh_card_focus_states() -> void:
 			active_entry_id = "menu_hero_%s" % String(HEROES[selected_hero_index].get("id", ""))
 	for button in menu_overview_buttons:
 		UICardFx.pin(button, String(button.get_meta("entry_id", "")) == active_entry_id)
+
+func _refresh_menu_button_fx_states() -> void:
+	if menu_action_buttons.is_empty():
+		return
+	for button in menu_action_buttons:
+		var menu_key := StringName(String(button.get_meta("menu_key", "")))
+		var active := false
+		match menu_key:
+			&"start":
+				active = screen_mode == "menu" or screen_mode == "select"
+			&"gallery":
+				active = screen_mode == "gallery"
+			&"about":
+				active = screen_mode == "about"
+		UICardFx.pin(button, active)
+		UICardFx.sync_text_button_state(button)
+
+func _set_menu_preview(menu_key: StringName) -> void:
+	menu_preview_key = menu_key
+	_sync_menu_preview()
+
+func _sync_menu_preview() -> void:
+	if menu_action_buttons.is_empty():
+		return
+	var active_preview_key: StringName = &""
+	for button in menu_action_buttons:
+		if button == null:
+			continue
+		if button.has_focus() or button.is_hovered():
+			active_preview_key = StringName(String(button.get_meta("menu_key", "")))
+			break
+	if active_preview_key == &"":
+		menu_preview_key = &""
+		left_blurb_label.text = _blurb_for_mode()
+		left_hint_label.text = _hint_text()
+		return
+	menu_preview_key = active_preview_key
+	left_blurb_label.text = _blurb_for_menu_key(active_preview_key)
+	left_hint_label.text = _hint_for_menu_key(active_preview_key)
+
+func _blurb_for_menu_key(menu_key: StringName) -> String:
+	match menu_key:
+		&"start":
+			return _locale_text(
+				"Jump into hero select, then commit to the champion whose rhythm and risk profile fit your route plan.",
+				"先进入选角，再锁定最适合你节奏和路线规划的角色。",
+				"先進入選角，再鎖定最適合你節奏和路線規劃的角色。"
+			)
+		&"settings":
+			return _locale_text(
+				"Switch display mode, VSync, and language before the run so the interface feels right end to end.",
+				"在开局前调整显示模式、垂直同步和语言，让整套界面都顺手。",
+				"在開局前調整顯示模式、垂直同步和語言，讓整套介面都順手。"
+			)
+		&"audio":
+			return _locale_text(
+				"Shape the mix before you enter: chapter score, room tone, combat impacts, and UI calls all have their own lane.",
+				"开局前先调音：章节音乐、环境氛围、战斗反馈和界面提示都能单独处理。",
+				"開局前先調音：章節音樂、環境氛圍、戰鬥回饋和介面提示都能單獨處理。"
+			)
+		&"gallery":
+			return _locale_text(
+				"Review heroes, bosses, relic families, and route notes before you lock into a run plan.",
+				"先看角色、首领、饰品家族和路线说明，再决定这一局怎么构筑。",
+				"先看角色、首領、飾品家族和路線說明，再決定這一局怎麼構築。"
+			)
+		&"about":
+			return _locale_text(
+				"Use the primer to refresh controls, encounter pacing, and how relic, prep, and drops fit together.",
+				"用玩法导览快速回顾操作、遭遇节奏，以及饰品、准备和掉落之间的关系。",
+				"用玩法導覽快速回顧操作、遭遇節奏，以及飾品、準備和掉落之間的關係。"
+			)
+		&"quit":
+			return _locale_text(
+				"Leave from here when you are done. The title menu keeps your settings and mix adjustments.",
+				"结束时可以从这里退出，菜单里的设置和音频调整都会保留。",
+				"結束時可以從這裡退出，選單裡的設定和音訊調整都會保留。"
+			)
+		_:
+			return _blurb_for_mode()
+
+func _hint_for_menu_key(menu_key: StringName) -> String:
+	match menu_key:
+		&"start":
+			return _locale_text(
+				"Enter hero select  |  1 / 2 / 3 quick pick  |  Enter confirm",
+				"Enter 进入选角  |  1 / 2 / 3 快速选角  |  Enter 确认",
+				"Enter 進入選角  |  1 / 2 / 3 快速選角  |  Enter 確認"
+			)
+		&"settings":
+			return _locale_text(
+				"S settings  |  F fullscreen  |  W windowed  |  V vsync",
+				"S 设置  |  F 全屏  |  W 窗口  |  V 垂直同步",
+				"S 設定  |  F 全螢幕  |  W 視窗  |  V 垂直同步"
+			)
+		&"audio":
+			return _locale_text(
+				"F10 audio mix  |  Drag sliders  |  Preview each lane",
+				"F10 音频混音  |  拖动滑杆  |  逐条试听",
+				"F10 音訊混音  |  拖動滑桿  |  逐條試聽"
+			)
+		&"gallery":
+			return _locale_text(
+				"G gallery  |  Compare routes  |  Review featured relics",
+				"G 图鉴  |  对比路线  |  查看重点饰品",
+				"G 圖鑑  |  對比路線  |  查看重點飾品"
+			)
+		&"about":
+			return _locale_text(
+				"A primer  |  Controls  |  Encounter flow  |  Run systems",
+				"A 玩法导览  |  操作  |  遭遇流程  |  局内系统",
+				"A 玩法導覽  |  操作  |  遭遇流程  |  局內系統"
+			)
+		&"quit":
+			return _locale_text(
+				"Q quit game  |  Esc stay here",
+				"Q 退出游戏  |  Esc 留在这里",
+				"Q 退出遊戲  |  Esc 留在這裡"
+			)
+		_:
+			return _hint_text()
 
 func _set_selected_hero(hero_index: int) -> void:
 	detail_mode = "hero"
@@ -737,14 +891,14 @@ func _apply_detail_entry(entry: Dictionary) -> void:
 func _refresh_copy(_locale: String = "") -> void:
 	title_label.text = UIText.text("menu_title")
 	subtitle_label.text = _subtitle_for_mode()
-	left_blurb_label.text = _blurb_for_mode()
-	primary_start_button.text = _locale_text("Start", "开始", "開始") if screen_mode != "select" else _locale_text("Enter Trial", "进入试炼", "進入試煉")
-	settings_button.text = UIText.text("menu_settings")
-	audio_button.text = UIText.text("audio_mix")
-	gallery_button.text = UIText.text("menu_gallery")
-	about_button.text = UIText.text("menu_about")
-	quit_button.text = UIText.text("menu_quit")
-	left_hint_label.text = _hint_text()
+	UICardFx.set_button_text(primary_start_button, _locale_text("Start", "开始", "開始") if screen_mode != "select" else _locale_text("Enter Trial", "进入试炼", "進入試煉"))
+	UICardFx.set_button_text(settings_button, UIText.text("menu_settings"))
+	UICardFx.set_button_text(audio_button, UIText.text("audio_mix"))
+	UICardFx.set_button_text(gallery_button, UIText.text("menu_gallery"))
+	UICardFx.set_button_text(about_button, UIText.text("menu_about"))
+	UICardFx.set_button_text(quit_button, UIText.text("menu_quit"))
+	_refresh_menu_button_fx_states()
+	_sync_menu_preview()
 	_refresh_menu_overview_copy()
 	match detail_mode:
 		"gallery":
@@ -857,7 +1011,7 @@ func _refresh_layout() -> void:
 	panel_margin.add_theme_constant_override("margin_right", 18 if compact else 28)
 	panel_margin.add_theme_constant_override("margin_bottom", 16 if compact else 24)
 	if menu_left_panel != null:
-		menu_left_panel.custom_minimum_size.x = 176.0 if very_compact else (214.0 if compact else 286.0)
+		menu_left_panel.custom_minimum_size.x = 192.0 if very_compact else (224.0 if compact else 286.0)
 	if hero_top_row != null:
 		hero_top_row.add_theme_constant_override("separation", 10 if very_compact else (12 if compact else 16))
 	if hero_portrait_frame != null:
@@ -871,7 +1025,7 @@ func _refresh_layout() -> void:
 	UISkin.label(left_hint_label, 10 if very_compact else (11 if compact else 12), UISkin.COLOR_MUTED)
 	UISkin.label(menu_overview_title, 12 if compact else 13, UISkin.COLOR_ACCENT)
 	left_blurb_label.max_lines_visible = 4 if very_compact else (5 if compact else -1)
-	left_hint_label.max_lines_visible = 2 if very_compact else -1
+	left_hint_label.max_lines_visible = 3 if very_compact else -1
 	menu_overview_panel.custom_minimum_size.y = 182.0 if very_compact else (214.0 if compact else 232.0)
 	menu_overview_grid.columns = _overview_columns(compact, very_compact)
 	cards_grid.columns = 1 if very_compact else (2 if compact else 3)
@@ -880,8 +1034,22 @@ func _refresh_layout() -> void:
 		if button != null:
 			var full_height := 54.0 if button == primary_start_button else 42.0
 			button.custom_minimum_size.y = 34.0 if very_compact else (40.0 if compact else full_height)
+			UICardFx.sync_text_button_state(button)
 	for hero_button in hero_buttons:
-		hero_button.custom_minimum_size.y = 172.0 if compact else 200.0
+		hero_button.custom_minimum_size.y = 164.0 if very_compact else (190.0 if compact else 208.0)
+		var portrait_frame := hero_button.get_node_or_null("TiltRoot/Margin/CardColumn/PortraitFrame") as PanelContainer
+		var name_label := hero_button.get_node_or_null("TiltRoot/Margin/CardColumn/NameLabel") as Label
+		var role_label := hero_button.get_node_or_null("TiltRoot/Margin/CardColumn/RoleLabel") as Label
+		var stats_label := hero_button.get_node_or_null("TiltRoot/Margin/CardColumn/StatsLabel") as Label
+		if portrait_frame != null:
+			portrait_frame.custom_minimum_size.y = 74.0 if very_compact else (86.0 if compact else 96.0)
+		if name_label != null:
+			UISkin.label(name_label, 13 if compact else 16, Color.WHITE)
+		if role_label != null:
+			UISkin.label(role_label, 10 if compact else 12, UISkin.COLOR_ACCENT)
+		if stats_label != null:
+			stats_label.max_lines_visible = 1 if very_compact else 2
+			UISkin.label(stats_label, 9 if compact else 11, UISkin.COLOR_MUTED)
 	for overview_button in menu_overview_buttons:
 		overview_button.custom_minimum_size.y = 84.0 if very_compact else (90.0 if compact else 94.0)
 		var name_label := overview_button.get_node_or_null("Margin/Row/TextColumn/NameLabel") as Label

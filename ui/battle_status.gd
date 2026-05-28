@@ -14,15 +14,21 @@ var objective_value_label: Label
 var threat_value_label: Label
 var hero_value_label: Label
 var relic_value_label: Label
+var context_panel_map: Dictionary = {}
+var context_value_map: Dictionary = {}
+var context_accent_map: Dictionary = {}
 var run_label: Label
 var run_route_label: Label
 var run_bonus_label: Label
 var metric_grid: GridContainer
 var metric_value_labels: Dictionary = {}
+var metric_panel_map: Dictionary = {}
+var metric_accent_map: Dictionary = {}
 var context_caption_labels: Array[Label] = []
 var metric_caption_labels: Array[Label] = []
 var layout_size_override: Vector2 = Vector2.ZERO
 var context_state: Dictionary = {}
+var run_panel_root: PanelContainer
 
 func _ready() -> void:
 	context_state = _default_context_state()
@@ -131,6 +137,7 @@ func _build_ui() -> void:
 	var run_panel := PanelContainer.new()
 	run_panel.add_theme_stylebox_override("panel", UISkin.content_panel_style())
 	content.add_child(run_panel)
+	run_panel_root = run_panel
 
 	var run_margin := MarginContainer.new()
 	run_margin.add_theme_constant_override("margin_left", 10)
@@ -176,10 +183,22 @@ func _build_ui() -> void:
 
 	_refresh_context()
 
+func _accent_panel_style(accent: Color, emphasized: bool = false) -> StyleBox:
+	var border_color := accent if emphasized else accent.lerp(UISkin.COLOR_BORDER_ALT, 0.45)
+	var background := UISkin.COLOR_PANEL_ALT.lightened(0.05 if emphasized else 0.02)
+	return UISkin.flat_style(
+		background,
+		border_color,
+		2 if emphasized else 1,
+		4 if emphasized else 3,
+		Vector4(12, 10, 12, 10)
+	)
+
 func _context_card(caption: String, accent: Color) -> Dictionary:
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	panel.add_theme_stylebox_override("panel", UISkin.content_panel_style())
+	panel.add_theme_stylebox_override("panel", _accent_panel_style(accent, true))
+	panel.set_meta("accent", accent)
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 10)
@@ -200,8 +219,12 @@ func _context_card(caption: String, accent: Color) -> Dictionary:
 
 	var value_label := Label.new()
 	value_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	UISkin.label(value_label, 12, Color(0.88, 0.92, 0.98))
+	value_label.custom_minimum_size.y = 32.0
+	UISkin.label(value_label, 13, Color.WHITE)
 	column.add_child(value_label)
+	context_panel_map[caption.to_lower()] = panel
+	context_value_map[caption.to_lower()] = value_label
+	context_accent_map[caption.to_lower()] = accent
 
 	return {
 		"panel": panel,
@@ -211,7 +234,8 @@ func _context_card(caption: String, accent: Color) -> Dictionary:
 func _add_metric_card(metric_id: String, caption: String, accent: Color) -> void:
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	panel.add_theme_stylebox_override("panel", UISkin.choice_panel_style())
+	panel.add_theme_stylebox_override("panel", _accent_panel_style(accent))
+	panel.set_meta("metric_id", metric_id)
 	metric_grid.add_child(panel)
 
 	var margin := MarginContainer.new()
@@ -233,10 +257,13 @@ func _add_metric_card(metric_id: String, caption: String, accent: Color) -> void
 
 	var value_label := Label.new()
 	value_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	UISkin.label(value_label, 14, Color.WHITE)
+	value_label.custom_minimum_size.y = 24.0
+	UISkin.label(value_label, 15, Color.WHITE)
 	column.add_child(value_label)
 
 	metric_value_labels[metric_id] = value_label
+	metric_panel_map[metric_id] = panel
+	metric_accent_map[metric_id] = accent
 
 func _on_run_state_changed(state: Dictionary) -> void:
 	if run_label == null:
@@ -273,6 +300,7 @@ func _on_run_state_changed(state: Dictionary) -> void:
 	(metric_value_labels.get("next") as Label).text = next_text
 	(metric_value_labels.get("effects") as Label).text = _locale_text("%d active", "%d 条激活", "%d 條啟動") % modifier_count
 
+	_refresh_metric_card_states(int(state.get("gold", 0)), int(state.get("cleared_encounters", 0)), modifier_count, reward_flat_bonus, reward_multiplier)
 	run_bonus_label.text = "%s %d  |  %s %d/%d  |  %s %d  |  %s %s" % [
 		_locale_text("Level", "等级", "等級"),
 		hero_level,
@@ -297,6 +325,23 @@ func _on_run_state_changed(state: Dictionary) -> void:
 		_locale_text("Current focus", "当前重心", "當前重心"),
 		_locale_text("Kill cleanly, scoop drops, and turn levels into safer boss checks.", "打干净、捡掉落，把等级优势转成更稳的 Boss 检定。", "打乾淨、撿掉落，把等級優勢轉成更穩的 Boss 檢定。")
 	]
+
+func _refresh_metric_card_states(gold_value: int, cleared_value: int, modifier_count: int, reward_flat_bonus: int, reward_multiplier: float) -> void:
+	for metric_id in metric_panel_map.keys():
+		var panel := metric_panel_map[metric_id] as PanelContainer
+		var accent := metric_accent_map.get(metric_id, UISkin.COLOR_ACCENT) as Color
+		var emphasized := false
+		match String(metric_id):
+			"gold":
+				emphasized = gold_value > 0
+			"cleared":
+				emphasized = cleared_value > 0
+			"next":
+				emphasized = true
+			"effects":
+				emphasized = modifier_count > 0 or reward_flat_bonus > 0 or reward_multiplier > 1.001
+		if panel != null:
+			panel.add_theme_stylebox_override("panel", _accent_panel_style(accent, emphasized))
 
 func _refresh_copy(_locale: String = "") -> void:
 	title_label.text = _locale_text("Town Boss Trial", "城镇王战试炼", "城鎮王戰試煉")
@@ -382,8 +427,16 @@ func _refresh_layout() -> void:
 		viewport_size = Vector2(get_window().size)
 	var compact: bool = viewport_size.x < 980.0 or viewport_size.y < 680.0
 	var very_compact: bool = viewport_size.x < 760.0 or viewport_size.y < 560.0
-	root_margin.offset_right = clampf(viewport_size.x * (0.46 if very_compact else 0.40), 430.0, 700.0)
-	root_margin.offset_bottom = clampf(viewport_size.y * (0.54 if very_compact else 0.46), 292.0, 460.0)
+	root_margin.offset_right = clampf(
+		viewport_size.x * (0.42 if very_compact else (0.35 if compact else 0.38)),
+		320.0 if very_compact else 360.0,
+		620.0
+	)
+	root_margin.offset_bottom = clampf(
+		viewport_size.y * (0.46 if very_compact else (0.41 if compact else 0.44)),
+		256.0,
+		420.0
+	)
 	panel_margin.add_theme_constant_override("margin_left", 10 if very_compact else (12 if compact else 14))
 	panel_margin.add_theme_constant_override("margin_top", 10 if very_compact else (12 if compact else 14))
 	panel_margin.add_theme_constant_override("margin_right", 10 if very_compact else (12 if compact else 14))
@@ -393,13 +446,17 @@ func _refresh_layout() -> void:
 	UISkin.label(title_label, 18 if very_compact else (21 if compact else 24), Color(0.98, 0.90, 0.66))
 	UISkin.label(subtitle_label, 12 if very_compact else (13 if compact else 15), Color(0.86, 0.88, 0.92))
 	UISkin.label(detail_label, 10 if very_compact else (11 if compact else 13), Color(0.70, 0.76, 0.84))
+	detail_label.max_lines_visible = 1 if very_compact else 2
 	for value_label in [objective_value_label, threat_value_label, hero_value_label, relic_value_label]:
 		if value_label != null:
-			UISkin.label(value_label, 10 if very_compact else 12, Color(0.88, 0.92, 0.98))
+			UISkin.label(value_label, 11 if very_compact else (12 if compact else 13), Color.WHITE)
 	for key in metric_value_labels.keys():
 		var metric_label := metric_value_labels[key] as Label
 		if metric_label != null:
-			UISkin.label(metric_label, 12 if very_compact else (13 if compact else 14), Color.WHITE)
+			UISkin.label(metric_label, 11 if very_compact else (13 if compact else 15), Color.WHITE)
 	UISkin.label(run_bonus_label, 10 if very_compact else 11, Color(0.90, 0.84, 0.68))
 	UISkin.label(run_route_label, 10 if very_compact else 11, Color(0.84, 0.90, 0.98))
 	UISkin.label(run_label, 10 if very_compact else 11, Color(0.72, 0.78, 0.88))
+	run_bonus_label.max_lines_visible = 2 if compact else 3
+	run_route_label.max_lines_visible = 2 if compact else 3
+	run_label.max_lines_visible = 2 if compact else 3

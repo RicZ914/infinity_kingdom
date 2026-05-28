@@ -2,6 +2,12 @@ extends CanvasLayer
 
 const RunEffects := preload("res://systems/run/run_effects.gd")
 const UISkin := preload("res://ui/ui_skin.gd")
+const SKILL_SLOT_ACCENTS := {
+	"attack": Color(0.98, 0.86, 0.58),
+	"skill1": Color(0.92, 0.74, 0.70),
+	"skill2": Color(0.76, 0.90, 1.0),
+	"skill3": Color(0.88, 0.80, 1.0)
+}
 
 const TAG_LABELS := {
 	"attack": {"en": "Attack", "zh_Hans": "普攻", "zh_Hant": "普攻"},
@@ -34,6 +40,9 @@ var defense_bar: TextureProgressBar
 var defense_label: Label
 var inspiration_bar: TextureProgressBar
 var inspiration_label: Label
+var vitals_panel_root: PanelContainer
+var status_panel_root: PanelContainer
+var skills_panel_root: PanelContainer
 var shield_label: Label
 var state_label: Label
 var level_label: Label
@@ -57,6 +66,8 @@ var layout_size_override: Vector2 = Vector2.ZERO
 var run_metric_grid: GridContainer
 var run_metric_labels: Dictionary = {}
 var run_panel_root: PanelContainer
+var current_accessory_id: String = "none"
+var current_run_state: Dictionary = {}
 var skill_icon_paths := {
 	"Knight": [
 		"res://assets/ui/skill/knight_charge_slash.png",
@@ -167,16 +178,16 @@ func _build_ui() -> void:
 	UISkin.label(title_label, 20, Color(0.98, 0.90, 0.66))
 	content.add_child(title_label)
 
-	var vitals_panel := PanelContainer.new()
-	vitals_panel.add_theme_stylebox_override("panel", UISkin.content_panel_style())
-	content.add_child(vitals_panel)
+	vitals_panel_root = PanelContainer.new()
+	vitals_panel_root.add_theme_stylebox_override("panel", _hud_panel_style(Color(0.98, 0.86, 0.58)))
+	content.add_child(vitals_panel_root)
 
 	var vitals_margin := MarginContainer.new()
 	vitals_margin.add_theme_constant_override("margin_left", 10)
 	vitals_margin.add_theme_constant_override("margin_top", 10)
 	vitals_margin.add_theme_constant_override("margin_right", 10)
 	vitals_margin.add_theme_constant_override("margin_bottom", 10)
-	vitals_panel.add_child(vitals_margin)
+	vitals_panel_root.add_child(vitals_margin)
 
 	var vitals_column := VBoxContainer.new()
 	vitals_column.add_theme_constant_override("separation", 6)
@@ -209,16 +220,16 @@ func _build_ui() -> void:
 	status_grid.add_child(level_label)
 	status_grid.add_child(xp_label)
 
-	var status_panel := PanelContainer.new()
-	status_panel.add_theme_stylebox_override("panel", UISkin.content_panel_style())
-	content.add_child(status_panel)
+	status_panel_root = PanelContainer.new()
+	status_panel_root.add_theme_stylebox_override("panel", _hud_panel_style(Color(0.84, 0.90, 0.98)))
+	content.add_child(status_panel_root)
 
 	var status_margin := MarginContainer.new()
 	status_margin.add_theme_constant_override("margin_left", 10)
 	status_margin.add_theme_constant_override("margin_top", 10)
 	status_margin.add_theme_constant_override("margin_right", 10)
 	status_margin.add_theme_constant_override("margin_bottom", 10)
-	status_panel.add_child(status_margin)
+	status_panel_root.add_child(status_margin)
 
 	var status_column := VBoxContainer.new()
 	status_column.add_theme_constant_override("separation", 6)
@@ -236,16 +247,16 @@ func _build_ui() -> void:
 	combat_feed_label.custom_minimum_size.y = 28.0
 	status_column.add_child(combat_feed_label)
 
-	var skills_panel := PanelContainer.new()
-	skills_panel.add_theme_stylebox_override("panel", UISkin.content_panel_style())
-	content.add_child(skills_panel)
+	skills_panel_root = PanelContainer.new()
+	skills_panel_root.add_theme_stylebox_override("panel", _hud_panel_style(Color(0.88, 0.80, 1.0)))
+	content.add_child(skills_panel_root)
 
 	var skills_margin := MarginContainer.new()
 	skills_margin.add_theme_constant_override("margin_left", 10)
 	skills_margin.add_theme_constant_override("margin_top", 10)
 	skills_margin.add_theme_constant_override("margin_right", 10)
 	skills_margin.add_theme_constant_override("margin_bottom", 10)
-	skills_panel.add_child(skills_margin)
+	skills_panel_root.add_child(skills_margin)
 
 	var skills_column := VBoxContainer.new()
 	skills_column.add_theme_constant_override("separation", 8)
@@ -351,6 +362,7 @@ func _build_ui() -> void:
 	run_state_label = _make_label(_locale_text("Gold 0 | Next Black Market", "金币 0 | 下一步 黑市", "金幣 0 | 下一步 黑市"), 12, Color(0.84, 0.90, 0.98))
 	run_state_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	run_column.add_child(run_state_label)
+	_refresh_section_emphasis()
 
 func _section_label(text_value: String) -> Label:
 	var label := Label.new()
@@ -420,7 +432,7 @@ func _skill_slot(key: String, hotkey: String, icon_path: String) -> Dictionary:
 	var root := PanelContainer.new()
 	root.custom_minimum_size = Vector2(84, 78)
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	root.add_theme_stylebox_override("panel", UISkin.choice_panel_style())
+	root.add_theme_stylebox_override("panel", _skill_slot_style(key, true))
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 8)
@@ -456,6 +468,65 @@ func _make_label(text: String, size: int, color: Color) -> Label:
 	UISkin.label(label, size, color)
 	return label
 
+func _hud_panel_style(accent: Color, emphasized: bool = false) -> StyleBox:
+	var border_color := accent if emphasized else accent.lerp(UISkin.COLOR_BORDER_ALT, 0.45)
+	var background := UISkin.COLOR_PANEL_ALT.lightened(0.05 if emphasized else 0.02)
+	return UISkin.flat_style(
+		background,
+		border_color,
+		2 if emphasized else 1,
+		4 if emphasized else 3,
+		Vector4(12, 10, 12, 10)
+	)
+
+func _skill_slot_style(slot_key: String, ready: bool) -> StyleBox:
+	var accent := SKILL_SLOT_ACCENTS.get(slot_key, UISkin.COLOR_ACCENT) as Color
+	var background := Color(0.14, 0.15, 0.18, 0.98)
+	if ready:
+		background = background.lightened(0.05)
+	return UISkin.flat_style(
+		background,
+		accent if ready else accent.lerp(UISkin.COLOR_BORDER_ALT, 0.55),
+		2 if ready else 1,
+		4 if ready else 3,
+		Vector4(10, 8, 10, 8)
+	)
+
+func _refresh_section_emphasis() -> void:
+	if vitals_panel_root != null and player_character != null and is_instance_valid(player_character):
+		var hp_ratio := 0.0 if player_character.max_hp <= 0.0 else clampf(float(player_character.hp) / float(player_character.max_hp), 0.0, 1.0)
+		var defense_ratio := 0.0 if player_character.max_defense <= 0.0 else clampf(float(player_character.defense) / float(player_character.max_defense), 0.0, 1.0)
+		var vitals_accent := Color(0.98, 0.86, 0.58)
+		var vitals_emphasis := false
+		if hp_ratio <= 0.30:
+			vitals_accent = Color(1.0, 0.72, 0.68)
+			vitals_emphasis = true
+		elif defense_ratio <= 0.22:
+			vitals_accent = Color(0.76, 0.90, 1.0)
+			vitals_emphasis = true
+		vitals_panel_root.add_theme_stylebox_override("panel", _hud_panel_style(vitals_accent, vitals_emphasis))
+	if status_panel_root != null:
+		status_panel_root.add_theme_stylebox_override("panel", _hud_panel_style(Color(0.90, 0.82, 1.0), not last_control_summary.is_empty()))
+	if skills_panel_root != null and player_character != null and is_instance_valid(player_character):
+		var inspiration_ratio := 0.0 if player_character.max_inspiration <= 0.0 else clampf(float(player_character.inspiration) / float(player_character.max_inspiration), 0.0, 1.0)
+		skills_panel_root.add_theme_stylebox_override("panel", _hud_panel_style(Color(0.88, 0.80, 1.0), inspiration_ratio >= 0.95))
+	if accessory_panel_root != null:
+		accessory_panel_root.add_theme_stylebox_override("panel", _hud_panel_style(Color(0.82, 0.92, 0.76), current_accessory_id != "none"))
+	if run_panel_root != null:
+		var run_emphasis := false
+		var run_accent := Color(0.84, 0.90, 0.98)
+		if not current_run_state.is_empty():
+			var reward_flat_bonus := int(current_run_state.get("reward_flat_bonus", 0))
+			var reward_multiplier := float(current_run_state.get("reward_multiplier", 1.0))
+			var pending_prep := current_run_state.get("pending_encounter_prep", {}) as Dictionary
+			if reward_flat_bonus > 0 or reward_multiplier > 1.001:
+				run_emphasis = true
+				run_accent = Color(0.98, 0.86, 0.58)
+			elif not pending_prep.is_empty():
+				run_emphasis = true
+				run_accent = Color(0.88, 0.80, 1.0)
+		run_panel_root.add_theme_stylebox_override("panel", _hud_panel_style(run_accent, run_emphasis))
+
 func _connect_character_signal(signal_name: String, callable: Callable) -> void:
 	if not player_character.has_signal(signal_name):
 		return
@@ -466,16 +537,19 @@ func _on_hp_changed(current_hp: float, max_hp_value: float) -> void:
 	hp_bar.value = 0.0 if max_hp_value <= 0.0 else clampf(current_hp / max_hp_value, 0.0, 1.0)
 	var hp_percent := 0 if max_hp_value <= 0.0 else int(round(clampf(current_hp / max_hp_value, 0.0, 1.0) * 100.0))
 	hp_label.text = "%s %d / %d  |  %d%%" % [_locale_text("HP", "生命", "生命"), int(round(current_hp)), int(round(max_hp_value)), hp_percent]
+	_refresh_section_emphasis()
 
 func _on_inspiration_changed(current_inspiration: float, max_inspiration_value: float) -> void:
 	inspiration_bar.value = 0.0 if max_inspiration_value <= 0.0 else clampf(current_inspiration / max_inspiration_value, 0.0, 1.0)
 	var inspiration_percent := 0 if max_inspiration_value <= 0.0 else int(round(clampf(current_inspiration / max_inspiration_value, 0.0, 1.0) * 100.0))
 	inspiration_label.text = "%s %d / %d  |  %d%%" % [_locale_text("Inspiration", "灵感", "靈感"), int(round(current_inspiration)), int(round(max_inspiration_value)), inspiration_percent]
+	_refresh_section_emphasis()
 
 func _on_defense_changed(current_defense: float, max_defense_value: float) -> void:
 	defense_bar.value = 0.0 if max_defense_value <= 0.0 else clampf(current_defense / max_defense_value, 0.0, 1.0)
 	var defense_percent := 0 if max_defense_value <= 0.0 else int(round(clampf(current_defense / max_defense_value, 0.0, 1.0) * 100.0))
 	defense_label.text = "%s %d / %d  |  %d%%" % [_locale_text("Defense", "护甲", "護甲"), int(round(current_defense)), int(round(max_defense_value)), defense_percent]
+	_refresh_section_emphasis()
 
 func _on_shield_changed(current_shield: float) -> void:
 	shield_label.text = "%s %d" % [_locale_text("Shield", "护盾", "護盾"), int(round(current_shield))]
@@ -500,12 +574,14 @@ func _on_control_status_changed(summary: String) -> void:
 		if not last_control_summary.is_empty():
 			_set_combat_feed(_locale_text("Steady again", "状态重新稳定", "狀態重新穩定"), Color(0.98, 0.90, 0.68), 1.05)
 		last_control_summary = ""
+		_refresh_section_emphasis()
 		return
 	control_label.text = "%s %s" % [_locale_text("Status", "状态", "狀態"), summary]
 	control_label.modulate = Color(1.0, 0.84, 0.64)
 	if summary != last_control_summary:
 		_set_combat_feed(summary, Color(0.90, 0.82, 1.0), 1.04)
 	last_control_summary = summary
+	_refresh_section_emphasis()
 
 func _on_attack_started(attack_name: StringName) -> void:
 	if attack_name == &"attack":
@@ -525,6 +601,7 @@ func _on_attack_hit(attack_name: StringName, target: Node) -> void:
 func _on_accessory_equipped(accessory: Dictionary) -> void:
 	if accessory_icon == null:
 		return
+	current_accessory_id = String(accessory.get("id", "none"))
 	accessory_icon.texture = load(String(accessory.get("icon", "res://assets/ui/icon/ui_unknown.png"))) as Texture2D
 	accessory_name_label.text = String(accessory.get("name", _locale_text("No Accessory", "无饰品", "無飾品")))
 	var tags_text := _localized_tag_list(accessory.get("tags", []))
@@ -542,10 +619,12 @@ func _on_accessory_equipped(accessory: Dictionary) -> void:
 	if summary_parts.is_empty():
 		summary_parts.append(_locale_text("Win encounters to claim relics.", "通过战斗获得饰品。", "通過戰鬥獲得飾品。"))
 	accessory_summary_label.text = "\n".join(summary_parts)
+	_refresh_section_emphasis()
 
 func _on_run_state_changed(state: Dictionary) -> void:
 	if run_state_label == null:
 		return
+	current_run_state = state.duplicate(true)
 	_refresh_run_state_label(state)
 
 func _refresh_run_state_label(state: Dictionary) -> void:
@@ -592,6 +671,7 @@ func _refresh_run_state_label(state: Dictionary) -> void:
 		level_label.text = "%s %d  |  %s %d" % [_locale_text("Level", "等级", "等級"), hero_level, _locale_text("Kills", "击杀", "擊殺"), total_kills]
 	if xp_label != null:
 		xp_label.text = "%s %d / %d" % [_locale_text("XP", "经验", "經驗"), hero_xp, hero_xp_to_next]
+	_refresh_section_emphasis()
 
 func _set_run_metric_value(metric_id: String, value: String) -> void:
 	if not run_metric_labels.has(metric_id):
@@ -645,14 +725,19 @@ func _update_skill_slots() -> void:
 		return
 	for key in skill_slots.keys():
 		var slot: Dictionary = skill_slots[key] as Dictionary
+		var root := slot.get("root") as PanelContainer
 		var label: Label = slot.get("label") as Label
 		var cooldown := float(player_character.cooldowns.get(key, 0.0))
 		if cooldown <= 0.05:
 			label.text = _skill_ready_text(String(slot.get("hotkey", "")))
 			label.modulate = Color(0.78, 1.0, 0.78)
+			if root != null:
+				root.add_theme_stylebox_override("panel", _skill_slot_style(String(slot.get("key", key)), true))
 		else:
 			label.text = "%s %.1f" % [String(slot.get("hotkey", "")), cooldown]
 			label.modulate = Color(1.0, 0.80, 0.62)
+			if root != null:
+				root.add_theme_stylebox_override("panel", _skill_slot_style(String(slot.get("key", key)), false))
 
 func _prep_run_text(current_scene: Node, pending_prep: Dictionary) -> String:
 	var active_prep: Dictionary = {}
@@ -828,9 +913,18 @@ func _refresh_layout() -> void:
 		viewport_size = Vector2(get_window().size)
 	var compact: bool = viewport_size.x < 980.0 or viewport_size.y < 720.0
 	var very_compact: bool = viewport_size.x < 780.0 or viewport_size.y < 620.0
-	var panel_width := clampf(viewport_size.x * (0.36 if very_compact else 0.30), 304.0, 500.0)
+	var panel_width := clampf(
+		viewport_size.x * (0.38 if very_compact else (0.28 if compact else 0.30)),
+		272.0 if very_compact else 292.0,
+		468.0
+	)
+	var panel_height := clampf(
+		viewport_size.y * (0.80 if very_compact else (0.70 if compact else 0.68)),
+		404.0 if very_compact else 468.0,
+		640.0
+	)
 	root_margin.offset_right = panel_width
-	root_margin.offset_top = -clampf(viewport_size.y * (1.0 if very_compact else 0.97), 540.0 if very_compact else 540.0, 760.0)
+	root_margin.offset_top = -panel_height
 	root_margin.offset_left = 10.0 if very_compact else 18.0
 	root_margin.offset_bottom = -10.0 if very_compact else -18.0
 	root_margin.add_theme_constant_override("margin_left", 8 if very_compact else 10)
@@ -849,15 +943,15 @@ func _refresh_layout() -> void:
 	accessory_grid.columns = 2 if panel_width >= 300.0 else 1
 	accessory_grid.add_theme_constant_override("h_separation", 8 if compact else 10)
 	accessory_grid.add_theme_constant_override("v_separation", 6 if compact else 8)
-	run_metric_grid.columns = 2
-	run_metric_grid.visible = not very_compact
+	run_metric_grid.columns = 1 if compact else 2
+	run_metric_grid.visible = not compact
 	if run_panel_root != null:
-		run_panel_root.visible = not very_compact
+		run_panel_root.visible = not compact
 	if accessory_panel_root != null:
 		accessory_panel_root.visible = not very_compact
 	accessory_summary_label.max_lines_visible = 1 if very_compact else 3
-	combat_feed_label.max_lines_visible = 2 if very_compact else 3
-	run_state_label.max_lines_visible = 2 if very_compact else 3
+	combat_feed_label.max_lines_visible = 1 if very_compact else 2
+	run_state_label.max_lines_visible = 2 if compact else 3
 	UISkin.label(title_label, 16 if very_compact else (18 if compact else 20), Color(0.98, 0.90, 0.66))
 	for header in [vitals_header_label, status_header_label, skills_header_label, accessory_header_label, run_header_label]:
 		UISkin.label(header, 11 if compact else 12, UISkin.COLOR_ACCENT)
@@ -874,7 +968,7 @@ func _refresh_layout() -> void:
 	UISkin.label(accessory_summary_label, 10 if compact else 12, Color(0.72, 0.78, 0.86))
 	UISkin.label(run_state_label, 10 if compact else 12, Color(0.84, 0.90, 0.98))
 	for bar in meter_bars:
-		bar.custom_minimum_size = Vector2(panel_width - (56.0 if very_compact else 78.0), 18.0 if compact else 22.0)
+		bar.custom_minimum_size = Vector2(panel_width - (64.0 if very_compact else 86.0), 18.0 if compact else 22.0)
 	var slot_width := 60.0 if very_compact else (72.0 if compact else 84.0)
 	var slot_height := 64.0 if very_compact else (72.0 if compact else 78.0)
 	for slot_data in skill_slots.values():
