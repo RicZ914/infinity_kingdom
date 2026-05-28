@@ -3,6 +3,7 @@ extends CanvasLayer
 signal event_choice_made(choice_id: String)
 
 const RunEffects := preload("res://systems/run/run_effects.gd")
+const UICardFx := preload("res://ui/ui_card_fx.gd")
 const UISkin := preload("res://ui/ui_skin.gd")
 const PANEL_MIN_SIZE := Vector2(340, 400)
 const PANEL_MAX_SIZE := Vector2(1080, 640)
@@ -160,6 +161,12 @@ func _choice_card(choice_id: String, title: String, summary: String, icon_path: 
 	button.add_theme_stylebox_override("disabled", UISkin.flat_style(Color(0.12, 0.13, 0.15, 0.72), Color(0.34, 0.36, 0.40, 0.8), 1, 4, Vector4(16, 14, 16, 14)))
 	button.set_meta("choice_id", choice_id)
 	choice_buttons.append(button)
+	var tilt_root := UICardFx.install(button, {
+		"active_scale": 1.024,
+		"rotation_max": 2.4,
+		"float_offset": Vector2(5.0, 3.0),
+		"sheen_alpha": 0.10
+	})
 
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -167,7 +174,7 @@ func _choice_card(choice_id: String, title: String, summary: String, icon_path: 
 	margin.offset_top = 16
 	margin.offset_right = -16
 	margin.offset_bottom = -16
-	button.add_child(margin)
+	tilt_root.add_child(margin)
 
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
@@ -219,8 +226,7 @@ func _choice_card(choice_id: String, title: String, summary: String, icon_path: 
 	box.add_child(cost_label)
 
 	UISkin.ignore_mouse_recursive(margin)
-	button.focus_entered.connect(func() -> void: _preview_choice(choice_id, title, summary, cost, button.disabled))
-	button.mouse_entered.connect(func() -> void: _preview_choice(choice_id, title, summary, cost, button.disabled))
+	UICardFx.bind(button, func() -> void: _preview_choice(choice_id, title, summary, cost, button.disabled))
 	button.pressed.connect(func() -> void:
 		close()
 		event_choice_made.emit(choice_id)

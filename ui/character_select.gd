@@ -5,6 +5,7 @@ signal audio_requested
 signal settings_requested
 signal quit_requested
 
+const UICardFx := preload("res://ui/ui_card_fx.gd")
 const UISkin := preload("res://ui/ui_skin.gd")
 
 const HEROES := [
@@ -456,8 +457,12 @@ func _hero_card(hero: Dictionary, hero_index: int) -> Button:
 	button.add_theme_stylebox_override("normal", UISkin.choice_panel_style())
 	button.add_theme_stylebox_override("hover", UISkin.flat_style(Color(0.22, 0.23, 0.27), UISkin.COLOR_ACCENT, 2, 3))
 	button.add_theme_stylebox_override("pressed", UISkin.flat_style(Color(0.14, 0.15, 0.18), UISkin.COLOR_ACCENT.darkened(0.2), 2, 3))
-	button.focus_entered.connect(func() -> void: _set_selected_hero(hero_index))
-	button.mouse_entered.connect(func() -> void: _set_selected_hero(hero_index))
+	var tilt_root := UICardFx.install(button, {
+		"active_scale": 1.026,
+		"rotation_max": 2.6,
+		"float_offset": Vector2(5.0, 4.0)
+	})
+	UICardFx.bind(button, func() -> void: _set_selected_hero(hero_index))
 	button.pressed.connect(func() -> void: _activate_hero(hero_index))
 
 	var margin := MarginContainer.new()
@@ -466,7 +471,7 @@ func _hero_card(hero: Dictionary, hero_index: int) -> Button:
 	margin.offset_top = 12
 	margin.offset_right = -12
 	margin.offset_bottom = -12
-	button.add_child(margin)
+	tilt_root.add_child(margin)
 
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 8)
@@ -517,8 +522,13 @@ func _overview_entry_card(entry: Dictionary, pressed_callback: Callable, preview
 	button.add_theme_stylebox_override("hover", UISkin.flat_style(Color(0.22, 0.23, 0.27), UISkin.COLOR_ACCENT, 2, 3))
 	button.add_theme_stylebox_override("pressed", UISkin.flat_style(Color(0.14, 0.15, 0.18), UISkin.COLOR_ACCENT.darkened(0.2), 2, 3))
 	button.set_meta("entry_id", String(entry.get("id", "")))
-	button.focus_entered.connect(preview_callback)
-	button.mouse_entered.connect(preview_callback)
+	var tilt_root := UICardFx.install(button, {
+		"active_scale": 1.022,
+		"rotation_max": 2.0,
+		"float_offset": Vector2(4.0, 3.0),
+		"sheen_alpha": 0.09
+	})
+	UICardFx.bind(button, preview_callback)
 	button.pressed.connect(pressed_callback)
 
 	var margin := MarginContainer.new()
@@ -528,7 +538,7 @@ func _overview_entry_card(entry: Dictionary, pressed_callback: Callable, preview
 	margin.offset_top = 10
 	margin.offset_right = -10
 	margin.offset_bottom = -10
-	button.add_child(margin)
+	tilt_root.add_child(margin)
 
 	var row := HBoxContainer.new()
 	row.name = "Row"
@@ -649,6 +659,20 @@ func _focus_current_overview_entry() -> void:
 	if not menu_overview_buttons.is_empty():
 		menu_overview_buttons[0].grab_focus()
 
+func _refresh_card_focus_states() -> void:
+	for hero_index in range(hero_buttons.size()):
+		UICardFx.pin(hero_buttons[hero_index], hero_index == selected_hero_index)
+	var active_entry_id := ""
+	match screen_mode:
+		"gallery":
+			active_entry_id = active_gallery_entry_id
+		"about":
+			active_entry_id = active_about_entry_id
+		_:
+			active_entry_id = "menu_hero_%s" % String(HEROES[selected_hero_index].get("id", ""))
+	for button in menu_overview_buttons:
+		UICardFx.pin(button, String(button.get_meta("entry_id", "")) == active_entry_id)
+
 func _set_selected_hero(hero_index: int) -> void:
 	detail_mode = "hero"
 	selected_hero_index = clampi(hero_index, 0, HEROES.size() - 1)
@@ -670,6 +694,7 @@ func _set_selected_hero(hero_index: int) -> void:
 		_localized_hero_field(hero, "signature"),
 		action_text if screen_mode == "select" else _localized_hero_field(hero, "route")
 	]
+	_refresh_card_focus_states()
 
 func _activate_selected_hero() -> void:
 	_activate_hero(selected_hero_index)
@@ -688,6 +713,7 @@ func _set_gallery_entry(entry_id: String) -> void:
 	entry_id = String(entry.get("id", "gallery_hero_knight"))
 	active_gallery_entry_id = entry_id
 	_apply_detail_entry(entry)
+	_refresh_card_focus_states()
 
 func _set_about_entry(entry_id: String) -> void:
 	detail_mode = "about"
@@ -698,6 +724,7 @@ func _set_about_entry(entry_id: String) -> void:
 	entry_id = String(entry.get("id", "about_overview"))
 	active_about_entry_id = entry_id
 	_apply_detail_entry(entry)
+	_refresh_card_focus_states()
 
 func _apply_detail_entry(entry: Dictionary) -> void:
 	if entry.is_empty():
@@ -985,6 +1012,7 @@ func _refresh_menu_overview_copy() -> void:
 				)
 				menu_overview_buttons.append(button)
 				menu_overview_grid.add_child(button)
+	_refresh_card_focus_states()
 
 func _menu_hero_entry(hero: Dictionary) -> Dictionary:
 	return {
