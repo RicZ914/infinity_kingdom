@@ -36,6 +36,14 @@ func _run() -> void:
 	await process_frame
 	await _capture_world(world, Vector2i(1280, 720), "relic_offer_zh_hans_1280x720.png")
 	await _capture_world(world, Vector2i(720, 540), "relic_offer_zh_hans_720x540.png")
+	if world.accessory_choice != null and world.accessory_choice.has_method("close"):
+		world.accessory_choice.close()
+	if world.run_event_panel != null and world.run_event_panel.has_method("open"):
+		world.run_event_panel.open("forge", 100)
+	await process_frame
+	await process_frame
+	await _capture_world(world, Vector2i(1280, 720), "forge_event_zh_hans_1280x720.png")
+	await _capture_world(world, Vector2i(720, 540), "forge_event_zh_hans_720x540.png")
 
 	world.queue_free()
 	await process_frame

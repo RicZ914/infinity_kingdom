@@ -96,6 +96,42 @@ const SCOUT_CHOICE_DATA := {
 	}
 }
 
+const FORGE_FILL_ORDER := [
+	"forge_edge",
+	"forge_focus",
+	"forge_guard",
+	"forge_flow",
+	"forge_seal"
+]
+
+const FORGE_CHOICE_DATA := {
+	"forge_edge": {
+		"title": "Tempered Edge",
+		"summary": "+8% attack damage, +3% crit chance, and 4% faster attacks.",
+		"icon": "res://assets/ui/trait/trait_damage.png"
+	},
+	"forge_focus": {
+		"title": "Spell Lattice",
+		"summary": "+8 max inspiration, lower skill costs, and 6% faster skill recovery.",
+		"icon": "res://assets/ui/trait/trait_echo.png"
+	},
+	"forge_guard": {
+		"title": "Bastion Plate",
+		"summary": "+10 max hp, +14 max defense, and restore armor.",
+		"icon": "res://assets/ui/icon/ui_shield.png"
+	},
+	"forge_flow": {
+		"title": "Quickstep Gears",
+		"summary": "+10% move speed, faster attacks, and more inspiration on hit.",
+		"icon": "res://assets/ui/icon/stat_speed_pixel.png"
+	},
+	"forge_seal": {
+		"title": "King's Seal",
+		"summary": "+8 max hp, +6 max inspiration, and +8% skill damage.",
+		"icon": "res://assets/ui/trait/trait_execute.png"
+	}
+}
+
 const CHOICE_LOCALIZATION := {
 	"zh_Hans": {
 		"shop_attack": {"title": "磨锋油", "card": "本局攻击伤害 +10%。", "result": "已涂抹磨锋油。"},
@@ -122,7 +158,12 @@ const CHOICE_LOCALIZATION := {
 		"attune_gambit": {"title": "末线神经", "card": "暴击率 +8%，技能伤害 +10%，但技能消耗更高。", "result": "已共鸣末线神经。"},
 		"scout_assault": {"title": "强袭路线", "card": "下一战：攻击伤害 +14%，暴击率 +6%，胜利后额外 +30 金币。", "result": "已准备强袭路线。"},
 		"scout_bulwark": {"title": "壁垒路线", "card": "下一战：护甲回满，获得 45 点护盾，移动速度 +10%。", "result": "已准备壁垒路线。"},
-		"scout_focus": {"title": "专注路线", "card": "下一战：灵感回满，技能冷却额外缩短 18%。", "result": "已准备专注路线。"}
+		"scout_focus": {"title": "专注路线", "card": "下一战：灵感回满，技能冷却额外缩短 18%。", "result": "已准备专注路线。"},
+		"forge_edge": {"title": "淬锋", "card": "攻击伤害 +8%，暴击率 +3%，攻击更快。", "result": "已完成淬锋。"},
+		"forge_focus": {"title": "术式晶格", "card": "最大灵感 +8，技能消耗降低，冷却额外缩短 6%。", "result": "已完成术式晶格。"},
+		"forge_guard": {"title": "壁垒甲片", "card": "最大生命 +10，最大护甲 +14，并恢复护甲。", "result": "已完成壁垒甲片。"},
+		"forge_flow": {"title": "迅步齿轮", "card": "移动速度 +10%，攻击更快，命中回灵更多。", "result": "已完成迅步齿轮。"},
+		"forge_seal": {"title": "王印", "card": "最大生命 +8，最大灵感 +6，技能伤害 +8%。", "result": "已完成王印锻造。"}
 	},
 	"zh_Hant": {
 		"shop_attack": {"title": "磨鋒油", "card": "本局攻擊傷害 +10%。", "result": "已塗抹磨鋒油。"},
@@ -149,7 +190,12 @@ const CHOICE_LOCALIZATION := {
 		"attune_gambit": {"title": "末線神經", "card": "暴擊率 +8%，技能傷害 +10%，但技能消耗更高。", "result": "已共鳴末線神經。"},
 		"scout_assault": {"title": "強襲路線", "card": "下一戰：攻擊傷害 +14%，暴擊率 +6%，勝利後額外 +30 金幣。", "result": "已準備強襲路線。"},
 		"scout_bulwark": {"title": "壁壘路線", "card": "下一戰：護甲回滿，獲得 45 點護盾，移動速度 +10%。", "result": "已準備壁壘路線。"},
-		"scout_focus": {"title": "專注路線", "card": "下一戰：靈感回滿，技能冷卻額外縮短 18%。", "result": "已準備專注路線。"}
+		"scout_focus": {"title": "專注路線", "card": "下一戰：靈感回滿，技能冷卻額外縮短 18%。", "result": "已準備專注路線。"},
+		"forge_edge": {"title": "淬鋒", "card": "攻擊傷害 +8%，暴擊率 +3%，攻擊更快。", "result": "已完成淬鋒。"},
+		"forge_focus": {"title": "術式晶格", "card": "最大靈感 +8，技能消耗降低，冷卻額外縮短 6%。", "result": "已完成術式晶格。"},
+		"forge_guard": {"title": "壁壘甲片", "card": "最大生命 +10，最大護甲 +14，並恢復護甲。", "result": "已完成壁壘甲片。"},
+		"forge_flow": {"title": "迅步齒輪", "card": "移動速度 +10%，攻擊更快，命中回靈更多。", "result": "已完成迅步齒輪。"},
+		"forge_seal": {"title": "王印", "card": "最大生命 +8，最大靈感 +6，技能傷害 +8%。", "result": "已完成王印鍛造。"}
 	}
 }
 
@@ -173,6 +219,11 @@ const CHOICE_TAGS := {
 	"train_speed": ["speed", "tempo"],
 	"train_cooldown": ["skill", "tempo", "resource"],
 	"train_resource": ["resource", "skill"],
+	"forge_edge": ["attack", "damage", "crit", "tempo"],
+	"forge_focus": ["skill", "resource", "tempo"],
+	"forge_guard": ["defense", "survival"],
+	"forge_flow": ["speed", "tempo", "resource"],
+	"forge_seal": ["power", "skill", "resource", "survival"],
 	"pact_power": ["power", "damage", "risk"],
 	"pact_guard": ["defense", "survival"],
 	"pact_focus": ["skill", "resource", "power"],
@@ -230,6 +281,34 @@ static func apply_choice(choice_id: String, actor: Node) -> void:
 			persistent_changed = true
 		"train_resource":
 			RunDirector.add_run_modifier("max_inspiration", 12.0)
+			persistent_changed = true
+		"forge_edge":
+			RunDirector.add_run_modifier("attack_damage", 0.0, 1.08)
+			RunDirector.add_run_modifier("crit_rate", 0.03)
+			RunDirector.add_run_modifier("attack_interval", 0.0, 0.96, 0.18)
+			persistent_changed = true
+		"forge_focus":
+			RunDirector.add_run_modifier("max_inspiration", 8.0)
+			for field in ["skill1_cooldown", "skill2_cooldown", "skill3_cooldown"]:
+				RunDirector.add_run_modifier(field, 0.0, 0.94, 0.0)
+			for field in ["skill1_cost", "skill2_cost", "skill3_cost"]:
+				RunDirector.add_run_modifier(field, 0.0, 0.94, 0.0)
+			persistent_changed = true
+		"forge_guard":
+			RunDirector.add_run_modifier("max_hp", 10.0)
+			RunDirector.add_run_modifier("max_defense", 14.0)
+			persistent_changed = true
+			restore_defense_after_refresh = true
+		"forge_flow":
+			RunDirector.add_run_modifier("move_speed", 0.0, 1.10)
+			RunDirector.add_run_modifier("attack_interval", 0.0, 0.95, 0.15)
+			RunDirector.add_run_modifier("inspiration_gain_on_attack_hit", 0.8)
+			persistent_changed = true
+		"forge_seal":
+			RunDirector.add_run_modifier("max_hp", 8.0)
+			RunDirector.add_run_modifier("max_inspiration", 6.0)
+			for field in ["skill1_damage", "skill2_damage", "skill3_damage"]:
+				RunDirector.add_run_modifier(field, 0.0, 1.08, 0.0)
 			persistent_changed = true
 		"pact_power":
 			RunDirector.add_run_modifier("attack_damage", 0.0, 1.18)
@@ -335,6 +414,16 @@ static func summary(choice_id: String) -> String:
 			return "Skill rhythm improved."
 		"train_resource":
 			return "Inspiration capacity expanded."
+		"forge_edge":
+			return "Tempered Edge is complete."
+		"forge_focus":
+			return "Spell Lattice is complete."
+		"forge_guard":
+			return "Bastion Plate is complete."
+		"forge_flow":
+			return "Quickstep Gears are complete."
+		"forge_seal":
+			return "King's Seal is complete."
 		"pact_power":
 			return "Blood Price accepted."
 		"pact_guard":
@@ -391,6 +480,16 @@ static func display_name(choice_id: String) -> String:
 			return "Rhythm"
 		"train_resource":
 			return "Focus Drill"
+		"forge_edge":
+			return "Tempered Edge"
+		"forge_focus":
+			return "Spell Lattice"
+		"forge_guard":
+			return "Bastion Plate"
+		"forge_flow":
+			return "Quickstep Gears"
+		"forge_seal":
+			return "King's Seal"
 		"pact_power":
 			return "Blood Price"
 		"pact_guard":
@@ -399,20 +498,18 @@ static func display_name(choice_id: String) -> String:
 			return "Astral Debt"
 		"skip":
 			return "Skip"
-	if ATTUNEMENT_CHOICE_DATA.has(choice_id):
-		return String((ATTUNEMENT_CHOICE_DATA.get(choice_id, {}) as Dictionary).get("title", choice_id))
-	if SCOUT_CHOICE_DATA.has(choice_id):
-		return String((SCOUT_CHOICE_DATA.get(choice_id, {}) as Dictionary).get("title", choice_id))
+	var choice_data := _choice_catalog_entry(choice_id)
+	if not choice_data.is_empty():
+		return String(choice_data.get("title", choice_id))
 	return choice_id.capitalize()
 
 static func card_summary(choice_id: String) -> String:
 	var localized := _localized_choice_value(choice_id, "card")
 	if not localized.is_empty():
 		return localized
-	if ATTUNEMENT_CHOICE_DATA.has(choice_id):
-		return String((ATTUNEMENT_CHOICE_DATA.get(choice_id, {}) as Dictionary).get("summary", ""))
-	if SCOUT_CHOICE_DATA.has(choice_id):
-		return String((SCOUT_CHOICE_DATA.get(choice_id, {}) as Dictionary).get("summary", ""))
+	var choice_data := _choice_catalog_entry(choice_id)
+	if not choice_data.is_empty():
+		return String(choice_data.get("summary", ""))
 	return ""
 
 static func attunement_choices() -> Array[Dictionary]:
@@ -432,27 +529,29 @@ static func attunement_choices() -> Array[Dictionary]:
 	for choice_id in categories:
 		if choices.size() >= 3:
 			break
-		var data: Dictionary = (ATTUNEMENT_CHOICE_DATA.get(choice_id, {}) as Dictionary).duplicate(true)
-		if data.is_empty():
-			continue
-		data["id"] = choice_id
-		data["cost"] = 0
-		data["title"] = display_name(choice_id)
-		data["summary"] = card_summary(choice_id)
-		choices.append(data)
+		_append_choice_from_catalog(choices, choice_id, ATTUNEMENT_CHOICE_DATA)
 	return choices
 
 static func scout_choices() -> Array[Dictionary]:
 	var choices: Array[Dictionary] = []
 	for choice_id in ["scout_assault", "scout_bulwark", "scout_focus"]:
-		var data: Dictionary = (SCOUT_CHOICE_DATA.get(choice_id, {}) as Dictionary).duplicate(true)
-		if data.is_empty():
-			continue
-		data["id"] = choice_id
-		data["cost"] = 0
-		data["title"] = display_name(choice_id)
-		data["summary"] = card_summary(choice_id)
-		choices.append(data)
+		_append_choice_from_catalog(choices, choice_id, SCOUT_CHOICE_DATA)
+	return choices
+
+static func forge_choices(actor: Node = null) -> Array[Dictionary]:
+	var choices: Array[Dictionary] = []
+	var remaining: Array = FORGE_FILL_ORDER.duplicate()
+	while choices.size() < 3 and not remaining.is_empty():
+		var best_index := 0
+		var best_score := -9999
+		for index in range(remaining.size()):
+			var choice_id := String(remaining[index])
+			var score := _forge_offer_score(choice_id, actor)
+			if score > best_score:
+				best_score = score
+				best_index = index
+		_append_choice_from_catalog(choices, String(remaining[best_index]), FORGE_CHOICE_DATA)
+		remaining.remove_at(best_index)
 	return choices
 
 static func choice_tags(choice_id: String) -> Array[String]:
@@ -564,6 +663,41 @@ static func evaluate_choice(choice_id: String, actor: Node = null) -> Dictionary
 			"An extra relic is strongest when your build identity is still thin.",
 			"当构筑方向还不够明确时，额外饰品最有价值。",
 			"當構築方向還不夠明確時，額外飾品最有價值。"
+		))
+	if choice_id == "forge_guard" and (hp_ratio <= 0.65 or defense_ratio <= 0.45):
+		score += 3
+		reasons.append(_localized_text(
+			"This shores up a fragile mid-run state before it snowballs against you.",
+			"这能在中盘失稳前把生存面补回来。",
+			"這能在中盤失穩前把生存面補回來。"
+		))
+	if choice_id == "forge_focus" and inspiration_ratio <= 0.55:
+		score += 2
+		reasons.append(_localized_text(
+			"Your build is tight on inspiration, so better spell economy pays immediately.",
+			"当前灵感周转偏紧，强化技能经济会立刻见效。",
+			"當前靈感周轉偏緊，強化技能經濟會立刻見效。"
+		))
+	if choice_id == "forge_edge" and hp_ratio >= 0.70:
+		score += 2
+		reasons.append(_localized_text(
+			"You have enough health to press the run harder with a sharper damage lane.",
+			"你当前血线足够健康，适合把伤害路线再往前推一档。",
+			"你當前血線足夠健康，適合把傷害路線再往前推一檔。"
+		))
+	if choice_id == "forge_flow" and (hero_name == "Ranger" or relic_matches.has("tempo")):
+		score += 2
+		reasons.append(_localized_text(
+			"This compounds tempo cleanly, especially on speed-leaning setups.",
+			"这会很顺地叠高节奏，尤其适合偏速度的构筑。",
+			"這會很順地疊高節奏，尤其適合偏速度的構築。"
+		))
+	if choice_id == "forge_seal" and (hero_name == "Mage" or (hp_ratio <= 0.75 and inspiration_ratio <= 0.70)):
+		score += 2
+		reasons.append(_localized_text(
+			"This is a balanced bridge when you need both body and casting headroom.",
+			"当你同时需要身板和施法空间时，这条线最均衡。",
+			"當你同時需要身板和施法空間時，這條線最均衡。"
 		))
 	if choice_id in ["bounty_tithe", "pact_power", "attune_gambit"] and hp_ratio <= 0.42:
 		score -= 3
@@ -780,3 +914,58 @@ static func _scout_prep_for_choice(choice_id: String) -> Dictionary:
 		return prep
 	prep["choice_id"] = choice_id
 	return prep
+
+static func _append_choice_from_catalog(choices: Array[Dictionary], choice_id: String, catalog: Dictionary) -> void:
+	var data: Dictionary = (catalog.get(choice_id, {}) as Dictionary).duplicate(true)
+	if data.is_empty():
+		return
+	data["id"] = choice_id
+	data["cost"] = 0
+	data["title"] = display_name(choice_id)
+	data["summary"] = card_summary(choice_id)
+	choices.append(data)
+
+static func _choice_catalog_entry(choice_id: String) -> Dictionary:
+	if ATTUNEMENT_CHOICE_DATA.has(choice_id):
+		return ATTUNEMENT_CHOICE_DATA.get(choice_id, {}) as Dictionary
+	if SCOUT_CHOICE_DATA.has(choice_id):
+		return SCOUT_CHOICE_DATA.get(choice_id, {}) as Dictionary
+	if FORGE_CHOICE_DATA.has(choice_id):
+		return FORGE_CHOICE_DATA.get(choice_id, {}) as Dictionary
+	return {}
+
+static func _forge_offer_score(choice_id: String, actor: Node = null) -> int:
+	var score := 0
+	var effect_tags := choice_tags(choice_id)
+	var relic_tags := AccessoryManager.get_equipped_tags()
+	for tag in effect_tags:
+		if relic_tags.has(tag):
+			score += 2
+	var hero_name := _hero_name(actor)
+	for tag in HERO_TAG_PROFILES.get(hero_name, []):
+		if effect_tags.has(String(tag)):
+			score += 1
+	var hp_ratio := _ratio(actor, "hp", "max_hp")
+	var defense_ratio := _ratio(actor, "defense", "max_defense")
+	var inspiration_ratio := _ratio(actor, "inspiration", "max_inspiration")
+	match choice_id:
+		"forge_guard":
+			if hp_ratio <= 0.65:
+				score += 3
+			if defense_ratio <= 0.50:
+				score += 2
+		"forge_focus":
+			if inspiration_ratio <= 0.55:
+				score += 3
+		"forge_edge":
+			if hp_ratio >= 0.70:
+				score += 2
+		"forge_flow":
+			if hero_name == "Ranger":
+				score += 2
+		"forge_seal":
+			if hero_name == "Mage":
+				score += 2
+			if hp_ratio <= 0.75 and inspiration_ratio <= 0.70:
+				score += 2
+	return score

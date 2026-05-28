@@ -240,6 +240,22 @@ func _run() -> void:
 		quit(1)
 		return
 	world.run_event_panel.close()
+	world.run_event_panel.open("forge", 100)
+	await process_frame
+	if not world.run_event_panel.visible:
+		push_error("Forge panel did not open")
+		quit(1)
+		return
+	var forge_choice_row := world.run_event_panel.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ChoiceScroll/ChoiceRow") as GridContainer
+	if forge_choice_row == null or forge_choice_row.get_child_count() < 4:
+		push_error("Forge panel did not build its choice cards")
+		quit(1)
+		return
+	if detail_label == null or detail_label.text.find("Fit") == -1:
+		push_error("Forge panel detail preview did not initialize build fit guidance")
+		quit(1)
+		return
+	world.run_event_panel.close()
 	world.run_event_panel.open("attunement", 100)
 	await process_frame
 	if not world.run_event_panel.visible:
@@ -416,6 +432,13 @@ func _run() -> void:
 		await process_frame
 		event_panel = world.run_event_panel.get_node("Backdrop/CenterContainer/PanelContainer") as PanelContainer
 		if not _assert_control_fits(event_panel, test_size, "Scout event panel"):
+			quit(1)
+			return
+		world.run_event_panel.close()
+		world.run_event_panel.open("forge", 100)
+		await process_frame
+		event_panel = world.run_event_panel.get_node("Backdrop/CenterContainer/PanelContainer") as PanelContainer
+		if not _assert_control_fits(event_panel, test_size, "Forge event panel"):
 			quit(1)
 			return
 		world.run_event_panel.close()

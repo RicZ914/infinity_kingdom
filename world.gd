@@ -690,6 +690,8 @@ func _event_status_hint(kind: String) -> String:
 			return _ui_text("Recovery is immediate. Heal if survival is shaky, or refill defense and inspiration if stable.", "恢复会立刻生效。生存吃紧就补血，稳定时就回护甲和灵感。", "恢復會立刻生效。生存吃緊就補血，穩定時就回護甲和靈感。")
 		"training":
 			return _ui_text("Training is permanent. Reinforce the lane your hero and relic already reward.", "训练是永久收益，优先强化角色与饰品已经在奖励的方向。", "訓練是永久收益，優先強化角色與飾品已經在獎勵的方向。")
+		"forge":
+			return _ui_text("Forge upgrades are mixed permanents. Use them to lock in a build or repair a real weakness.", "锻造是复合永久强化，适合把构筑定型，或把明显短板补平。", "鍛造是複合永久強化，適合把構築定型，或把明顯短板補平。")
 		"pact":
 			return _ui_text("Pacts are permanent tradeoffs. Take only the drawback your current hero can absorb.", "契约是永久交换，只拿当前角色扛得住的代价。", "契約是永久交換，只拿當前角色扛得住的代價。")
 		"attunement":

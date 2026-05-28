@@ -85,6 +85,12 @@ func _run() -> void:
 	run_effects.apply_choice("train_speed", actor)
 	run_effects.apply_choice("train_crit", actor)
 	run_effects.apply_choice("train_resource", actor)
+	run_effects.apply_choice("forge_edge", actor)
+	run_effects.apply_choice("forge_focus", actor)
+	if float(actor.skill1_cost) >= 10.0:
+		push_error("forge_focus did not reduce skill cost")
+		quit(1)
+		return
 	run_effects.apply_choice("rest_repair", actor)
 	run_effects.apply_choice("pact_power", actor)
 	run_effects.apply_choice("pact_focus", actor)
@@ -102,6 +108,10 @@ func _run() -> void:
 		return
 	if float(actor.max_inspiration) <= 40.0:
 		push_error("train_resource did not increase max inspiration")
+		quit(1)
+		return
+	if float(actor.attack_interval) >= 1.0:
+		push_error("forge_edge did not improve attack cadence")
 		quit(1)
 		return
 	if float(actor.max_hp) < base_hp - 4.0:
@@ -123,6 +133,18 @@ func _run() -> void:
 		attunement_ids[String((choice as Dictionary).get("id", ""))] = true
 	if not attunement_ids.has("attune_offense") or not attunement_ids.has("attune_gambit"):
 		push_error("Attunement choices did not reflect equipped relic tags")
+		quit(1)
+		return
+	var forge_choices: Array = run_effects.forge_choices(actor)
+	if forge_choices.size() != 3:
+		push_error("Forge choices did not produce three offers")
+		quit(1)
+		return
+	var forge_ids := {}
+	for choice in forge_choices:
+		forge_ids[String((choice as Dictionary).get("id", ""))] = true
+	if not forge_ids.has("forge_edge") and not forge_ids.has("forge_flow"):
+		push_error("Forge choices did not reflect the current offensive relic route")
 		quit(1)
 		return
 	var before_attunement_damage := float(actor.attack_damage)

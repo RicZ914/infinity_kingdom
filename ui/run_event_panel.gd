@@ -99,6 +99,12 @@ func _rebuild(kind: String, gold: int) -> void:
 			choice_row.add_child(_choice_card("train_cooldown", RunEffects.display_name("train_cooldown"), RunEffects.card_summary("train_cooldown"), "res://assets/ui/icon/stat_cooldown_pixel.png", 0, gold))
 			choice_row.add_child(_choice_card("train_resource", RunEffects.display_name("train_resource"), RunEffects.card_summary("train_resource"), "res://assets/ui/icon/stat_mana_pixel.png", 0, gold))
 			choice_row.add_child(_choice_card("skip", _locale_text("Leave the Yard", "离开训练场", "離開訓練場"), _locale_text("Skip training and keep the build unchanged.", "跳过训练，保持当前构筑。", "跳過訓練，保持當前構築。"), "res://assets/ui/icon/ui_back.png", 0, gold))
+		"forge":
+			title_label.text = UIText.text("event_forge_title")
+			subtitle_label.text = UIText.text("event_forge_subtitle")
+			for choice in RunEffects.forge_choices(_current_actor()):
+				choice_row.add_child(_choice_card_from_data(choice, gold))
+			choice_row.add_child(_choice_card("skip", _locale_text("Leave the Forge", "离开熔炉", "離開熔爐"), _locale_text("Keep the current build and move on.", "保持当前构筑不变，继续前进。", "保持當前構築不變，繼續前進。"), "res://assets/ui/icon/ui_back.png", 0, gold))
 		"pact":
 			title_label.text = UIText.text("event_pact_title")
 			subtitle_label.text = UIText.text("event_pact_subtitle")
@@ -174,7 +180,10 @@ func _choice_card(choice_id: String, title: String, summary: String, icon_path: 
 	box.add_child(badge_row)
 	badge_row.add_child(_badge(String(meta.get("type", "Choice")), meta.get("color", Color(0.82, 0.86, 0.96))))
 	var fit_data := RunEffects.evaluate_choice(choice_id, _current_actor())
-	badge_row.add_child(_badge(String(fit_data.get("label", meta.get("timing", "Now"))), fit_data.get("color", meta.get("timing_color", Color(0.92, 0.84, 0.66)))))
+	var fit_label := String(fit_data.get("label", meta.get("timing", "Now")))
+	if _current_locale() != "en":
+		fit_label = _localized_fit_label(fit_label)
+	badge_row.add_child(_badge(fit_label, fit_data.get("color", meta.get("timing_color", Color(0.92, 0.84, 0.66)))))
 
 	var slot := PanelContainer.new()
 	slot.custom_minimum_size = Vector2(88, 88)
@@ -285,6 +294,8 @@ func _rule_summary_for_kind(kind: String) -> String:
 			return _locale_text("Recovery is immediate and does not change your long-term route.", "恢复会立刻生效，不改变长期路线。", "恢復會立刻生效，不改變長期路線。")
 		"training":
 			return _locale_text("Training permanently boosts one lane for the rest of the run.", "训练会永久强化一条路线，持续到本局结束。", "訓練會永久強化一條路線，持續到本局結束。")
+		"forge":
+			return _locale_text("The forge offers hybrid permanent upgrades tuned to your current build.", "熔炉会给出更偏构筑成型的复合永久强化。", "熔爐會給出更偏構築成型的複合永久強化。")
 		"pact":
 			return _locale_text("Pacts are permanent. They raise power now and reshape future fights.", "契约是永久收益，也会永久改变后续战斗。", "契約是永久收益，也會永久改變後續戰鬥。")
 		"attunement":
@@ -304,6 +315,8 @@ func _default_detail_for_kind(kind: String) -> String:
 			return _locale_text("Take health if survival is shaky, or recover defense and inspiration if your build is already stable.", "生存压力大就补血，构筑稳定就回护甲和灵感。", "生存壓力大就補血，構築穩定就回護甲和靈感。")
 		"training":
 			return _locale_text("Training is permanent. Pick the lane your current relic and hero already reward.", "训练是永久收益，优先强化角色与饰品已经在奖励的方向。", "訓練是永久收益，優先強化角色與飾品已經在獎勵的方向。")
+		"forge":
+			return _locale_text("Forge options are mixed upgrades. Use them to round out a weakness or lock in a winning lane.", "熔炉给的是复合强化，既能补短板，也能把已经成型的路线彻底定住。", "熔爐給的是複合強化，既能補短板，也能把已經成型的路線徹底定住。")
 		"pact":
 			return _locale_text("Every pact is a commitment. Look for the tradeoff your current hero can absorb best.", "每个契约都是承诺，找你当前角色最扛得住的代价。", "每個契約都是承諾，找你當前角色最扛得住的代價。")
 		"attunement":
@@ -327,6 +340,8 @@ func _footer_text_for_kind(kind: String) -> String:
 			return UIText.text("event_footer_rest", {"lead": lead})
 		"training":
 			return UIText.text("event_footer_training", {"lead": lead})
+		"forge":
+			return UIText.text("event_footer_forge", {"lead": lead})
 		"pact":
 			return UIText.text("event_footer_pact", {"lead": lead})
 		"attunement":
@@ -398,6 +413,11 @@ func _choice_meta(choice_id: String, cost: int) -> Dictionary:
 		meta["timing"] = _locale_text("Permanent", "永久", "永久")
 		meta["detail"] = _locale_text("Adds a clean stat bonus for the rest of the run.", "会为本局剩余流程增加稳定属性收益。", "會為本局剩餘流程增加穩定屬性收益。")
 		meta["color"] = Color(0.78, 0.90, 1.0)
+	elif choice_id.begins_with("forge_"):
+		meta["type"] = _locale_text("Forge", "锻造", "鍛造")
+		meta["timing"] = _locale_text("Permanent", "永久", "永久")
+		meta["detail"] = _locale_text("A mixed permanent upgrade that sharpens an established build lane.", "这是更贴着构筑走向的复合永久强化。", "這是更貼著構築走向的複合永久強化。")
+		meta["color"] = Color(1.0, 0.78, 0.58)
 	elif choice_id.begins_with("pact_"):
 		meta["type"] = _locale_text("Pact", "契约", "契約")
 		meta["timing"] = _locale_text("Tradeoff", "代价", "代價")
