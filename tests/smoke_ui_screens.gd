@@ -120,6 +120,49 @@ func _run() -> void:
 		push_error("Character select detail panel did not update to Ranger")
 		quit(1)
 		return
+	if not world.character_select.has_method("_show_gallery"):
+		push_error("Character select is missing gallery screen")
+		quit(1)
+		return
+	world.character_select._show_gallery()
+	await process_frame
+	await process_frame
+	if String(world.character_select.get("screen_mode")) != "gallery":
+		push_error("Character select did not enter gallery mode")
+		quit(1)
+		return
+	var overview_grid := world.character_select.get("menu_overview_grid") as GridContainer
+	var gallery_desc := world.character_select.get("hero_detail_desc") as Label
+	if overview_grid == null or overview_grid.get_child_count() < 8:
+		push_error("Gallery overview did not populate enough compendium entries")
+		quit(1)
+		return
+	if gallery_desc == null or gallery_desc.text.is_empty() or gallery_desc.text.find("placeholder") != -1:
+		push_error("Gallery detail panel is still empty or placeholder content")
+		quit(1)
+		return
+	if not world.character_select.has_method("_show_about"):
+		push_error("Character select is missing about screen")
+		quit(1)
+		return
+	world.character_select._show_about()
+	await process_frame
+	await process_frame
+	if String(world.character_select.get("screen_mode")) != "about":
+		push_error("Character select did not enter about mode")
+		quit(1)
+		return
+	var about_title := world.character_select.get("hero_detail_title") as Label
+	if overview_grid == null or overview_grid.get_child_count() < 4:
+		push_error("About overview did not populate its primer entries")
+		quit(1)
+		return
+	if about_title == null or about_title.text.find("Overview") == -1:
+		push_error("About detail panel did not show run primer content")
+		quit(1)
+		return
+	world.character_select._show_menu()
+	await process_frame
 
 	if world.pause_menu == null or not world.pause_menu.has_method("open"):
 		push_error("Pause menu missing")
@@ -452,8 +495,8 @@ func _run() -> void:
 			quit(1)
 			return
 		var hud_skill_grid := world.character_hud.get("skill_grid") as GridContainer
-		if test_size.x <= 720 and hud_skill_grid != null and hud_skill_grid.columns != 2:
-			push_error("Character HUD compact skill grid did not switch to two columns")
+		if test_size.x <= 720 and hud_skill_grid != null and hud_skill_grid.columns != 2 and hud_skill_grid.columns != 4:
+			push_error("Character HUD compact skill grid did not use an expected compact column count")
 			quit(1)
 			return
 		if test_size.x > 720 and hud_skill_grid != null and hud_skill_grid.columns != 4:

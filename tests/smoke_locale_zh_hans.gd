@@ -40,36 +40,41 @@ func _run() -> void:
 		quit(1)
 		return
 
-	var cards_panel := world.character_select.get("cards_panel") as PanelContainer
-	if cards_panel == null or cards_panel.visible:
-		push_error("Title screen did not stay on the start menu in Simplified Chinese")
+	if world.character_select == null or not world.character_select.has_method("_show_gallery"):
+		push_error("Character select gallery API missing")
+		quit(1)
+		return
+	world.character_select._show_gallery()
+	await process_frame
+	var gallery_desc := world.character_select.get("hero_detail_desc") as Label
+	if gallery_desc == null or gallery_desc.text.is_empty():
+		push_error("Gallery detail did not initialize in Simplified Chinese")
+		quit(1)
+		return
+	if gallery_desc.text.find("Hero Dossier") != -1 or gallery_desc.text.find("Boss Intel") != -1:
+		push_error("Gallery detail still contains English-only headings in Simplified Chinese")
+		quit(1)
+		return
+
+	if world.character_select == null or not world.character_select.has_method("_show_about"):
+		push_error("Character select about API missing")
+		quit(1)
+		return
+	world.character_select._show_about()
+	await process_frame
+	var about_title := world.character_select.get("hero_detail_title") as Label
+	if about_title == null or about_title.text != "试炼概览":
+		push_error("About screen title did not localize to Simplified Chinese")
 		quit(1)
 		return
 
 	world._on_character_selected(&"knight")
 	await process_frame
-	var run_effects := load("res://systems/run/run_effects.gd")
-	var run_director := root.get_node_or_null("/root/RunDirector")
-	if run_effects == null:
-		push_error("RunEffects script did not load")
-		quit(1)
-		return
-	if run_director == null:
-		push_error("RunDirector autoload missing")
-		quit(1)
-		return
-	run_effects.apply_choice("scout_assault", world.player_character)
-	var pending_prep := run_director.call("peek_pending_encounter_prep") as Dictionary
-	if run_effects.prep_title(pending_prep) != "强袭路线":
-		push_error("Scout prep title did not localize to Simplified Chinese")
-		quit(1)
-		return
-
-	world.run_event_panel.open("scout", 100)
 	await process_frame
-	var detail_label := world.run_event_panel.get_node("Backdrop/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Detail") as Label
-	if detail_label == null or detail_label.text.is_empty() or detail_label.text.find("Scout routes") != -1:
-		push_error("Scout event detail text did not switch to Simplified Chinese")
+
+	var battle_objective := world.battle_status.get("objective_value_label") as Label
+	if battle_objective == null or battle_objective.text.find("选择") == -1:
+		push_error("Battle status objective did not localize to Simplified Chinese")
 		quit(1)
 		return
 

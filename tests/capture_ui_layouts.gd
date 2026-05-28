@@ -23,6 +23,16 @@ func _run() -> void:
 
 	await _capture_world(world, Vector2i(1280, 720), "title_menu_zh_hans_1280x720.png")
 	await _capture_world(world, Vector2i(720, 540), "title_menu_zh_hans_720x540.png")
+	if world.character_select != null and world.character_select.has_method("_show_gallery"):
+		world.character_select._show_gallery()
+	await process_frame
+	await process_frame
+	await _capture_world(world, Vector2i(1280, 720), "title_gallery_zh_hans_1280x720.png")
+	if world.character_select != null and world.character_select.has_method("_show_about"):
+		world.character_select._show_about()
+	await process_frame
+	await process_frame
+	await _capture_world(world, Vector2i(1280, 720), "title_about_zh_hans_1280x720.png")
 
 	if world.character_select != null and world.character_select.has_method("_show_hero_select"):
 		world.character_select._show_hero_select()
@@ -38,6 +48,10 @@ func _run() -> void:
 	await _capture_world(world, Vector2i(720, 540), "relic_offer_zh_hans_720x540.png")
 	if world.accessory_choice != null and world.accessory_choice.has_method("close"):
 		world.accessory_choice.close()
+	await process_frame
+	await process_frame
+	await _capture_world(world, Vector2i(1280, 720), "battle_ui_zh_hans_1280x720.png")
+	await _capture_world(world, Vector2i(720, 540), "battle_ui_zh_hans_720x540.png")
 	if world.run_event_panel != null and world.run_event_panel.has_method("open"):
 		world.run_event_panel.open("forge", 100)
 	await process_frame

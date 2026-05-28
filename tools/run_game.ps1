@@ -47,6 +47,8 @@ try {
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         & $Godot --headless --path . --script res://tests/smoke_run_flow.gd
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        & $Godot --headless --path . --script res://tests/smoke_locale_zh_hans.gd
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         & $Godot --headless --path . --script res://tests/smoke_ui_screens.gd
         exit $LASTEXITCODE
     }

@@ -8,6 +8,10 @@ const PANEL_MIN_SIZE := Vector2(360, 440)
 const PANEL_MAX_SIZE := Vector2(1160, 780)
 const CARD_MIN_WIDTH := 296.0
 const CARD_GAP := 14.0
+const CARD_FLOAT_OFFSET := Vector2(6.0, 4.0)
+const CARD_ROTATION_MAX := 2.8
+const CARD_ACTIVE_SCALE := 1.028
+const CARD_SHEEN_ALPHA := 0.12
 const TAG_TINTS := {
 	"attack": Color(0.96, 0.76, 0.62),
 	"crit": Color(0.96, 0.68, 0.80),
@@ -150,6 +154,31 @@ func _choice_card(accessory: Dictionary, choice_index: int) -> Button:
 	button.add_theme_stylebox_override("hover", UISkin.flat_style(Color(0.20, 0.22, 0.26, 0.98), UISkin.COLOR_ACCENT, 2, 4, Vector4(16, 14, 16, 14)))
 	button.add_theme_stylebox_override("pressed", UISkin.flat_style(Color(0.12, 0.13, 0.16, 1.0), UISkin.COLOR_ACCENT.darkened(0.18), 2, 4, Vector4(16, 14, 16, 14)))
 	button.set_meta("accessory_id", String(accessory.get("id", "")))
+	button.resized.connect(func() -> void: _sync_card_fx(button))
+
+	var tilt_root := Control.new()
+	tilt_root.name = "TiltRoot"
+	tilt_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	tilt_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	button.add_child(tilt_root)
+
+	var glow := ColorRect.new()
+	glow.name = "Glow"
+	glow.set_anchors_preset(Control.PRESET_FULL_RECT)
+	glow.color = Color(0.96, 0.88, 0.68, 0.0)
+	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tilt_root.add_child(glow)
+
+	var sheen := ColorRect.new()
+	sheen.name = "Sheen"
+	sheen.color = Color(1.0, 1.0, 1.0, 0.0)
+	sheen.rotation_degrees = -16.0
+	sheen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tilt_root.add_child(sheen)
+
+	button.set_meta("tilt_root", tilt_root)
+	button.set_meta("tilt_glow", glow)
+	button.set_meta("tilt_sheen", sheen)
 
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -157,7 +186,7 @@ func _choice_card(accessory: Dictionary, choice_index: int) -> Button:
 	margin.offset_top = 16
 	margin.offset_right = -16
 	margin.offset_bottom = -16
-	button.add_child(margin)
+	tilt_root.add_child(margin)
 
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
@@ -235,14 +264,36 @@ func _choice_card(accessory: Dictionary, choice_index: int) -> Button:
 	for tag in accessory.get("tags", []):
 		tag_flow.add_child(_tag_chip(String(tag)))
 	UISkin.ignore_mouse_recursive(margin)
-	button.focus_entered.connect(func() -> void: _preview_accessory(choice_index))
-	button.mouse_entered.connect(func() -> void: _preview_accessory(choice_index))
+	button.focus_entered.connect(func() -> void:
+		_preview_accessory(choice_index)
+		_set_card_active(button, true)
+		_update_card_tilt(button, button.size * 0.5)
+	)
+	button.mouse_entered.connect(func() -> void:
+		_preview_accessory(choice_index)
+		_set_card_active(button, true)
+	)
+	button.focus_exited.connect(func() -> void:
+		if not button.is_hovered():
+			_set_card_active(button, false)
+			_reset_card_tilt(button)
+	)
+	button.mouse_exited.connect(func() -> void:
+		if not button.has_focus():
+			_set_card_active(button, false)
+			_reset_card_tilt(button)
+	)
+	button.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseMotion:
+			_update_card_tilt(button, (event as InputEventMouseMotion).position)
+	)
 	button.pressed.connect(func() -> void:
 		var accessory_id := String(accessory.get("id", ""))
 		AccessoryManager.equip(accessory_id, active_actor)
 		close()
 		accessory_choice_made.emit(accessory_id, false)
 	)
+	_sync_card_fx(button)
 	return button
 
 func _on_keep_pressed() -> void:
@@ -369,6 +420,66 @@ func _tag_chip(tag: String) -> PanelContainer:
 	panel_value.add_child(label_value)
 	return panel_value
 
+func _sync_card_fx(button: Button) -> void:
+	if button == null or not button.has_meta("tilt_root"):
+		return
+	var tilt_root := button.get_meta("tilt_root") as Control
+	var sheen := button.get_meta("tilt_sheen") as ColorRect
+	if tilt_root != null:
+		tilt_root.pivot_offset = button.size * 0.5
+	if sheen != null:
+		sheen.position = Vector2(button.size.x * 0.16, -28.0)
+		sheen.size = Vector2(74.0, button.size.y + 56.0)
+
+func _set_card_active(button: Button, active: bool) -> void:
+	if button == null or not button.has_meta("tilt_root"):
+		return
+	var tilt_root := button.get_meta("tilt_root") as Control
+	var glow := button.get_meta("tilt_glow") as ColorRect
+	var tween: Tween = null
+	if button.has_meta("tilt_tween"):
+		tween = button.get_meta("tilt_tween") as Tween
+	if tween != null:
+		tween.kill()
+	tween = create_tween()
+	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	if tilt_root != null:
+		tween.tween_property(tilt_root, "scale", Vector2.ONE * (CARD_ACTIVE_SCALE if active else 1.0), 0.14)
+	if glow != null:
+		tween.parallel().tween_property(glow, "color", Color(0.96, 0.88, 0.68, 0.05 if active else 0.0), 0.14)
+	button.set_meta("tilt_tween", tween)
+
+func _update_card_tilt(button: Button, local_position: Vector2) -> void:
+	if button == null or not button.is_hovered() and not button.has_focus():
+		return
+	if not button.has_meta("tilt_root"):
+		return
+	var tilt_root := button.get_meta("tilt_root") as Control
+	var sheen := button.get_meta("tilt_sheen") as ColorRect
+	if tilt_root == null or button.size.x <= 0.0 or button.size.y <= 0.0:
+		return
+	var x_ratio := clampf(local_position.x / button.size.x, 0.0, 1.0) * 2.0 - 1.0
+	var y_ratio := clampf(local_position.y / button.size.y, 0.0, 1.0) * 2.0 - 1.0
+	tilt_root.rotation_degrees = x_ratio * CARD_ROTATION_MAX
+	tilt_root.position = Vector2(x_ratio * CARD_FLOAT_OFFSET.x, y_ratio * CARD_FLOAT_OFFSET.y)
+	if sheen != null:
+		sheen.color = Color(1.0, 1.0, 1.0, CARD_SHEEN_ALPHA)
+		sheen.position = Vector2(button.size.x * 0.16 + x_ratio * 22.0, -28.0 + y_ratio * 10.0)
+
+func _reset_card_tilt(button: Button) -> void:
+	if button == null or not button.has_meta("tilt_root"):
+		return
+	var tilt_root := button.get_meta("tilt_root") as Control
+	var sheen := button.get_meta("tilt_sheen") as ColorRect
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	if tilt_root != null:
+		tween.tween_property(tilt_root, "rotation_degrees", 0.0, 0.16)
+		tween.parallel().tween_property(tilt_root, "position", Vector2.ZERO, 0.16)
+	if sheen != null:
+		tween.parallel().tween_property(sheen, "color", Color(1.0, 1.0, 1.0, 0.0), 0.16)
+		tween.parallel().tween_property(sheen, "position", Vector2(button.size.x * 0.16, -28.0), 0.16)
+
 func _queue_layout_refresh() -> void:
 	call_deferred("_refresh_layout")
 
@@ -425,3 +536,4 @@ func _refresh_layout() -> void:
 		if child is Button:
 			var card := child as Button
 			card.custom_minimum_size = Vector2(card_width, card_height)
+			_sync_card_fx(card)
