@@ -1,6 +1,7 @@
 class_name UICardFx
 extends RefCounted
 
+const UISkin := preload("res://ui/ui_skin.gd")
 const DEFAULT_FLOAT_OFFSET := Vector2(6.0, 4.0)
 const DEFAULT_ROTATION_MAX := 2.8
 const DEFAULT_ACTIVE_SCALE := 1.028
@@ -13,6 +14,10 @@ const DEFAULT_SHEEN_PADDING_Y := 28.0
 const DEFAULT_SHEEN_SHIFT_X := 22.0
 const DEFAULT_SHEEN_SHIFT_Y := 10.0
 const DEFAULT_SHEEN_ROTATION := -16.0
+const DEFAULT_TEXT_COLOR := Color(0.92, 0.88, 0.64, 1.0)
+const DEFAULT_TEXT_ACTIVE_COLOR := Color(1.0, 1.0, 1.0, 1.0)
+const DEFAULT_TEXT_DISABLED_COLOR := Color(0.58, 0.60, 0.66, 0.92)
+const DEFAULT_TEXT_PRESSED_COLOR := Color(0.92, 0.88, 0.64, 0.92)
 
 static func install(button: Button, options: Dictionary = {}) -> Control:
 	if button == null:
@@ -49,6 +54,70 @@ static func install(button: Button, options: Dictionary = {}) -> Control:
 	button.resized.connect(func() -> void: sync(button))
 	sync(button)
 	return tilt_root
+
+static func install_text_button(button: Button, options: Dictionary = {}) -> Label:
+	if button == null:
+		return null
+	var tilt_root := install(button, options)
+	if button.has_meta("card_fx_button_label"):
+		sync_text_button_state(button)
+		return button.get_meta("card_fx_button_label") as Label
+	var margin := MarginContainer.new()
+	margin.name = "ButtonMargin"
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var text_margins := options.get("text_margins", Vector4(14, 8, 14, 8)) as Vector4
+	margin.offset_left = text_margins.x
+	margin.offset_top = text_margins.y
+	margin.offset_right = -text_margins.z
+	margin.offset_bottom = -text_margins.w
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tilt_root.add_child(margin)
+
+	var label := Label.new()
+	label.name = "ButtonLabel"
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	margin.add_child(label)
+
+	button.set_meta("card_fx_button_text_config", {
+		"font_size": int(options.get("font_size", 14)),
+		"text_color": options.get("text_color", DEFAULT_TEXT_COLOR),
+		"active_text_color": options.get("active_text_color", DEFAULT_TEXT_ACTIVE_COLOR),
+		"disabled_text_color": options.get("disabled_text_color", DEFAULT_TEXT_DISABLED_COLOR),
+		"pressed_text_color": options.get("pressed_text_color", DEFAULT_TEXT_PRESSED_COLOR)
+	})
+	button.set_meta("card_fx_button_label", label)
+	_hide_builtin_button_text(button)
+	sync_text_button_state(button)
+	return label
+
+static func set_button_text(button: Button, text: String) -> void:
+	if button == null:
+		return
+	button.text = text
+	sync_text_button_state(button)
+
+static func sync_text_button_state(button: Button) -> void:
+	if button == null or not button.has_meta("card_fx_button_label"):
+		return
+	var label := button.get_meta("card_fx_button_label") as Label
+	if label == null:
+		return
+	var text_config := button.get_meta("card_fx_button_text_config", {}) as Dictionary
+	var color: Color = text_config.get("text_color", DEFAULT_TEXT_COLOR) as Color
+	if button.disabled:
+		color = text_config.get("disabled_text_color", DEFAULT_TEXT_DISABLED_COLOR) as Color
+	elif button.is_pressed():
+		color = text_config.get("pressed_text_color", DEFAULT_TEXT_PRESSED_COLOR) as Color
+	elif is_pinned(button) or (button.toggle_mode and button.button_pressed) or button.has_focus() or button.is_hovered():
+		color = text_config.get("active_text_color", DEFAULT_TEXT_ACTIVE_COLOR) as Color
+	label.text = button.text
+	UISkin.label(label, int(text_config.get("font_size", 14)), color)
+	label.modulate = Color(1.0, 1.0, 1.0, 0.8 if button.disabled else 1.0)
 
 static func bind(button: Button, preview_callback: Callable = Callable()) -> void:
 	if button == null or button.has_meta("card_fx_bound"):
@@ -122,6 +191,7 @@ static func set_active(button: Button, active: bool) -> void:
 			0.14
 		)
 	button.set_meta("card_fx_tween", tween)
+	sync_text_button_state(button)
 
 static func update_tilt(button: Button, local_position: Vector2) -> void:
 	if button == null or (not button.is_hovered() and not button.has_focus()):
@@ -179,6 +249,7 @@ static func pin(button: Button, pinned: bool) -> void:
 	if not button.is_hovered() and not button.has_focus():
 		set_active(button, false)
 		reset_tilt(button)
+	sync_text_button_state(button)
 
 static func is_pinned(button: Button) -> bool:
 	if button == null:
@@ -210,3 +281,11 @@ static func _invoke(callback: Callable) -> void:
 
 static func _with_alpha(color: Color, alpha: float) -> Color:
 	return Color(color.r, color.g, color.b, alpha)
+
+static func _hide_builtin_button_text(button: Button) -> void:
+	var transparent := Color(1.0, 1.0, 1.0, 0.0)
+	button.add_theme_color_override("font_color", transparent)
+	button.add_theme_color_override("font_hover_color", transparent)
+	button.add_theme_color_override("font_pressed_color", transparent)
+	button.add_theme_color_override("font_hover_pressed_color", transparent)
+	button.add_theme_color_override("font_disabled_color", transparent)

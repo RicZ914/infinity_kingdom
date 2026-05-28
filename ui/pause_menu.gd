@@ -7,6 +7,7 @@ signal restart_requested
 signal quit_requested
 
 const RunEffects := preload("res://systems/run/run_effects.gd")
+const UICardFx := preload("res://ui/ui_card_fx.gd")
 const UISkin := preload("res://ui/ui_skin.gd")
 const PANEL_MIN_SIZE := Vector2(340, 360)
 const PANEL_MAX_SIZE := Vector2(460, 590)
@@ -29,6 +30,7 @@ const PANEL_MAX_SIZE := Vector2(460, 590)
 var target_world: Node = null
 var layout_size_override: Vector2 = Vector2.ZERO
 var confirm_action: StringName = &""
+var menu_buttons: Array[Button] = []
 
 func _ready() -> void:
 	layer = 30
@@ -48,24 +50,33 @@ func _ready() -> void:
 	UISkin.label(encounter_summary_label, 12, Color(0.78, 0.84, 0.92))
 	UISkin.label(relic_summary_label, 11, Color(0.88, 0.84, 0.66))
 	UISkin.label(hint_label, 11, Color(0.74, 0.80, 0.88))
-	for button in [resume_button, audio_button, settings_button, restart_button, quit_button]:
+	menu_buttons = [resume_button, audio_button, settings_button, restart_button, quit_button]
+	for button in menu_buttons:
 		UISkin.button_styles(button, "large")
+		UICardFx.install_text_button(button, {
+			"font_size": 15,
+			"active_scale": 1.022,
+			"rotation_max": 1.8,
+			"float_offset": Vector2(4.0, 2.5),
+			"sheen_alpha": 0.08
+		})
 	resume_button.pressed.connect(_on_resume_pressed)
 	audio_button.pressed.connect(_on_audio_pressed)
 	settings_button.pressed.connect(_on_settings_pressed)
 	restart_button.pressed.connect(_on_restart_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
-	resume_button.focus_entered.connect(func() -> void: _on_button_focus(&"resume"))
-	audio_button.focus_entered.connect(func() -> void: _on_button_focus(&"audio"))
-	settings_button.focus_entered.connect(func() -> void: _on_button_focus(&"settings"))
-	restart_button.focus_entered.connect(func() -> void: _on_button_focus(&"restart"))
-	quit_button.focus_entered.connect(func() -> void: _on_button_focus(&"quit"))
+	UICardFx.bind(resume_button, func() -> void: _on_button_focus(&"resume"))
+	UICardFx.bind(audio_button, func() -> void: _on_button_focus(&"audio"))
+	UICardFx.bind(settings_button, func() -> void: _on_button_focus(&"settings"))
+	UICardFx.bind(restart_button, func() -> void: _on_button_focus(&"restart"))
+	UICardFx.bind(quit_button, func() -> void: _on_button_focus(&"quit"))
 	if get_viewport() != null and not get_viewport().size_changed.is_connected(_queue_layout_refresh):
 		get_viewport().size_changed.connect(_queue_layout_refresh)
 	_queue_layout_refresh()
 	_refresh_context()
 	_refresh_subtitle()
 	_refresh_button_labels()
+	_refresh_button_fx_states()
 
 func bind_world(world: Node) -> void:
 	target_world = world
@@ -81,6 +92,7 @@ func open() -> void:
 	_refresh_context()
 	_refresh_subtitle()
 	_refresh_button_labels()
+	_refresh_button_fx_states()
 	resume_button.grab_focus()
 
 func close() -> void:
@@ -101,6 +113,7 @@ func resume_from_submenu() -> void:
 	_refresh_context()
 	_refresh_subtitle()
 	_refresh_button_labels()
+	_refresh_button_fx_states()
 	resume_button.grab_focus()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -147,6 +160,7 @@ func _on_restart_pressed() -> void:
 	confirm_action = &"restart"
 	_refresh_button_labels()
 	_refresh_subtitle()
+	_refresh_button_fx_states()
 	restart_button.grab_focus()
 
 func _on_quit_pressed() -> void:
@@ -157,6 +171,7 @@ func _on_quit_pressed() -> void:
 	confirm_action = &"quit"
 	_refresh_button_labels()
 	_refresh_subtitle()
+	_refresh_button_fx_states()
 	quit_button.grab_focus()
 
 func _on_button_focus(button_key: StringName) -> void:
@@ -172,13 +187,23 @@ func _clear_confirm_state() -> void:
 	confirm_action = &""
 	_refresh_button_labels()
 	_refresh_subtitle()
+	_refresh_button_fx_states()
 
 func _refresh_button_labels() -> void:
-	resume_button.text = UIText.text("battle_resume")
-	audio_button.text = UIText.text("audio_mix")
-	settings_button.text = UIText.text("menu_settings")
-	restart_button.text = UIText.text("pause_restart_confirm_button") if confirm_action == &"restart" else UIText.text("pause_restart_button")
-	quit_button.text = UIText.text("pause_quit_confirm_button") if confirm_action == &"quit" else UIText.text("pause_quit_button")
+	UICardFx.set_button_text(resume_button, UIText.text("battle_resume"))
+	UICardFx.set_button_text(audio_button, UIText.text("audio_mix"))
+	UICardFx.set_button_text(settings_button, UIText.text("menu_settings"))
+	UICardFx.set_button_text(restart_button, UIText.text("pause_restart_confirm_button") if confirm_action == &"restart" else UIText.text("pause_restart_button"))
+	UICardFx.set_button_text(quit_button, UIText.text("pause_quit_confirm_button") if confirm_action == &"quit" else UIText.text("pause_quit_button"))
+
+func _refresh_button_fx_states() -> void:
+	UICardFx.pin(resume_button, false)
+	UICardFx.pin(audio_button, false)
+	UICardFx.pin(settings_button, false)
+	UICardFx.pin(restart_button, confirm_action == &"restart")
+	UICardFx.pin(quit_button, confirm_action == &"quit")
+	for button in menu_buttons:
+		UICardFx.sync_text_button_state(button)
 
 func _refresh_subtitle() -> void:
 	if confirm_action == &"restart":
@@ -320,5 +345,6 @@ func _refresh_layout() -> void:
 	UISkin.label(encounter_summary_label, 11 if compact else 12, Color(0.78, 0.84, 0.92))
 	UISkin.label(relic_summary_label, 10 if compact else 11, Color(0.88, 0.84, 0.66))
 	UISkin.label(hint_label, 10 if compact else 11, Color(0.74, 0.80, 0.88))
-	for button in [resume_button, audio_button, settings_button, restart_button, quit_button]:
+	for button in menu_buttons:
 		button.custom_minimum_size.y = 48.0 if compact else 58.0
+		UICardFx.sync_text_button_state(button)

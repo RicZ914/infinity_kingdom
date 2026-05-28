@@ -7,6 +7,7 @@ const BUS_AMBIENCE := "Ambience"
 const BUS_SFX := "SFX"
 const BUS_UI := "UI"
 const MASTER_LABEL := "Master"
+const UICardFx := preload("res://ui/ui_card_fx.gd")
 const UISkin := preload("res://ui/ui_skin.gd")
 const PANEL_MIN_WIDTH := 380.0
 const PANEL_MAX_WIDTH := 620.0
@@ -61,6 +62,7 @@ var bus_buttons_row_map: Dictionary = {}
 var suppress_slider_events: bool = false
 var hint_tween: Tween = null
 var layout_size_override: Vector2 = Vector2.ZERO
+var action_buttons: Array[Button] = []
 
 func _ready() -> void:
 	_apply_skin()
@@ -82,6 +84,10 @@ func _apply_skin() -> void:
 	UISkin.button_styles(master_mute_button, "thin")
 	UISkin.button_styles(reset_button, "thin")
 	UISkin.button_styles(close_button, "thin")
+	action_buttons = [master_mute_button, reset_button, close_button]
+	_apply_text_button_fx(master_mute_button, "Toggle the full mix at the Master bus.")
+	_apply_text_button_fx(reset_button, "Restore the chapter mix defaults for every lane.")
+	_apply_text_button_fx(close_button, "Close the mix panel and return to the current screen.")
 	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	subtitle_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -116,7 +122,7 @@ func set_panel_visible(is_visible: bool) -> void:
 func refresh_values() -> void:
 	suppress_slider_events = true
 	master_mute_button.button_pressed = Music.is_master_muted()
-	master_mute_button.text = "Master Muted" if Music.is_master_muted() else "Master Mute"
+	UICardFx.set_button_text(master_mute_button, "Master Muted" if Music.is_master_muted() else "Master Mute")
 	master_slider.value = _db_to_slider(Music.get_master_display_volume())
 	_update_master_visuals()
 	for bus_name in BUS_ORDER:
@@ -127,6 +133,7 @@ func refresh_values() -> void:
 		slider.value = slider_value
 		_update_row_visuals(bus_name)
 	suppress_slider_events = false
+	_refresh_button_fx_states()
 
 func _build_rows() -> void:
 	for bus_name in BUS_ORDER:
@@ -196,6 +203,13 @@ func _build_rows() -> void:
 		mute_button.toggle_mode = true
 		mute_button.toggled.connect(_on_mute_toggled.bind(bus_name))
 		UISkin.button_styles(mute_button, "thin")
+		_apply_text_button_fx(mute_button, "Toggle the %s lane on or off." % String(BUS_LABELS[bus_name]), {
+			"font_size": 12,
+			"active_scale": 1.016,
+			"rotation_max": 1.0,
+			"float_offset": Vector2(2.0, 1.2),
+			"sheen_alpha": 0.04
+		})
 		buttons_row.add_child(mute_button)
 
 		var preview_button := Button.new()
@@ -203,6 +217,13 @@ func _build_rows() -> void:
 		preview_button.text = "Preview"
 		preview_button.pressed.connect(_on_preview_pressed.bind(bus_name))
 		UISkin.button_styles(preview_button, "thin")
+		_apply_text_button_fx(preview_button, "Audition the %s lane through the current mix." % String(BUS_LABELS[bus_name]), {
+			"font_size": 12,
+			"active_scale": 1.016,
+			"rotation_max": 1.0,
+			"float_offset": Vector2(2.0, 1.2),
+			"sheen_alpha": 0.04
+		})
 		buttons_row.add_child(preview_button)
 
 		slider_map[bus_name] = slider
@@ -299,6 +320,10 @@ func _on_close_pressed() -> void:
 	if Sfx != null:
 		Sfx.play_event(&"ui_confirm")
 
+func _apply_text_button_fx(button: Button, preview_text: String, options: Dictionary = {}) -> void:
+	UICardFx.install_text_button(button, options)
+	UICardFx.bind(button, func() -> void: _set_status_text(preview_text))
+
 func _update_row_visuals(bus_name: String) -> void:
 	if not slider_map.has(bus_name):
 		return
@@ -310,10 +335,13 @@ func _update_row_visuals(bus_name: String) -> void:
 	var slider_value := slider.value
 	suppress_slider_events = true
 	mute_button.button_pressed = is_muted
-	mute_button.text = "Muted" if is_muted else "Mute"
+	UICardFx.set_button_text(mute_button, "Muted" if is_muted else "Mute")
 	suppress_slider_events = false
 	preview_button.disabled = is_muted or Music.is_master_muted()
 	_update_value_label(bus_name, slider_value, display_db, is_muted)
+	UICardFx.pin(mute_button, is_muted)
+	UICardFx.sync_text_button_state(mute_button)
+	UICardFx.sync_text_button_state(preview_button)
 
 func _update_master_visuals() -> void:
 	var is_muted := Music.is_master_muted()
@@ -324,6 +352,8 @@ func _update_master_visuals() -> void:
 		master_value_label.text = "%d%% | Muted" % int(round(slider_value))
 	elif absf(display_db - Music.get_default_master_volume()) <= 0.15:
 		master_value_label.text = "%d%% | Default" % int(round(slider_value))
+	UICardFx.pin(master_mute_button, is_muted)
+	UICardFx.sync_text_button_state(master_mute_button)
 
 func _update_value_label(bus_name: String, slider_value: float, display_db: float, is_muted: bool) -> void:
 	if not value_label_map.has(bus_name):
@@ -404,9 +434,9 @@ func _refresh_layout() -> void:
 	master_mute_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	reset_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	close_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	master_mute_button.text = "Master Off" if very_compact and Music.is_master_muted() else ("Master Mute" if not very_compact and not Music.is_master_muted() else ("Master On" if very_compact else "Master Muted"))
-	reset_button.text = "Reset" if very_compact else ("Reset Mix" if compact else "Chapter Default")
-	close_button.text = "Close"
+	UICardFx.set_button_text(master_mute_button, "Master Off" if very_compact and Music.is_master_muted() else ("Master Mute" if not very_compact and not Music.is_master_muted() else ("Master On" if very_compact else "Master Muted")))
+	UICardFx.set_button_text(reset_button, "Reset" if very_compact else ("Reset Mix" if compact else "Chapter Default"))
+	UICardFx.set_button_text(close_button, "Close")
 	hint_label.text = "F10 toggle  |  Esc close" if very_compact else "F10 toggle panel  |  Esc close"
 	for bus_name in BUS_ORDER:
 		if bus_label_map.has(bus_name):
@@ -427,12 +457,31 @@ func _refresh_layout() -> void:
 		if mute_button_map.has(bus_name):
 			var mute_button: Button = mute_button_map[bus_name]
 			mute_button.custom_minimum_size = Vector2(0.0, 32.0 if compact else 34.0)
-			mute_button.text = "Off" if very_compact and Music.is_bus_muted(StringName(bus_name)) else ("On" if very_compact else ("Muted" if Music.is_bus_muted(StringName(bus_name)) else "Mute"))
+			UICardFx.set_button_text(mute_button, "Off" if very_compact and Music.is_bus_muted(StringName(bus_name)) else ("On" if very_compact else ("Muted" if Music.is_bus_muted(StringName(bus_name)) else "Mute")))
 		if preview_button_map.has(bus_name):
 			var preview_button: Button = preview_button_map[bus_name]
 			preview_button.custom_minimum_size = Vector2(0.0, 32.0 if compact else 34.0)
-			preview_button.text = "Test" if very_compact else "Preview"
+			UICardFx.set_button_text(preview_button, "Test" if very_compact else "Preview")
 		if bus_buttons_row_map.has(bus_name):
 			var buttons_row: HBoxContainer = bus_buttons_row_map[bus_name]
 			buttons_row.add_theme_constant_override("separation", 8 if compact else 10)
 			buttons_row.alignment = BoxContainer.ALIGNMENT_CENTER if very_compact else BoxContainer.ALIGNMENT_END
+	_refresh_button_fx_states()
+
+func _refresh_button_fx_states() -> void:
+	for button in action_buttons:
+		if button == null:
+			continue
+		UICardFx.pin(button, button == master_mute_button and Music.is_master_muted())
+		UICardFx.sync_text_button_state(button)
+	for bus_name in BUS_ORDER:
+		if mute_button_map.has(bus_name):
+			var mute_button := mute_button_map[bus_name] as Button
+			if mute_button != null:
+				UICardFx.pin(mute_button, Music.is_bus_muted(StringName(bus_name)))
+				UICardFx.sync_text_button_state(mute_button)
+		if preview_button_map.has(bus_name):
+			var preview_button := preview_button_map[bus_name] as Button
+			if preview_button != null:
+				UICardFx.pin(preview_button, false)
+				UICardFx.sync_text_button_state(preview_button)

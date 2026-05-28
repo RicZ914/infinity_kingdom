@@ -2,6 +2,7 @@ extends CanvasLayer
 
 signal closed
 
+const UICardFx := preload("res://ui/ui_card_fx.gd")
 const UISkin := preload("res://ui/ui_skin.gd")
 
 @onready var backdrop: ColorRect = $Backdrop
@@ -18,6 +19,7 @@ const UISkin := preload("res://ui/ui_skin.gd")
 var layout_size_override: Vector2 = Vector2.ZERO
 var language_buttons: Dictionary = {}
 var language_header_label: Label
+var action_buttons: Array[Button] = []
 
 func _ready() -> void:
 	layer = 28
@@ -26,8 +28,17 @@ func _ready() -> void:
 	backdrop.color = Color(0.01, 0.012, 0.018, 0.72)
 	panel.add_theme_stylebox_override("panel", UISkin.menu_panel_style())
 	_build_language_row()
-	for button in [fullscreen_button, window_button, vsync_button, close_button]:
+	action_buttons = [fullscreen_button, window_button, vsync_button, close_button]
+	for button in action_buttons:
 		UISkin.button_styles(button, "large")
+		UICardFx.install_text_button(button, {
+			"font_size": 15,
+			"active_scale": 1.02,
+			"rotation_max": 1.5,
+			"float_offset": Vector2(3.5, 2.0),
+			"sheen_alpha": 0.07
+		})
+		UICardFx.bind(button)
 	fullscreen_button.pressed.connect(_set_fullscreen)
 	window_button.pressed.connect(_set_windowed)
 	vsync_button.pressed.connect(_toggle_vsync)
@@ -71,6 +82,14 @@ func _build_language_row() -> void:
 		button.toggle_mode = true
 		button.custom_minimum_size = Vector2(0, 38)
 		UISkin.button_styles(button, "thin")
+		UICardFx.install_text_button(button, {
+			"font_size": 13,
+			"active_scale": 1.018,
+			"rotation_max": 1.2,
+			"float_offset": Vector2(2.5, 1.5),
+			"sheen_alpha": 0.06
+		})
+		UICardFx.bind(button)
 		button.pressed.connect(func() -> void: UISettings.set_locale(locale))
 		row.add_child(button)
 		language_buttons[locale] = button
@@ -80,6 +99,7 @@ func open() -> void:
 	get_tree().paused = true
 	_refresh_status()
 	_refresh_copy()
+	_refresh_button_fx_states()
 	_grab_default_focus()
 
 func close() -> void:
@@ -122,9 +142,9 @@ func _toggle_vsync() -> void:
 func _refresh_copy(_locale: String = "") -> void:
 	title_label.text = UIText.text("settings_title")
 	hint_label.text = UIText.text("settings_hint")
-	fullscreen_button.text = UIText.text("settings_mode_fullscreen")
-	window_button.text = UIText.text("settings_mode_windowed")
-	close_button.text = UIText.text("settings_close")
+	UICardFx.set_button_text(fullscreen_button, UIText.text("settings_mode_fullscreen"))
+	UICardFx.set_button_text(window_button, UIText.text("settings_mode_windowed"))
+	UICardFx.set_button_text(close_button, UIText.text("settings_close"))
 	language_header_label.text = "%s  |  %s: %s" % [
 		UIText.text("settings_language"),
 		UIText.text("language_current"),
@@ -132,9 +152,11 @@ func _refresh_copy(_locale: String = "") -> void:
 	]
 	for locale in language_buttons.keys():
 		var button := language_buttons[locale] as Button
-		button.text = UISettings.get_language_label(String(locale))
+		UICardFx.set_button_text(button, UISettings.get_language_label(String(locale)))
 		button.button_pressed = String(locale) == UISettings.get_locale()
+		UICardFx.sync_text_button_state(button)
 	_refresh_status()
+	_refresh_button_fx_states()
 
 func _refresh_status() -> void:
 	var fullscreen_active := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
@@ -143,9 +165,10 @@ func _refresh_status() -> void:
 		UIText.text("settings_status_fullscreen") if fullscreen_active else UIText.text("settings_status_windowed"),
 		UIText.text("settings_vsync_on") if vsync_active else UIText.text("settings_vsync_off")
 	]
-	vsync_button.text = UIText.text("settings_vsync_off") if vsync_active else UIText.text("settings_vsync_on")
+	UICardFx.set_button_text(vsync_button, UIText.text("settings_vsync_off") if vsync_active else UIText.text("settings_vsync_on"))
 	fullscreen_button.disabled = fullscreen_active
 	window_button.disabled = not fullscreen_active
+	_refresh_button_fx_states()
 
 func _grab_default_focus() -> void:
 	if not fullscreen_button.disabled:
@@ -176,5 +199,22 @@ func _refresh_layout() -> void:
 	UISkin.label(title_label, 24 if compact else 28, UISkin.COLOR_ACCENT)
 	UISkin.label(status_label, 12 if compact else 13, UISkin.COLOR_MUTED)
 	UISkin.label(hint_label, 10 if compact else 11, UISkin.COLOR_MUTED)
-	for button in [fullscreen_button, window_button, vsync_button, close_button]:
+	for button in action_buttons:
 		button.custom_minimum_size.y = 48.0 if compact else 56.0
+		UICardFx.sync_text_button_state(button)
+	for button in language_buttons.values():
+		var language_button := button as Button
+		if language_button != null:
+			language_button.custom_minimum_size.y = 34.0 if compact else 38.0
+			UICardFx.sync_text_button_state(language_button)
+
+func _refresh_button_fx_states() -> void:
+	for button in action_buttons:
+		UICardFx.pin(button, false)
+		UICardFx.sync_text_button_state(button)
+	for locale in language_buttons.keys():
+		var button := language_buttons[locale] as Button
+		if button == null:
+			continue
+		UICardFx.pin(button, String(locale) == UISettings.get_locale())
+		UICardFx.sync_text_button_state(button)

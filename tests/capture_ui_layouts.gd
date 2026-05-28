@@ -52,6 +52,36 @@ func _run() -> void:
 	await process_frame
 	await _capture_world(world, Vector2i(1280, 720), "battle_ui_zh_hans_1280x720.png")
 	await _capture_world(world, Vector2i(720, 540), "battle_ui_zh_hans_720x540.png")
+	if world.pause_menu != null and world.pause_menu.has_method("open"):
+		world.pause_menu.open()
+	await process_frame
+	await process_frame
+	await _capture_world(world, Vector2i(1280, 720), "pause_menu_zh_hans_1280x720.png")
+	await _capture_world(world, Vector2i(720, 540), "pause_menu_zh_hans_720x540.png")
+	if world.pause_menu != null and world.pause_menu.has_method("close"):
+		world.pause_menu.close()
+	await process_frame
+	await process_frame
+	if world.audio_settings_panel != null and world.audio_settings_panel.has_method("show_panel"):
+		world.audio_settings_panel.show_panel()
+	await process_frame
+	await process_frame
+	await _capture_world(world, Vector2i(1280, 720), "audio_settings_zh_hans_1280x720.png")
+	await _capture_world(world, Vector2i(720, 540), "audio_settings_zh_hans_720x540.png")
+	if world.audio_settings_panel != null and world.audio_settings_panel.has_method("hide_panel"):
+		world.audio_settings_panel.hide_panel()
+	await process_frame
+	await process_frame
+	if world.settings_panel != null and world.settings_panel.has_method("open"):
+		world.settings_panel.open()
+	await process_frame
+	await process_frame
+	await _capture_world(world, Vector2i(1280, 720), "settings_panel_zh_hans_1280x720.png")
+	await _capture_world(world, Vector2i(720, 540), "settings_panel_zh_hans_720x540.png")
+	if world.settings_panel != null and world.settings_panel.has_method("close"):
+		world.settings_panel.close()
+	await process_frame
+	await process_frame
 	if world.run_event_panel != null and world.run_event_panel.has_method("open"):
 		world.run_event_panel.open("forge", 100)
 	await process_frame
