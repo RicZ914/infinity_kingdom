@@ -91,6 +91,10 @@ var hero_portrait: TextureRect
 var hero_detail_title: Label
 var hero_detail_role: Label
 var hero_detail_desc: Label
+var menu_overview_panel: PanelContainer
+var menu_overview_title: Label
+var menu_overview_grid: GridContainer
+var menu_overview_buttons: Array[Button] = []
 var cards_panel: PanelContainer
 var cards_grid: GridContainer
 var hero_buttons: Array[Button] = []
@@ -270,6 +274,36 @@ func _build_ui() -> void:
 	UISkin.label(hero_detail_desc, 12, UISkin.COLOR_MUTED)
 	hero_info_column.add_child(hero_detail_desc)
 
+	menu_overview_panel = PanelContainer.new()
+	menu_overview_panel.add_theme_stylebox_override("panel", UISkin.choice_panel_style())
+	right_column.add_child(menu_overview_panel)
+
+	var overview_margin := MarginContainer.new()
+	overview_margin.add_theme_constant_override("margin_left", 12)
+	overview_margin.add_theme_constant_override("margin_top", 12)
+	overview_margin.add_theme_constant_override("margin_right", 12)
+	overview_margin.add_theme_constant_override("margin_bottom", 12)
+	menu_overview_panel.add_child(overview_margin)
+
+	var overview_column := VBoxContainer.new()
+	overview_column.add_theme_constant_override("separation", 10)
+	overview_margin.add_child(overview_column)
+
+	menu_overview_title = Label.new()
+	UISkin.label(menu_overview_title, 13, UISkin.COLOR_ACCENT)
+	overview_column.add_child(menu_overview_title)
+
+	menu_overview_grid = GridContainer.new()
+	menu_overview_grid.columns = 3
+	menu_overview_grid.add_theme_constant_override("h_separation", 10)
+	menu_overview_grid.add_theme_constant_override("v_separation", 10)
+	overview_column.add_child(menu_overview_grid)
+
+	for hero_index in range(HEROES.size()):
+		var overview_button := _menu_overview_card(HEROES[hero_index], hero_index)
+		menu_overview_buttons.append(overview_button)
+		menu_overview_grid.add_child(overview_button)
+
 	cards_panel = PanelContainer.new()
 	cards_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	cards_panel.add_theme_stylebox_override("panel", UISkin.choice_panel_style())
@@ -353,6 +387,77 @@ func _hero_card(hero: Dictionary, hero_index: int) -> Button:
 	UISkin.ignore_mouse_recursive(margin)
 	return button
 
+func _menu_overview_card(hero: Dictionary, hero_index: int) -> Button:
+	var button := Button.new()
+	button.text = ""
+	button.focus_mode = Control.FOCUS_ALL
+	button.custom_minimum_size = Vector2(0, 94)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.add_theme_stylebox_override("normal", UISkin.choice_panel_style())
+	button.add_theme_stylebox_override("hover", UISkin.flat_style(Color(0.22, 0.23, 0.27), UISkin.COLOR_ACCENT, 2, 3))
+	button.add_theme_stylebox_override("pressed", UISkin.flat_style(Color(0.14, 0.15, 0.18), UISkin.COLOR_ACCENT.darkened(0.2), 2, 3))
+	button.focus_entered.connect(func() -> void: _set_selected_hero(hero_index))
+	button.mouse_entered.connect(func() -> void: _set_selected_hero(hero_index))
+	button.pressed.connect(func() -> void:
+		_show_hero_select()
+		_set_selected_hero(hero_index)
+	)
+
+	var margin := MarginContainer.new()
+	margin.name = "Margin"
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.offset_left = 10
+	margin.offset_top = 10
+	margin.offset_right = -10
+	margin.offset_bottom = -10
+	button.add_child(margin)
+
+	var row := HBoxContainer.new()
+	row.name = "Row"
+	row.add_theme_constant_override("separation", 10)
+	margin.add_child(row)
+
+	var portrait_frame := PanelContainer.new()
+	portrait_frame.custom_minimum_size = Vector2(54, 54)
+	portrait_frame.add_theme_stylebox_override("panel", UISkin.icon_slot_style())
+	row.add_child(portrait_frame)
+
+	var portrait := TextureRect.new()
+	portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	portrait.texture = load(String(hero["portrait"])) as Texture2D
+	portrait_frame.add_child(portrait)
+
+	var text_column := VBoxContainer.new()
+	text_column.name = "TextColumn"
+	text_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text_column.add_theme_constant_override("separation", 2)
+	row.add_child(text_column)
+
+	var name_label := Label.new()
+	name_label.name = "NameLabel"
+	name_label.text = _hero_name(hero)
+	UISkin.label(name_label, 13, Color.WHITE)
+	text_column.add_child(name_label)
+
+	var role_label := Label.new()
+	role_label.name = "RoleLabel"
+	role_label.text = _hero_role(hero)
+	UISkin.label(role_label, 11, UISkin.COLOR_ACCENT)
+	text_column.add_child(role_label)
+
+	var stats_label := Label.new()
+	stats_label.name = "StatsLabel"
+	stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	stats_label.text = " / ".join(_hero_stats(hero))
+	UISkin.label(stats_label, 10, UISkin.COLOR_MUTED)
+	text_column.add_child(stats_label)
+
+	UISkin.ignore_mouse_recursive(margin)
+	return button
+
 func _menu_button(text_value: String, callback: Callable, highlighted: bool = false) -> Button:
 	var button := Button.new()
 	button.text = text_value
@@ -370,6 +475,7 @@ func _on_primary_pressed() -> void:
 func _show_menu() -> void:
 	screen_mode = "menu"
 	detail_mode = "hero"
+	menu_overview_panel.visible = true
 	cards_panel.visible = false
 	_set_selected_hero(selected_hero_index)
 	_refresh_copy()
@@ -377,6 +483,7 @@ func _show_menu() -> void:
 func _show_hero_select() -> void:
 	screen_mode = "select"
 	detail_mode = "hero"
+	menu_overview_panel.visible = false
 	cards_panel.visible = true
 	_set_selected_hero(selected_hero_index)
 	_refresh_copy()
@@ -413,6 +520,7 @@ func _activate_hero(hero_index: int) -> void:
 func _show_about_placeholder() -> void:
 	screen_mode = "about"
 	detail_mode = "about"
+	menu_overview_panel.visible = false
 	cards_panel.visible = false
 	hero_detail_title.text = UIText.text("about_title")
 	hero_detail_role.text = UIText.text("placeholder_panel")
@@ -422,6 +530,7 @@ func _show_about_placeholder() -> void:
 func _show_gallery_placeholder() -> void:
 	screen_mode = "gallery"
 	detail_mode = "gallery"
+	menu_overview_panel.visible = false
 	cards_panel.visible = false
 	hero_detail_title.text = UIText.text("gallery_title")
 	hero_detail_role.text = UIText.text("placeholder_panel")
@@ -447,6 +556,7 @@ func _refresh_copy(_locale: String = "") -> void:
 	about_button.text = UIText.text("menu_about")
 	quit_button.text = UIText.text("menu_quit")
 	left_hint_label.text = _hint_text()
+	_refresh_menu_overview_copy()
 	match detail_mode:
 		"gallery":
 			hero_detail_title.text = UIText.text("gallery_title")
@@ -490,7 +600,7 @@ func _queue_layout_refresh() -> void:
 	call_deferred("_refresh_layout")
 
 func _refresh_layout() -> void:
-	if panel == null or cards_grid == null:
+	if panel == null or cards_grid == null or menu_overview_grid == null:
 		return
 	var viewport_size: Vector2 = layout_size_override
 	if viewport_size == Vector2.ZERO:
@@ -514,10 +624,24 @@ func _refresh_layout() -> void:
 	UISkin.label(hero_detail_role, 13 if compact else 14, UISkin.COLOR_ACCENT)
 	UISkin.label(hero_detail_desc, 12 if compact else 13, UISkin.COLOR_MUTED)
 	UISkin.label(left_hint_label, 11 if compact else 12, UISkin.COLOR_MUTED)
+	UISkin.label(menu_overview_title, 12 if compact else 13, UISkin.COLOR_ACCENT)
+	menu_overview_panel.custom_minimum_size.y = 118.0 if compact else 136.0
+	menu_overview_grid.columns = 3
 	cards_grid.columns = 1 if very_compact else (2 if compact else 3)
 	hero_portrait.custom_minimum_size = Vector2(200.0 if compact else 220.0, 240.0 if compact else 260.0)
 	for hero_button in hero_buttons:
 		hero_button.custom_minimum_size.y = 172.0 if compact else 200.0
+	for overview_button in menu_overview_buttons:
+		overview_button.custom_minimum_size.y = 78.0 if very_compact else (86.0 if compact else 94.0)
+		var name_label := overview_button.get_node_or_null("Margin/Row/TextColumn/NameLabel") as Label
+		var role_label := overview_button.get_node_or_null("Margin/Row/TextColumn/RoleLabel") as Label
+		var stats_label := overview_button.get_node_or_null("Margin/Row/TextColumn/StatsLabel") as Label
+		if name_label != null:
+			UISkin.label(name_label, 11 if compact else 13, Color.WHITE)
+		if role_label != null:
+			UISkin.label(role_label, 10 if compact else 11, UISkin.COLOR_ACCENT)
+		if stats_label != null:
+			UISkin.label(stats_label, 9 if compact else 10, UISkin.COLOR_MUTED)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
@@ -578,6 +702,22 @@ func _localized_hero_field(hero: Dictionary, field: String) -> String:
 	var locale := _current_locale()
 	var localized := hero.get(field, {}) as Dictionary
 	return String(localized.get(locale, localized.get("en", "")))
+
+func _refresh_menu_overview_copy() -> void:
+	if menu_overview_title != null:
+		menu_overview_title.text = _locale_text("Hero Roster", "角色预览", "角色預覽")
+	for hero_index in range(min(menu_overview_buttons.size(), HEROES.size())):
+		var button: Button = menu_overview_buttons[hero_index]
+		var hero: Dictionary = HEROES[hero_index]
+		var name_label := button.get_node_or_null("Margin/Row/TextColumn/NameLabel") as Label
+		var role_label := button.get_node_or_null("Margin/Row/TextColumn/RoleLabel") as Label
+		var stats_label := button.get_node_or_null("Margin/Row/TextColumn/StatsLabel") as Label
+		if name_label != null:
+			name_label.text = _hero_name(hero)
+		if role_label != null:
+			role_label.text = _hero_role(hero)
+		if stats_label != null:
+			stats_label.text = " / ".join(_hero_stats(hero))
 
 func _current_locale() -> String:
 	if UISettings != null and UISettings.has_method("get_locale"):

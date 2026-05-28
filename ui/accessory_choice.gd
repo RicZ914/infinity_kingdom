@@ -406,10 +406,11 @@ func _refresh_layout() -> void:
 	UISkin.label(preview_title_label, 14 if very_compact else (15 if compact else 16), Color(0.98, 0.90, 0.67))
 	UISkin.label(preview_detail_label, 12 if compact else 13, Color(0.84, 0.88, 0.96))
 	UISkin.label(footer_label, 11 if very_compact else 12, Color(0.74, 0.80, 0.88))
-	var card_width := 224.0 if very_compact else (256.0 if compact else 300.0)
-	var card_height := 334.0 if very_compact else (360.0 if compact else 390.0)
+	var card_width := 196.0 if very_compact else (256.0 if compact else 300.0)
+	var card_height := 286.0 if very_compact else (360.0 if compact else 390.0)
 	var available_width := maxf(choices_scroll.size.x, panel.custom_minimum_size.x - (56.0 if very_compact else 96.0))
-	var next_columns := clampi(int(floor((available_width + CARD_GAP) / (card_width + CARD_GAP))), 1, 3)
+	var max_columns := 3
+	var next_columns := clampi(int(floor((available_width + CARD_GAP) / (card_width + CARD_GAP))), 1, max_columns)
 	choices_row.columns = max(1, min(next_columns, max(active_choices.size(), 1)))
 	button_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	button_row.add_theme_constant_override("separation", 8 if compact else 12)

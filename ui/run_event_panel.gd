@@ -491,10 +491,11 @@ func _refresh_layout() -> void:
 		footer_label.text = UIText.text("event_footer_base", {"count": mini(maxi(choice_row.get_child_count(), 1), 5)})
 		if _has_skip_choice():
 			footer_label.text += UIText.text("event_footer_skip")
-	var card_width := 212.0 if very_compact else (224.0 if compact else 236.0)
-	var card_height := 238.0 if very_compact else (252.0 if compact else 274.0)
+	var card_width := 196.0 if very_compact else (224.0 if compact else 236.0)
+	var card_height := 204.0 if very_compact else (252.0 if compact else 274.0)
 	var available_width := maxf(choice_scroll.size.x, panel.custom_minimum_size.x - (56.0 if very_compact else 96.0))
-	var next_columns := clampi(int(floor((available_width + CARD_GAP) / (card_width + CARD_GAP))), 1, 4)
+	var max_columns := 3 if compact else 4
+	var next_columns := clampi(int(floor((available_width + CARD_GAP) / (card_width + CARD_GAP))), 1, max_columns)
 	choice_row.columns = max(1, min(next_columns, max(choice_row.get_child_count(), 1)))
 	for child in choice_row.get_children():
 		if child is Button:
