@@ -136,7 +136,7 @@ func _process(_delta: float) -> void:
 	var state_name := ""
 	if player_character.get("state_machine") != null:
 		state_name = String(player_character.state_machine.get_state_name())
-	state_label.text = "%s %s" % [_locale_text("State", "状态", "狀態"), state_name]
+	state_label.text = "%s %s" % [_locale_text("State", "状态", "狀態"), _localized_player_state_name(state_name)]
 	_update_skill_slots()
 	_update_danger_visuals()
 	if RunDirector != null:
@@ -900,6 +900,31 @@ func _hero_display_name(hero_name: String) -> String:
 		_:
 			return hero_name
 
+func _localized_player_state_name(state_name: String) -> String:
+	match state_name:
+		"idle":
+			return _locale_text("Idle", "待机", "待機")
+		"move":
+			return _locale_text("Move", "移动", "移動")
+		"attack":
+			return _locale_text("Attack", "攻击", "攻擊")
+		"charge":
+			return _locale_text("Charge", "蓄势", "蓄勢")
+		"dash":
+			return _locale_text("Dash", "突进", "突進")
+		"skill":
+			return _locale_text("Skill", "技能", "技能")
+		"guard":
+			return _locale_text("Guard", "格挡", "格擋")
+		"buff":
+			return _locale_text("Buff", "强化", "強化")
+		"hit":
+			return _locale_text("Hit", "受击", "受擊")
+		"dead":
+			return _locale_text("Down", "倒下", "倒下")
+		_:
+			return state_name.capitalize()
+
 func _queue_layout_refresh() -> void:
 	call_deferred("_refresh_layout")
 
@@ -919,9 +944,9 @@ func _refresh_layout() -> void:
 		468.0
 	)
 	var panel_height := clampf(
-		viewport_size.y * (0.80 if very_compact else (0.70 if compact else 0.68)),
-		404.0 if very_compact else 468.0,
-		640.0
+		viewport_size.y * (0.86 if very_compact else (0.72 if compact else 0.76)),
+		438.0 if very_compact else 486.0,
+		668.0
 	)
 	root_margin.offset_right = panel_width
 	root_margin.offset_top = -panel_height
@@ -935,9 +960,9 @@ func _refresh_layout() -> void:
 	inner_margin.add_theme_constant_override("margin_top", 10 if very_compact else 12)
 	inner_margin.add_theme_constant_override("margin_right", 10 if very_compact else 12)
 	inner_margin.add_theme_constant_override("margin_bottom", 10 if very_compact else 12)
-	content.add_theme_constant_override("separation", 4 if very_compact else (6 if compact else 8))
+	content.add_theme_constant_override("separation", 3 if very_compact else (5 if compact else 8))
 	status_grid.columns = 2
-	skill_grid.columns = 4 if panel_width >= 300.0 else (2 if very_compact else 4)
+	skill_grid.columns = 4
 	skill_grid.add_theme_constant_override("h_separation", 6 if compact else 8)
 	skill_grid.add_theme_constant_override("v_separation", 6 if compact else 8)
 	accessory_grid.columns = 2 if panel_width >= 300.0 else 1
@@ -952,6 +977,7 @@ func _refresh_layout() -> void:
 	accessory_summary_label.max_lines_visible = 1 if very_compact else 3
 	combat_feed_label.max_lines_visible = 1 if very_compact else 2
 	run_state_label.max_lines_visible = 2 if compact else 3
+	title_label.visible = not very_compact
 	UISkin.label(title_label, 16 if very_compact else (18 if compact else 20), Color(0.98, 0.90, 0.66))
 	for header in [vitals_header_label, status_header_label, skills_header_label, accessory_header_label, run_header_label]:
 		UISkin.label(header, 11 if compact else 12, UISkin.COLOR_ACCENT)
@@ -968,9 +994,9 @@ func _refresh_layout() -> void:
 	UISkin.label(accessory_summary_label, 10 if compact else 12, Color(0.72, 0.78, 0.86))
 	UISkin.label(run_state_label, 10 if compact else 12, Color(0.84, 0.90, 0.98))
 	for bar in meter_bars:
-		bar.custom_minimum_size = Vector2(panel_width - (64.0 if very_compact else 86.0), 18.0 if compact else 22.0)
-	var slot_width := 60.0 if very_compact else (72.0 if compact else 84.0)
-	var slot_height := 64.0 if very_compact else (72.0 if compact else 78.0)
+		bar.custom_minimum_size = Vector2(panel_width - (70.0 if very_compact else 86.0), 16.0 if very_compact else (18.0 if compact else 22.0))
+	var slot_width := 52.0 if very_compact else (68.0 if compact else 84.0)
+	var slot_height := 56.0 if very_compact else (68.0 if compact else 78.0)
 	for slot_data in skill_slots.values():
 		var slot_dict: Dictionary = slot_data as Dictionary
 		var root := slot_dict.get("root") as PanelContainer
@@ -979,9 +1005,9 @@ func _refresh_layout() -> void:
 		if root != null:
 			root.custom_minimum_size = Vector2(slot_width, slot_height)
 		if icon != null:
-			icon.custom_minimum_size = Vector2(34.0 if very_compact else 40.0, 34.0 if very_compact else 40.0)
+			icon.custom_minimum_size = Vector2(28.0 if very_compact else 40.0, 28.0 if very_compact else 40.0)
 		if label != null:
-			UISkin.label(label, 9 if very_compact else 11, Color(0.86, 0.88, 0.92))
+			UISkin.label(label, 8 if very_compact else 11, Color(0.86, 0.88, 0.92))
 	for metric_id in run_metric_labels.keys():
 		var metric_slot: Dictionary = run_metric_labels[metric_id] as Dictionary
 		var caption_label := metric_slot.get("caption") as Label

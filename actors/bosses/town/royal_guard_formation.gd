@@ -29,17 +29,32 @@ func bind_player(player: Node2D) -> void:
 			guard.bind_player(player)
 
 func get_status_title() -> String:
-	return "Royal Guard Formation"
+	return _locale_text("Royal Guard Formation", "王家近卫阵列", "王家近衛陣列")
 
 func get_status_text() -> String:
 	if encounter_finished:
-		return "Formation collapsed."
-	var immune_text := "Immune" if coverage_progress < 1.0 else "Vulnerable"
-	return "%s\nCoverage %d%% | Guards remaining %d" % [
+		return _locale_text("Formation collapsed.", "阵列已崩解。", "陣列已崩解。")
+	var immune_text := _locale_text("Immune", "免疫", "免疫") if coverage_progress < 1.0 else _locale_text("Vulnerable", "可破", "可破")
+	return _locale_text("%s\nCoverage %d%% | Guards remaining %d", "%s\n覆盖进度 %d%% | 近卫剩余 %d", "%s\n覆蓋進度 %d%% | 近衛剩餘 %d") % [
 		immune_text,
 		int(round(coverage_progress * 100.0)),
 		all_guards.size()
 	]
+
+func _current_locale() -> String:
+	var ui_settings := get_node_or_null("/root/UISettings")
+	if ui_settings != null and ui_settings.has_method("get_locale"):
+		return String(ui_settings.get_locale())
+	return "en"
+
+func _locale_text(en_text: String, zh_hans_text: String, zh_hant_text: String) -> String:
+	match _current_locale():
+		"zh_Hant":
+			return zh_hant_text
+		"zh_Hans":
+			return zh_hans_text
+		_:
+			return en_text
 
 func _physics_process(delta: float) -> void:
 	if encounter_finished:

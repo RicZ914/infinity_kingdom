@@ -71,15 +71,49 @@ func bind_player(player: Node2D) -> void:
 	target = player
 
 func get_status_title() -> String:
-	return "Judicator"
+	return _locale_text("Judicator", "审判官", "審判官")
 
 func get_status_text() -> String:
-	return "HP %d / %d%s\nState: %s" % [
+	return _locale_text("HP %d / %d%s\nState: %s", "生命 %d / %d%s\n状态：%s", "生命 %d / %d%s\n狀態：%s") % [
 		int(round(hp)),
 		int(round(max_hp)),
-		"  ENRAGED" if enraged else "",
-		String(state)
+		_locale_text("  ENRAGED", "  暴怒", "  暴怒") if enraged else "",
+		_localized_state_name(String(state))
 	]
+
+func _current_locale() -> String:
+	var ui_settings := get_node_or_null("/root/UISettings")
+	if ui_settings != null and ui_settings.has_method("get_locale"):
+		return String(ui_settings.get_locale())
+	return "en"
+
+func _locale_text(en_text: String, zh_hans_text: String, zh_hant_text: String) -> String:
+	match _current_locale():
+		"zh_Hant":
+			return zh_hant_text
+		"zh_Hans":
+			return zh_hans_text
+		_:
+			return en_text
+
+func _localized_state_name(state_name: String) -> String:
+	match state_name:
+		"idle":
+			return _locale_text("Idle", "待机", "待機")
+		"basic_attack":
+			return _locale_text("Basic Attack", "普攻", "普攻")
+		"skill_1_jump_start":
+			return _locale_text("Leap Windup", "跃击蓄势", "躍擊蓄勢")
+		"skill_1_slam":
+			return _locale_text("Leap Slam", "跃击重砸", "躍擊重砸")
+		"skill_2_charge":
+			return _locale_text("Line Verdict", "裁决冲锋", "裁決衝鋒")
+		"recover":
+			return _locale_text("Recover", "恢复", "恢復")
+		"dead":
+			return _locale_text("Defeated", "倒下", "倒下")
+		_:
+			return state_name.capitalize()
 
 func _physics_process(delta: float) -> void:
 	if hp <= 0.0:

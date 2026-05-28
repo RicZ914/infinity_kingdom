@@ -1086,10 +1086,18 @@ func _encounter_threat_hint(encounter: Node) -> String:
 			if active_waves_value is Array:
 				wave_total = (active_waves_value as Array).size()
 		if _has_property(encounter, "waiting_for_next_wave") and bool(encounter.get("waiting_for_next_wave")):
-			var reset_hint := "Wave %d cleared. Reposition before the next pack lands." % max(wave_index + 1, 1)
+			var reset_hint := _ui_text(
+				"Wave %d cleared. Reposition before the next pack lands.",
+				"第 %d 波已清空，在下一队落位前重新站好位置。",
+				"第 %d 波已清空，在下一隊落位前重新站好位置。"
+			) % max(wave_index + 1, 1)
 			return "%s %s" % [modifier_hint, reset_hint] if not modifier_hint.is_empty() else reset_hint
 		if wave_total > 0 and wave_index >= wave_total - 1:
-			var final_hint := "Final wave mixes elites with arcanist control. Remove ranged pressure first."
+			var final_hint := _ui_text(
+				"Final wave mixes elites with arcanist control. Remove ranged pressure first.",
+				"最后一波会把精英和奥术控制混在一起，先拆远程压力。",
+				"最後一波會把精英和奧術控制混在一起，先拆遠程壓力。"
+			)
 			return "%s %s" % [modifier_hint, final_hint] if not modifier_hint.is_empty() else final_hint
 		var active_enemy_count := 0
 		if _has_property(encounter, "active_enemies"):
@@ -1097,24 +1105,56 @@ func _encounter_threat_hint(encounter: Node) -> String:
 			if active_enemies_value is Array:
 				active_enemy_count = (active_enemies_value as Array).size()
 		if active_enemy_count >= 5:
-			var crowd_hint := "Mixed melee and ranged pressure. Thin archers and mages before hunters collapse."
+			var crowd_hint := _ui_text(
+				"Mixed melee and ranged pressure. Thin archers and mages before hunters collapse.",
+				"近战和远程会一起压上来，先削弓手和法师，再处理扑脸的猎手。",
+				"近戰和遠程會一起壓上來，先削弓手和法師，再處理撲臉的獵手。"
+			)
 			return "%s %s" % [modifier_hint, crowd_hint] if not modifier_hint.is_empty() else crowd_hint
-		var baseline_hint := "Keep space from flankers and do not stand still against ranged telegraphs."
+		var baseline_hint := _ui_text(
+			"Keep space from flankers and do not stand still against ranged telegraphs.",
+			"和侧翼单位保持距离，面对远程预警时不要原地站桩。",
+			"和側翼單位保持距離，面對遠程預警時不要原地站樁。"
+		)
 		return "%s %s" % [modifier_hint, baseline_hint] if not modifier_hint.is_empty() else baseline_hint
 	if script_path.ends_with("judicator_boss.gd"):
 		var state_name := String(encounter.get("state")) if _has_property(encounter, "state") else ""
 		var enraged := bool(encounter.get("enraged")) if _has_property(encounter, "enraged") else false
 		if enraged:
 			if state_name == "skill_1_jump_start" or state_name == "skill_1_slam":
-				return "Enraged leap adds an aftershock. Leave the landing ring early."
+				return _ui_text(
+					"Enraged leap adds an aftershock. Leave the landing ring early.",
+					"暴怒后的跃击会追加余震，提前离开落点圈。",
+					"暴怒後的躍擊會追加餘震，提前離開落點圈。"
+				)
 			if state_name == "skill_2_charge":
-				return "Enraged line verdict is wider and longer. Exit the lane immediately."
-			return "Below 45% HP he enrages, hits harder, and chains leap aftershocks."
+				return _ui_text(
+					"Enraged line verdict is wider and longer. Exit the lane immediately.",
+					"暴怒后的直线裁决更宽更长，看到线就立刻离开。",
+					"暴怒後的直線裁決更寬更長，看到線就立刻離開。"
+				)
+			return _ui_text(
+				"Below 45% HP he enrages, hits harder, and chains leap aftershocks.",
+				"血量低于 45% 后会暴怒，伤害更高，还会连带跃击余震。",
+				"血量低於 45% 後會暴怒，傷害更高，還會連帶躍擊餘震。"
+			)
 		if state_name == "skill_1_jump_start" or state_name == "skill_1_slam":
-			return "Leap slam is committed. Move off the landing ring before impact."
+			return _ui_text(
+				"Leap slam is committed. Move off the landing ring before impact.",
+				"他已经锁定跃击重砸，落地前离开圈内。",
+				"他已經鎖定躍擊重砸，落地前離開圈內。"
+			)
 		if state_name == "skill_2_charge":
-			return "Line verdict is charging. Side-step the telegraph before the slash fires."
-		return "Respect his cooldowns and save movement for leap or line verdict."
+			return _ui_text(
+				"Line verdict is charging. Side-step the telegraph before the slash fires.",
+				"直线裁决正在蓄势，斩出前侧移离线。",
+				"直線裁決正在蓄勢，斬出前側移離線。"
+			)
+		return _ui_text(
+			"Respect his cooldowns and save movement for leap or line verdict.",
+			"盯住他的技能冷却，把位移留给跃击和直线裁决。",
+			"盯住他的技能冷卻，把位移留給躍擊和直線裁決。"
+		)
 	if script_path.ends_with("royal_guard_formation.gd"):
 		var coverage := float(encounter.get("coverage_progress")) if _has_property(encounter, "coverage_progress") else 0.0
 		var guard_count := 0
@@ -1123,30 +1163,78 @@ func _encounter_threat_hint(encounter: Node) -> String:
 			if guards_value is Array:
 				guard_count = (guards_value as Array).size()
 		if coverage < 1.0:
-			return "The formation stays immune until coverage fills. Survive and isolate exposed guards."
+			return _ui_text(
+				"The formation stays immune until coverage fills. Survive and isolate exposed guards.",
+				"覆盖条填满前阵列都处于免疫，先活下来并单抓露头的近卫。",
+				"覆蓋條填滿前陣列都處於免疫，先活下來並單抓露頭的近衛。"
+			)
 		if guard_count > 2:
-			return "Coverage is broken. Collapse the mobile guards before the crossfire settles."
-		return "The formation is vulnerable. Clean up the remaining guards quickly."
+			return _ui_text(
+				"Coverage is broken. Collapse the mobile guards before the crossfire settles.",
+				"覆盖已被打破，在交叉火力重新站稳前先收掉机动近卫。",
+				"覆蓋已被打破，在交叉火力重新站穩前先收掉機動近衛。"
+			)
+		return _ui_text(
+			"The formation is vulnerable. Clean up the remaining guards quickly.",
+			"阵列已经可破，尽快清掉剩余近卫。",
+			"陣列已經可破，盡快清掉剩餘近衛。"
+		)
 	if script_path.ends_with("twin_princes_boss.gd"):
 		var phase := int(encounter.get("current_phase")) if _has_property(encounter, "current_phase") else 1
 		var state_name := String(encounter.get("state")) if _has_property(encounter, "state") else ""
 		var desperate := bool(encounter.get("desperation_active")) if _has_property(encounter, "desperation_active") else false
 		if phase == 1:
 			if state_name == "teleport_mark" or state_name == "teleport_slash":
-				return "Blink slash lands beside you. Keep moving so the follow-up whiffs."
+				return _ui_text(
+					"Blink slash lands beside you. Keep moving so the follow-up whiffs.",
+					"跃迁斩会贴身落下，持续移动让后手斩空掉。",
+					"躍遷斬會貼身落下，持續移動讓後手斬空掉。"
+				)
 			if state_name == "spear_charge":
-				return "Spear charge owns a straight lane. Step off the line early."
-			return "Phase one alternates blink slash and spear charge with short rests."
+				return _ui_text(
+					"Spear charge owns a straight lane. Step off the line early.",
+					"枪阵突袭会吃满一整条直线，提前离线。",
+					"槍陣突襲會吃滿一整條直線，提前離線。"
+				)
+			return _ui_text(
+				"Phase one alternates blink slash and spear charge with short rests.",
+				"一阶段会在跃迁斩和枪阵突袭之间切换，间歇很短。",
+				"一階段會在躍遷斬和槍陣突襲之間切換，間歇很短。"
+			)
 		if state_name == "phase_change":
-			return "Phase two is arming up. Re-center before barrage patterns start."
+			return _ui_text(
+				"Phase two is arming up. Re-center before barrage patterns start.",
+				"二阶段正在起势，在弹幕开始前回到好走位的位置。",
+				"二階段正在起勢，在彈幕開始前回到好走位的位置。"
+			)
 		if desperate:
 			if state_name == "barrage_cast":
-				return "Desperate barrage fires extra bolts and a second wave. Keep distance, then sidestep."
-			return "Desperate phase speeds up teleports and adds heavier barrage pressure."
+				return _ui_text(
+					"Desperate barrage fires extra bolts and a second wave. Keep distance, then sidestep.",
+					"殊死弹幕会多打一轮追加弹，先拉开，再横移躲散射。",
+					"殊死彈幕會多打一輪追加彈，先拉開，再橫移躲散射。"
+				)
+			return _ui_text(
+				"Desperate phase speeds up teleports and adds heavier barrage pressure.",
+				"殊死阶段会加快跃迁并叠高弹幕压力。",
+				"殊死階段會加快躍遷並疊高彈幕壓力。"
+			)
 		if state_name == "barrage_cast":
-			return "Royal barrage is casting. Create angle before the bolt spread fans out."
-		return "Phase two adds barrage pressure and shorter recovery windows."
-	return "Read telegraphs, preserve space, and do not spend movement too early."
+			return _ui_text(
+				"Royal barrage is casting. Create angle before the bolt spread fans out.",
+				"王室弹幕正在施放，先拉出角度再躲散开的弹群。",
+				"王室彈幕正在施放，先拉出角度再躲散開的彈群。"
+			)
+		return _ui_text(
+			"Phase two adds barrage pressure and shorter recovery windows.",
+			"二阶段会加入弹幕压制，而且留给你的喘息更短。",
+			"二階段會加入彈幕壓制，而且留給你的喘息更短。"
+		)
+	return _ui_text(
+		"Read telegraphs, preserve space, and do not spend movement too early.",
+		"先看预警、留住空间，不要太早把位移交掉。",
+		"先看預警、留住空間，不要太早把位移交掉。"
+	)
 
 func _script_path(target: Object) -> String:
 	if target == null:

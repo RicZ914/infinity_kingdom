@@ -59,16 +59,54 @@ func bind_player(player: Node2D) -> void:
 	target = player
 
 func get_status_title() -> String:
-	return "Grand Prince" if current_phase == 1 else "Saint Prince Yage"
+	return _locale_text("Grand Prince", "大王子", "大王子") if current_phase == 1 else _locale_text("Saint Prince Yage", "圣裔王子雅格", "聖裔王子雅格")
 
 func get_status_text() -> String:
-	return "Phase %d%s\nHP %d / %d\nState: %s" % [
+	return _locale_text("Phase %d%s\nHP %d / %d\nState: %s", "阶段 %d%s\n生命 %d / %d\n状态：%s", "階段 %d%s\n生命 %d / %d\n狀態：%s") % [
 		current_phase,
-		"  DESPERATE" if desperation_active else "",
+		_locale_text("  DESPERATE", "  殊死", "  殊死") if desperation_active else "",
 		int(round(hp)),
 		int(round(max_hp)),
-		String(state)
+		_localized_state_name(String(state))
 	]
+
+func _current_locale() -> String:
+	var ui_settings := get_node_or_null("/root/UISettings")
+	if ui_settings != null and ui_settings.has_method("get_locale"):
+		return String(ui_settings.get_locale())
+	return "en"
+
+func _locale_text(en_text: String, zh_hans_text: String, zh_hant_text: String) -> String:
+	match _current_locale():
+		"zh_Hant":
+			return zh_hant_text
+		"zh_Hans":
+			return zh_hans_text
+		_:
+			return en_text
+
+func _localized_state_name(state_name: String) -> String:
+	match state_name:
+		"intro":
+			return _locale_text("Intro", "登场", "登場")
+		"idle":
+			return _locale_text("Idle", "待机", "待機")
+		"teleport_mark":
+			return _locale_text("Teleport Mark", "跃迁标记", "躍遷標記")
+		"teleport_slash":
+			return _locale_text("Teleport Slash", "跃迁斩", "躍遷斬")
+		"spear_charge":
+			return _locale_text("Spear Charge", "枪阵突袭", "槍陣突襲")
+		"barrage_cast":
+			return _locale_text("Royal Barrage", "王室弹幕", "王室彈幕")
+		"phase_change":
+			return _locale_text("Phase Change", "转阶段", "轉階段")
+		"recover":
+			return _locale_text("Recover", "恢复", "恢復")
+		"dead":
+			return _locale_text("Defeated", "倒下", "倒下")
+		_:
+			return state_name.capitalize()
 
 func _physics_process(delta: float) -> void:
 	if state == &"dead":

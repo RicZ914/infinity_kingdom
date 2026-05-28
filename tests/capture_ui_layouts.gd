@@ -46,8 +46,8 @@ func _run() -> void:
 	await process_frame
 	await _capture_world(world, Vector2i(1280, 720), "relic_offer_zh_hans_1280x720.png")
 	await _capture_world(world, Vector2i(720, 540), "relic_offer_zh_hans_720x540.png")
-	if world.accessory_choice != null and world.accessory_choice.has_method("close"):
-		world.accessory_choice.close()
+	if world.accessory_choice != null and world.accessory_choice.has_method("_on_keep_pressed"):
+		world.accessory_choice._on_keep_pressed()
 	await process_frame
 	await process_frame
 	await _capture_world(world, Vector2i(1280, 720), "battle_ui_zh_hans_1280x720.png")

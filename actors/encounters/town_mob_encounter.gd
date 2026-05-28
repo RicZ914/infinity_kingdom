@@ -148,31 +148,103 @@ func bind_player(player: Node2D) -> void:
 	_start_next_wave()
 
 func get_status_title() -> String:
-	return "Town Enemy Sweep"
+	return _locale_text("Town Enemy Sweep", "城镇敌军清剿", "城鎮敵軍清剿")
 
 func get_status_text() -> String:
 	if active_waves.is_empty():
-		return "Scouts are forming up."
+		return _locale_text("Scouts are forming up.", "敌军正在集结。", "敵軍正在集結。")
 	if wave_index >= active_waves.size():
-		return "All enemy waves cleared."
-	var wave_name: String = String(active_waves[wave_index]["title"]) if wave_index >= 0 and wave_index < active_waves.size() else "Preparing"
+		return _locale_text("All enemy waves cleared.", "敌军波次已清空。", "敵軍波次已清空。")
+	var wave_name: String = _localized_wave_title(String(active_waves[wave_index]["title"])) if wave_index >= 0 and wave_index < active_waves.size() else _locale_text("Preparing", "准备中", "準備中")
 	var modifier_title := get_modifier_title()
-	return "Wave %d / %d\n%s\nModifier: %s\nEnemies remaining %d" % [
+	return _locale_text(
+		"Wave %d / %d\n%s\nModifier: %s\nEnemies remaining %d",
+		"波次 %d / %d\n%s\n词缀：%s\n剩余敌人 %d",
+		"波次 %d / %d\n%s\n詞綴：%s\n剩餘敵人 %d"
+	) % [
 		max(wave_index + 1, 1),
 		active_waves.size(),
 		String(wave_name),
-		modifier_title if not modifier_title.is_empty() else "Standard Patrol",
+		modifier_title if not modifier_title.is_empty() else _locale_text("Standard Patrol", "常规巡逻", "常規巡邏"),
 		active_enemies.size()
 	]
 
 func get_modifier_title() -> String:
-	return String(active_modifier.get("title", ""))
+	return _localized_modifier_text(String(active_modifier.get("id", "")), "title", String(active_modifier.get("title", "")))
 
 func get_modifier_hint() -> String:
-	return String(active_modifier.get("hint", ""))
+	return _localized_modifier_text(String(active_modifier.get("id", "")), "hint", String(active_modifier.get("hint", "")))
 
 func get_modifier_summary() -> String:
-	return String(active_modifier.get("summary", ""))
+	return _localized_modifier_text(String(active_modifier.get("id", "")), "summary", String(active_modifier.get("summary", "")))
+
+func _current_locale() -> String:
+	var ui_settings := get_node_or_null("/root/UISettings")
+	if ui_settings != null and ui_settings.has_method("get_locale"):
+		return String(ui_settings.get_locale())
+	return "en"
+
+func _locale_text(en_text: String, zh_hans_text: String, zh_hant_text: String) -> String:
+	match _current_locale():
+		"zh_Hant":
+			return zh_hant_text
+		"zh_Hans":
+			return zh_hans_text
+		_:
+			return en_text
+
+func _localized_wave_title(title: String) -> String:
+	match title:
+		"Frontline Probe":
+			return _locale_text("Frontline Probe", "前线试探", "前線試探")
+		"Crossfire Patrol":
+			return _locale_text("Crossfire Patrol", "交叉火力巡队", "交叉火力巡隊")
+		"Shielded Volley":
+			return _locale_text("Shielded Volley", "盾阵齐射", "盾陣齊射")
+		"Hunter Pincer":
+			return _locale_text("Hunter Pincer", "猎手钳击", "獵手鉗擊")
+		"Shadow and Spell":
+			return _locale_text("Shadow and Spell", "暗影与秘术", "暗影與秘術")
+		"Arcane Command":
+			return _locale_text("Arcane Command", "奥术统御", "奧術統御")
+		_:
+			return title
+
+func _localized_modifier_text(modifier_id: String, field: String, fallback: String) -> String:
+	match modifier_id:
+		"fortified":
+			match field:
+				"title":
+					return _locale_text("Fortified Line", "固守阵线", "固守陣線")
+				"summary":
+					return _locale_text("Shield carriers reinforce every wave with heavier front-loaded pressure.", "盾卫会让每一波的前排压力都更重。", "盾衛會讓每一波的前排壓力都更重。")
+				"hint":
+					return _locale_text("Break shield carriers first or kite until the frontline opens.", "优先拆盾卫，或拉扯到前排松动为止。", "優先拆盾衛，或拉扯到前排鬆動為止。")
+		"relentless":
+			match field:
+				"title":
+					return _locale_text("Relentless March", "无休行军", "無休行軍")
+				"summary":
+					return _locale_text("All enemies rotate back in faster and give you shorter recovery windows.", "所有敌人的回转更快，你的喘息窗口会更短。", "所有敵人的回轉更快，你的喘息窗口會更短。")
+				"hint":
+					return _locale_text("Do not spend movement too early. The next engage comes back faster than normal.", "不要太早交位移，下一轮贴脸会比平时更快回来。", "不要太早交位移，下一輪貼臉會比平時更快回來。")
+		"crossfire":
+			match field:
+				"title":
+					return _locale_text("Crossfire Lanes", "交叉火力线", "交叉火力線")
+				"summary":
+					return _locale_text("Archers and casters hold lanes longer and punish loose positioning.", "弓手与施法者会更久地压住走位线，站位松散就会被惩罚。", "弓手與施法者會更久地壓住走位線，站位鬆散就會被懲罰。")
+				"hint":
+					return _locale_text("The backline is the timer. Collapse on ranged units before flankers arrive.", "后排就是倒计时，在侧翼近身前先压掉远程。", "後排就是倒計時，在側翼近身前先壓掉遠程。")
+		"hunt_pack":
+			match field:
+				"title":
+					return _locale_text("Hunt Pack", "猎群围猎", "獵群圍獵")
+				"summary":
+					return _locale_text("Hunters and skirmishers surge forward to punish stalled footwork.", "猎手与游击兵会更凶地前压，专抓停顿和失误走位。", "獵手與遊擊兵會更兇地前壓，專抓停頓和失誤走位。")
+				"hint":
+					return _locale_text("Expect harder flanks. Reposition early so hunters cannot pin you into volleys.", "侧翼会更难处理，尽早换位，别让猎手把你钉进齐射区。", "側翼會更難處理，盡早換位，別讓獵手把你釘進齊射區。")
+	return fallback
 
 func _physics_process(_delta: float) -> void:
 	if active_enemies.is_empty() and not waiting_for_next_wave and wave_index >= 0:
