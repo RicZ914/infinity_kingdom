@@ -81,6 +81,8 @@ const ENEMY_PREVIEW_SCALE := Vector2(0.82, 0.82)
 const COLLISION_WALL_THICKNESS := 80.0
 const COLLISION_DEBUG_VISIBLE := false
 const PROP_COLLISION_DEBUG_VISIBLE := true
+const PROP_COLLISION_SOURCE_PADDING := Vector2(1.12, 1.06)
+const PROP_COLLISION_MIN_RATIO := Vector2(0.12, 0.08)
 const RANDOM_PROP_MIN_PER_ROOM := 2
 const RANDOM_PROP_MAX_PER_ROOM := 4
 
@@ -507,9 +509,8 @@ func _add_cover_prop(parent: Node, candidate: Dictionary) -> void:
 	)
 	var texture_to_room_scale := Vector2(room_rect.size.x / float(texture.get_width()), room_rect.size.y / float(texture.get_height()))
 	var prop_position_ratio: Vector2 = candidate["position"]
-	var collision_ratio: Vector2 = candidate["collision"]
 	var world_position := room_rect.position + Vector2(room_rect.size.x * prop_position_ratio.x, room_rect.size.y * prop_position_ratio.y)
-	var collision_size := Vector2(room_rect.size.x * collision_ratio.x, room_rect.size.y * collision_ratio.y)
+	var collision_size := calculate_prop_collision_size(candidate, room_rect.size, source_rect, texture_to_room_scale)
 
 	var body := StaticBody2D.new()
 	body.name = "%sCover" % String(candidate["name"])
@@ -549,6 +550,20 @@ func _add_collision_debug_outline(parent: Node, size: Vector2) -> void:
 	outline.add_point(Vector2(size.x * 0.5, size.y * 0.5))
 	outline.add_point(Vector2(-size.x * 0.5, size.y * 0.5))
 	parent.add_child(outline)
+
+static func calculate_prop_collision_size(candidate: Dictionary, room_size: Vector2, source_rect: Rect2, texture_to_room_scale: Vector2) -> Vector2:
+	var source_world_size := source_rect.size * texture_to_room_scale
+	var manual_ratio: Vector2 = candidate.get("collision", Vector2.ZERO)
+	var manual_size := Vector2(room_size.x * manual_ratio.x, room_size.y * manual_ratio.y)
+	var minimum_size := Vector2(room_size.x * PROP_COLLISION_MIN_RATIO.x, room_size.y * PROP_COLLISION_MIN_RATIO.y)
+	var padded_source_size := Vector2(
+		source_world_size.x * PROP_COLLISION_SOURCE_PADDING.x,
+		source_world_size.y * PROP_COLLISION_SOURCE_PADDING.y
+	)
+	return Vector2(
+		maxf(maxf(padded_source_size.x, manual_size.x), minimum_size.x),
+		maxf(maxf(padded_source_size.y, manual_size.y), minimum_size.y)
+	)
 
 func _add_enemy_previews(parent: Node) -> void:
 	var enemy_root := Node2D.new()

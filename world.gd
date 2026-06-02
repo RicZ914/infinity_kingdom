@@ -277,8 +277,7 @@ func _add_runtime_cover_prop(candidate: Dictionary) -> void:
 	)
 	var texture_to_room_scale := Vector2(room_rect.size.x / float(texture.get_width()), room_rect.size.y / float(texture.get_height()))
 	var position_ratio: Vector2 = candidate["position"]
-	var collision_ratio: Vector2 = candidate["collision"]
-	var collision_size := Vector2(room_rect.size.x * collision_ratio.x, room_rect.size.y * collision_ratio.y)
+	var collision_size := MapBrowserDemo.calculate_prop_collision_size(candidate, room_rect.size, source_rect, texture_to_room_scale)
 	var body := StaticBody2D.new()
 	body.name = "%sCover" % String(candidate["name"])
 	body.collision_layer = 1
