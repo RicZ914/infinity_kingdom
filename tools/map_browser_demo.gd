@@ -61,7 +61,7 @@ const ENEMY_PREVIEWS := [
 	}
 ]
 
-const ROOM_GAP := 96.0
+const ROOM_GAP := 0.0
 const PLAYER_SPEED := 520.0
 const PLAYER_RADIUS := 22.0
 const ENEMY_PREVIEW_SCALE := Vector2(0.82, 0.82)
@@ -69,14 +69,14 @@ const COLLISION_WALL_THICKNESS := 80.0
 const COLLISION_DEBUG_VISIBLE := true
 
 const WALKABLE_AREAS := [
-	Rect2(0.08, 0.52, 0.84, 0.32),
-	Rect2(0.08, 0.50, 0.84, 0.34),
-	Rect2(0.10, 0.50, 0.82, 0.34),
-	Rect2(0.10, 0.47, 0.82, 0.37),
-	Rect2(0.10, 0.49, 0.82, 0.35),
-	Rect2(0.10, 0.50, 0.82, 0.34),
-	Rect2(0.10, 0.49, 0.82, 0.35),
-	Rect2(0.10, 0.51, 0.82, 0.33)
+	Rect2(0.0, 0.52, 1.0, 0.32),
+	Rect2(0.0, 0.50, 1.0, 0.34),
+	Rect2(0.0, 0.50, 1.0, 0.34),
+	Rect2(0.0, 0.47, 1.0, 0.37),
+	Rect2(0.0, 0.49, 1.0, 0.35),
+	Rect2(0.0, 0.50, 1.0, 0.34),
+	Rect2(0.0, 0.49, 1.0, 0.35),
+	Rect2(0.0, 0.51, 1.0, 0.33)
 ]
 
 var player: CharacterBody2D
@@ -112,7 +112,6 @@ func _build_map() -> void:
 	walkable_rects.clear()
 	var x_cursor := 0.0
 	var max_height := 0.0
-	var previous_center := Vector2.ZERO
 	for index in range(ROOM_PATHS.size()):
 		var texture := load(ROOM_PATHS[index]) as Texture2D
 		if texture == null:
@@ -131,11 +130,8 @@ func _build_map() -> void:
 		var room_rect := Rect2(room.position, size)
 		room_rects.append(room_rect)
 		walkable_rects.append(_get_walkable_rect(index, room_rect))
-		var center := room.position + size * 0.5
 		_add_room_label(map_root, ROOM_TITLES[index], room.position + Vector2(24.0, 24.0))
-		if index > 0:
-			_add_connector(map_root, previous_center, center)
-		previous_center = center
+		_add_room_portals(map_root, index, room_rect, walkable_rects[index])
 
 		x_cursor += size.x + ROOM_GAP
 		max_height = maxf(max_height, size.y)
@@ -227,15 +223,41 @@ func _add_room_label(parent: Node, text: String, position: Vector2) -> void:
 	label.add_theme_font_size_override("font_size", 30)
 	parent.add_child(label)
 
-func _add_connector(parent: Node, from_point: Vector2, to_point: Vector2) -> void:
+func _add_room_portals(parent: Node, index: int, room_rect: Rect2, walk_rect: Rect2) -> void:
+	var portal_height: float = min(walk_rect.size.y * 0.72, 220.0)
+	var portal_center_y: float = walk_rect.get_center().y
+	var left_text: String = "START" if index == 0 else "IN"
+	var right_text: String = "EXIT" if index == room_rects.size() - 1 else "OUT"
+	_add_portal_marker(parent, "%s%02d" % [left_text, index + 1], Vector2(room_rect.position.x, portal_center_y), portal_height, left_text, true)
+	_add_portal_marker(parent, "%s%02d" % [right_text, index + 1], Vector2(room_rect.end.x, portal_center_y), portal_height, right_text, false)
+
+func _add_portal_marker(parent: Node, marker_name: String, position: Vector2, height: float, text: String, label_on_left: bool) -> void:
+	var marker := Node2D.new()
+	marker.name = "%sPortal" % marker_name
+	marker.position = position
+	marker.z_index = 25
+	parent.add_child(marker)
+
 	var line := Line2D.new()
-	line.name = "RouteConnector"
-	line.width = 8.0
-	line.default_color = Color(1.0, 0.82, 0.36, 0.68)
-	line.add_point(from_point)
-	line.add_point(to_point)
-	line.z_index = 20
-	parent.add_child(line)
+	line.name = "DoorLine"
+	line.width = 7.0
+	line.default_color = Color(0.42, 1.0, 0.78, 0.88)
+	line.add_point(Vector2(0.0, -height * 0.5))
+	line.add_point(Vector2(0.0, height * 0.5))
+	marker.add_child(line)
+
+	var label := Label.new()
+	label.name = "DoorLabel"
+	label.text = text
+	label.size = Vector2(92.0, 28.0)
+	label.position = Vector2(-106.0, -height * 0.5 - 34.0) if label_on_left else Vector2(14.0, -height * 0.5 - 34.0)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_color_override("font_color", Color(0.66, 1.0, 0.84, 1.0))
+	label.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.9))
+	label.add_theme_constant_override("shadow_offset_x", 2)
+	label.add_theme_constant_override("shadow_offset_y", 2)
+	label.add_theme_font_size_override("font_size", 18)
+	marker.add_child(label)
 
 func _add_bounds_outline(parent: Node) -> void:
 	var outline := Line2D.new()

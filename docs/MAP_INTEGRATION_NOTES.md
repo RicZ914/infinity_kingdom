@@ -37,7 +37,7 @@ Recommended final direction:
 - Keep high-resolution room PNGs as visual backdrops.
 - Add collisions/walk masks later, either by TileMap or by authored CollisionPolygon2D.
 
-For now, `res://tools/map_browser_demo.tscn` is a browsing prototype. It stitches room PNGs into a long route and gives a placeholder player plus camera. It also generates rough rectangular `StaticBody2D` collision boxes at runtime so the placeholder player can browse inside an approximate walkable route.
+For now, `res://tools/map_browser_demo.tscn` is a browsing prototype. It stitches room PNGs into a long route and gives a placeholder player plus camera. Adjacent room images are placed edge-to-edge: each room's left edge is treated as an entrance and its right edge is treated as an exit. It also generates rough rectangular `StaticBody2D` collision boxes at runtime so the placeholder player can browse inside an approximate walkable route.
 
 The same demo also places six enemy material previews on top of the stitched route:
 
