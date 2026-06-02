@@ -49,6 +49,21 @@ Camera and room flow:
 - In this prototype, pressing `C` marks the active room as cleared. In the real integration, replace that with an enemy-death counter from the encounter system.
 - After clearing, walking into the right exit transfers the player to the next room's left entrance.
 
+Main flow mapping in `res://world.gd`:
+
+```text
+room_01_outer_entrance      -> town mob encounter
+room_02_street_battle_1     -> town mob encounter
+room_03_street_battle_2     -> town mob encounter
+room_04_central_plaza       -> town mob encounter
+room_09_elite_zone          -> town mob encounter
+room_10_palace_hall         -> Judicator boss
+room_11_palace_corridor     -> Royal Guard Formation
+room_12_king_gate           -> Twin Princes boss
+```
+
+The first five rooms are treated as outside/approach rooms and use the six soldier enemy types. The first palace room uses the first boss. The king gate / throne-front room uses the final twin boss.
+
 The same demo also places six enemy material previews on top of the stitched route:
 
 ```text

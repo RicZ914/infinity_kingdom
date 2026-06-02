@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://actors/enemy/town_enemy.gd" id="1"]
 [ext_resource type="Script" path="res://combat/health_component.gd" id="2"]
+[ext_resource type="Texture2D" path="res://actors/enemy/textures/hunter.png" id="3"]
 
 [sub_resource type="CircleShape2D" id="1"]
 radius = 18.0
@@ -17,11 +18,14 @@ attack_damage = 10.0
 attack_interval = 3.0
 attack_range = 58.0
 
-[node name="Body" type="Polygon2D" parent="."]
-color = Color(0.58, 0.28, 0.28, 1)
-polygon = PackedVector2Array(-14, 20, 14, 20, 18, -2, 6, -22, -6, -22, -18, -2)
+[node name="Body" type="Sprite2D" parent="."]
+texture = ExtResource("3")
+position = Vector2(0, -6)
+scale = Vector2(0.78, 0.78)
+texture_filter = 1
 
 [node name="Weapon" type="Polygon2D" parent="."]
+visible = false
 color = Color(0.9, 0.82, 0.7, 1)
 position = Vector2(12, -4)
 polygon = PackedVector2Array(-2, 6, 3, 6, 5, -12, 0, -22, -4, -12)

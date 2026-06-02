@@ -9,10 +9,46 @@ const RUN_PICKUP_SCRIPT := preload("res://systems/pickups/run_pickup.gd")
 const WORLD_HEALTH_BAR_SCRIPT := preload("res://ui/world_health_bar.gd")
 const ENCOUNTER_SCENES := [
 	preload("res://actors/encounters/town_mob_encounter.tscn"),
+	preload("res://actors/encounters/town_mob_encounter.tscn"),
+	preload("res://actors/encounters/town_mob_encounter.tscn"),
+	preload("res://actors/encounters/town_mob_encounter.tscn"),
+	preload("res://actors/encounters/town_mob_encounter.tscn"),
 	preload("res://actors/bosses/town/judicator_boss.tscn"),
 	preload("res://actors/bosses/town/royal_guard_formation.tscn"),
 	preload("res://actors/bosses/town/twin_princes_boss.tscn")
 ]
+const MAP_ROOM_TEXTURES := [
+	"res://assets/maps/stitched_demo/room_01_outer_entrance.png",
+	"res://assets/maps/stitched_demo/room_02_street_battle_1.png",
+	"res://assets/maps/stitched_demo/room_03_street_battle_2.png",
+	"res://assets/maps/stitched_demo/room_04_central_plaza.png",
+	"res://assets/maps/stitched_demo/room_09_elite_zone.png",
+	"res://assets/maps/stitched_demo/room_10_palace_hall.png",
+	"res://assets/maps/stitched_demo/room_11_palace_corridor.png",
+	"res://assets/maps/stitched_demo/room_12_king_gate.png"
+]
+const MAP_ROOM_TITLES := [
+	"Outer Entrance",
+	"Street Battle I",
+	"Street Battle II",
+	"Central Plaza",
+	"Elite Gate",
+	"Palace Hall",
+	"Palace Corridor",
+	"King Gate"
+]
+const MAP_WALKABLE_AREAS := [
+	Rect2(0.0, 0.52, 1.0, 0.32),
+	Rect2(0.0, 0.50, 1.0, 0.34),
+	Rect2(0.0, 0.50, 1.0, 0.34),
+	Rect2(0.0, 0.47, 1.0, 0.37),
+	Rect2(0.0, 0.49, 1.0, 0.35),
+	Rect2(0.0, 0.50, 1.0, 0.34),
+	Rect2(0.0, 0.49, 1.0, 0.35),
+	Rect2(0.0, 0.51, 1.0, 0.33)
+]
+const MAP_CAMERA_ZOOM := Vector2(1.7, 1.7)
+const MAP_BOUNDARY_THICKNESS := 72.0
 const RELIC_REROLL_COST := 20
 const HIT_FEEDBACK_COOLDOWN_MSEC := 55
 const LEVEL_UP_FLASH_COLOR := Color(1.0, 0.92, 0.62, 1.0)
@@ -50,9 +86,14 @@ var return_pause_after_audio_panel: bool = false
 var return_pause_after_settings_panel: bool = false
 var last_attack_feedback_msec: int = 0
 var reward_rng := RandomNumberGenerator.new()
+var map_root: Node2D = null
+var map_camera: Camera2D = null
+var map_room_rects: Array[Rect2] = []
+var map_walkable_rects: Array[Rect2] = []
 
 func _ready() -> void:
 	reward_rng.randomize()
+	_prepare_map_runtime()
 	if get_tree() != null and not get_tree().node_added.is_connected(_on_tree_node_added):
 		get_tree().node_added.connect(_on_tree_node_added)
 	RunDirector.configure_event_count(maxi(ENCOUNTER_SCENES.size() - 1, 1))
@@ -101,7 +142,136 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	_sync_audio_hint_state()
+	_update_map_camera()
 	_refresh_battle_status()
+
+func _prepare_map_runtime() -> void:
+	_hide_legacy_arena()
+	map_root = Node2D.new()
+	map_root.name = "RuntimeMapRooms"
+	map_root.z_index = -20
+	add_child(map_root)
+	_build_runtime_map_rooms()
+	map_camera = Camera2D.new()
+	map_camera.name = "RoomCamera2D"
+	map_camera.enabled = true
+	map_camera.zoom = MAP_CAMERA_ZOOM
+	map_camera.position_smoothing_enabled = true
+	map_camera.position_smoothing_speed = 9.0
+	add_child(map_camera)
+
+func _hide_legacy_arena() -> void:
+	for node_name in ["BackdropImage", "Backdrop", "CenterLane", "ThroneDais", "ThroneBanner"]:
+		var node := get_node_or_null(node_name)
+		if node is CanvasItem:
+			(node as CanvasItem).visible = false
+	var bounds := get_node_or_null("Bounds")
+	if bounds != null:
+		for child in bounds.get_children():
+			if child is CollisionObject2D:
+				(child as CollisionObject2D).collision_layer = 0
+				(child as CollisionObject2D).collision_mask = 0
+			if child is CanvasItem:
+				(child as CanvasItem).visible = false
+
+func _build_runtime_map_rooms() -> void:
+	map_room_rects.clear()
+	map_walkable_rects.clear()
+	var x_cursor := 0.0
+	for index in range(MAP_ROOM_TEXTURES.size()):
+		var texture := load(String(MAP_ROOM_TEXTURES[index])) as Texture2D
+		if texture == null:
+			push_warning("Missing map texture: %s" % MAP_ROOM_TEXTURES[index])
+			continue
+		var sprite := Sprite2D.new()
+		sprite.name = "MapRoom%02d" % [index + 1]
+		sprite.texture = texture
+		sprite.centered = false
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		sprite.position = Vector2(x_cursor, 0.0)
+		map_root.add_child(sprite)
+		var room_rect := Rect2(sprite.position, Vector2(float(texture.get_width()), float(texture.get_height())))
+		map_room_rects.append(room_rect)
+		map_walkable_rects.append(_map_walkable_rect(index, room_rect))
+		_add_runtime_room_walls(index, room_rect, map_walkable_rects[index])
+		x_cursor += room_rect.size.x
+
+func _map_walkable_rect(index: int, room_rect: Rect2) -> Rect2:
+	var ratio: Rect2 = MAP_WALKABLE_AREAS[min(index, MAP_WALKABLE_AREAS.size() - 1)]
+	return Rect2(
+		room_rect.position + Vector2(room_rect.size.x * ratio.position.x, room_rect.size.y * ratio.position.y),
+		Vector2(room_rect.size.x * ratio.size.x, room_rect.size.y * ratio.size.y)
+	)
+
+func _add_runtime_room_walls(index: int, room_rect: Rect2, walk_rect: Rect2) -> void:
+	_add_runtime_wall("Room%02dTopWall" % [index + 1], Rect2(room_rect.position, Vector2(room_rect.size.x, walk_rect.position.y - room_rect.position.y)))
+	_add_runtime_wall("Room%02dBottomWall" % [index + 1], Rect2(Vector2(room_rect.position.x, walk_rect.end.y), Vector2(room_rect.size.x, room_rect.end.y - walk_rect.end.y)))
+	_add_runtime_wall("Room%02dLeftWall" % [index + 1], Rect2(Vector2(walk_rect.position.x - MAP_BOUNDARY_THICKNESS, walk_rect.position.y), Vector2(MAP_BOUNDARY_THICKNESS, walk_rect.size.y)))
+	_add_runtime_wall("Room%02dRightWall" % [index + 1], Rect2(Vector2(walk_rect.end.x, walk_rect.position.y), Vector2(MAP_BOUNDARY_THICKNESS, walk_rect.size.y)))
+
+func _add_runtime_wall(wall_name: String, rect: Rect2) -> void:
+	if map_root == null or rect.size.x <= 0.0 or rect.size.y <= 0.0:
+		return
+	var body := StaticBody2D.new()
+	body.name = wall_name
+	body.collision_layer = 1
+	body.collision_mask = 2
+	body.position = rect.get_center()
+	map_root.add_child(body)
+	var shape := CollisionShape2D.new()
+	var rectangle := RectangleShape2D.new()
+	rectangle.size = rect.size
+	shape.shape = rectangle
+	body.add_child(shape)
+
+func _activate_map_room(room_index: int) -> void:
+	if map_walkable_rects.is_empty():
+		return
+	var clamped_index := clampi(room_index, 0, map_walkable_rects.size() - 1)
+	spawn_marker.position = _player_spawn_for_room(clamped_index)
+	encounter_marker.position = _encounter_spawn_for_room(clamped_index)
+	if player_character != null and is_instance_valid(player_character):
+		player_character.position = spawn_marker.position
+	_update_map_camera(true)
+
+func _player_spawn_for_room(room_index: int) -> Vector2:
+	if map_walkable_rects.is_empty():
+		return spawn_marker.position
+	var walk_rect := map_walkable_rects[clampi(room_index, 0, map_walkable_rects.size() - 1)]
+	return walk_rect.position + Vector2(walk_rect.size.x * 0.14, walk_rect.size.y * 0.54)
+
+func _encounter_spawn_for_room(room_index: int) -> Vector2:
+	if map_walkable_rects.is_empty():
+		return encounter_marker.position
+	var walk_rect := map_walkable_rects[clampi(room_index, 0, map_walkable_rects.size() - 1)]
+	var y_ratio: float = 0.76 if room_index <= 4 else 0.58
+	return walk_rect.position + Vector2(walk_rect.size.x * 0.56, walk_rect.size.y * y_ratio)
+
+func _update_map_camera(force: bool = false) -> void:
+	if map_camera == null or player_character == null or not is_instance_valid(player_character) or map_room_rects.is_empty():
+		return
+	var room_index := clampi(encounter_index, 0, map_room_rects.size() - 1)
+	var target := _clamped_camera_position(room_index, (player_character as Node2D).global_position)
+	if force:
+		map_camera.position_smoothing_enabled = false
+		map_camera.global_position = target
+		map_camera.position_smoothing_enabled = true
+	else:
+		map_camera.global_position = target
+
+func _clamped_camera_position(room_index: int, target: Vector2) -> Vector2:
+	var room_rect := map_room_rects[clampi(room_index, 0, map_room_rects.size() - 1)]
+	var viewport_size := Vector2(get_viewport_rect().size)
+	var visible_size := Vector2(viewport_size.x / MAP_CAMERA_ZOOM.x, viewport_size.y / MAP_CAMERA_ZOOM.y)
+	var half_size := visible_size * 0.5
+	var min_x := room_rect.position.x + half_size.x
+	var max_x := room_rect.end.x - half_size.x
+	var min_y := room_rect.position.y + half_size.y
+	var max_y := room_rect.end.y - half_size.y
+	var clamped := target
+	clamped.x = room_rect.get_center().x if min_x > max_x else clampf(target.x, min_x, max_x)
+	clamped.y = room_rect.get_center().y if min_y > max_y else clampf(target.y, min_y, max_y)
+	return clamped
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -172,9 +342,10 @@ func _on_character_selected(character_id: StringName) -> void:
 	elif character_id == &"mage":
 		next_scene = MAGE_SCENE
 	player_character = next_scene.instantiate()
-	player_character.position = spawn_marker.position
+	player_character.position = _player_spawn_for_room(0)
 	add_child(player_character)
 	player_character.z_index = 3
+	_update_map_camera(true)
 	if character_select != null:
 		character_select.visible = false
 	_update_screen_layers()
@@ -201,6 +372,7 @@ func _start_next_encounter() -> void:
 		active_encounter_prep.clear()
 		_complete_run_victory()
 		return
+	_activate_map_room(encounter_index)
 	_play_audio_profile_for_encounter(encounter_index)
 	current_encounter = ENCOUNTER_SCENES[encounter_index].instantiate()
 	current_encounter.position = encounter_marker.position
@@ -929,9 +1101,9 @@ func _refresh_battle_status(override_title: String = "", override_subtitle: Stri
 			current_encounter.get_status_title(),
 			current_encounter.get_status_text(),
 			_localized_detail_text(_ui_text(
-				"Encounter order: Town Enemies -> Judicator -> Guard Formation -> Twin Princes",
-				"遭遇顺序：城镇敌群 -> 审判官 -> 近卫方阵 -> 双子王子",
-				"遭遇順序：城鎮敵群 -> 審判官 -> 近衛方陣 -> 雙子王子"
+				"Route: outer rooms use soldiers, Palace Hall uses the first boss, King Gate uses Twin Princes.",
+				"路线：宫外地图为小兵战，皇宫前厅放第一个 Boss，王门前放双子 Boss。",
+				"路線：宮外地圖為小兵戰，皇宮前廳放第一個 Boss，王門前放雙子 Boss。"
 			))
 		)
 	if battle_status.has_method("set_context"):

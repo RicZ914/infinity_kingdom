@@ -26,8 +26,8 @@ enum EnemyType {
 @export var elite: bool = false
 @export var elite_scale: float = 2.0
 
-@onready var body: Polygon2D = $Body
-@onready var weapon: Polygon2D = $Weapon
+@onready var body: CanvasItem = $Body
+@onready var weapon: Node2D = $Weapon
 @onready var telegraph_ring: Line2D = $TelegraphRing
 @onready var telegraph_line: Line2D = $TelegraphLine
 @onready var projectile_spawner: Node2D = $ProjectileSpawner
@@ -602,7 +602,7 @@ func _update_visuals() -> void:
 		color = color.lerp(Color(1.0, 0.82, 0.46, 1.0), 0.35)
 	if silenced_time_remaining > 0.0:
 		color = Color(0.72, 0.64, 0.92, 1.0)
-	body.color = color
+	_set_body_tint(color)
 	telegraph_ring.visible = state == &"draw_bow" or state == &"cast_bolt" or state == &"basic_cast"
 	telegraph_ring.default_color = color.lightened(0.25)
 	var pulse := 0.82 + 0.18 * sin(Time.get_ticks_msec() * 0.008)
@@ -612,7 +612,7 @@ func _update_visuals() -> void:
 	if telegraph_line.visible:
 		telegraph_line.width = 3.2 + 0.8 * pulse
 		telegraph_line.modulate = Color(1.0, 1.0, 1.0, 0.72 + 0.18 * pulse)
-	if target != null and is_instance_valid(target):
+	if weapon != null and target != null and is_instance_valid(target):
 		weapon.rotation = (target.global_position - global_position).angle()
 		projectile_spawner.position.x = 26.0 if target.global_position.x >= global_position.x else -26.0
 
@@ -625,12 +625,20 @@ func _spawn_damage_number(amount: float, is_critical: bool) -> void:
 func _on_damaged(_amount: float, remaining_hp: float, _source: Node) -> void:
 	hp = remaining_hp
 	Sfx.play_event(&"enemy_generic_hit", global_position, -4.0)
-	body.color = Color(1.0, 0.58, 0.58, 1.0)
+	_set_body_tint(Color(1.0, 0.58, 0.58, 1.0))
 	var timer := get_tree().create_timer(0.12)
 	timer.timeout.connect(func() -> void:
 		if is_instance_valid(self) and hp > 0.0:
 			_update_visuals()
 	)
+
+func _set_body_tint(color: Color) -> void:
+	if body == null:
+		return
+	if body is Polygon2D:
+		(body as Polygon2D).color = color
+	else:
+		body.modulate = color
 
 func _on_died() -> void:
 	hp = 0.0
