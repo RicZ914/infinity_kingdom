@@ -75,6 +75,8 @@ const ENEMY_PREVIEWS := [
 const ROOM_GAP := 0.0
 const PLAYER_SPEED := 520.0
 const PLAYER_RADIUS := 22.0
+const CAMERA_ZOOM := Vector2(1.7, 1.7)
+const ROOM_EXIT_MARGIN := 26.0
 const ENEMY_PREVIEW_SCALE := Vector2(0.82, 0.82)
 const COLLISION_WALL_THICKNESS := 80.0
 const COLLISION_DEBUG_VISIBLE := false
@@ -134,9 +136,12 @@ const PROP_CANDIDATES := [
 
 var player: CharacterBody2D
 var camera: Camera2D
+var hud_label: Label
 var map_bounds := Rect2(Vector2.ZERO, Vector2.ZERO)
 var room_rects: Array[Rect2] = []
 var walkable_rects: Array[Rect2] = []
+var room_cleared: Array[bool] = []
+var active_room_index := 0
 var rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
@@ -149,14 +154,15 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if player == null:
 		return
+	if Input.is_key_pressed(KEY_C):
+		_mark_current_room_cleared()
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if input == Vector2.ZERO:
 		input = _fallback_keyboard_vector()
 	player.velocity = input * PLAYER_SPEED
 	player.move_and_slide()
-	if map_bounds.size != Vector2.ZERO:
-		player.position.x = clampf(player.position.x, map_bounds.position.x + PLAYER_RADIUS, map_bounds.end.x - PLAYER_RADIUS)
-		player.position.y = clampf(player.position.y, map_bounds.position.y + PLAYER_RADIUS, map_bounds.end.y - PLAYER_RADIUS)
+	_apply_room_bounds()
+	_update_camera_position()
 
 func _build_map() -> void:
 	var map_root := Node2D.new()
@@ -165,6 +171,7 @@ func _build_map() -> void:
 
 	room_rects.clear()
 	walkable_rects.clear()
+	room_cleared.clear()
 	var x_cursor := 0.0
 	var max_height := 0.0
 	for index in range(ROOM_PATHS.size()):
@@ -185,6 +192,7 @@ func _build_map() -> void:
 		var room_rect := Rect2(room.position, size)
 		room_rects.append(room_rect)
 		walkable_rects.append(_get_walkable_rect(index, room_rect))
+		room_cleared.append(false)
 		_add_room_label(map_root, ROOM_TITLES[index], room.position + Vector2(24.0, 24.0))
 		_add_room_portals(map_root, index, room_rect, walkable_rects[index])
 
@@ -237,22 +245,23 @@ func _build_camera() -> void:
 	camera = Camera2D.new()
 	camera.name = "Camera2D"
 	camera.enabled = true
-	camera.zoom = Vector2(0.65, 0.65)
+	camera.zoom = CAMERA_ZOOM
 	camera.position_smoothing_enabled = true
-	camera.position_smoothing_speed = 8.0
-	player.add_child(camera)
+	camera.position_smoothing_speed = 10.0
+	add_child(camera)
+	_update_camera_position()
 
 func _build_help_label() -> void:
 	var canvas := CanvasLayer.new()
 	canvas.name = "HUD"
 	add_child(canvas)
 
-	var label := Label.new()
-	label.text = "Map Browser Demo | WASD/Arrow keys move | Rough collision boxes are enabled."
-	label.position = Vector2(24.0, 18.0)
-	label.add_theme_color_override("font_color", Color(1.0, 0.96, 0.78, 1.0))
-	label.add_theme_font_size_override("font_size", 22)
-	canvas.add_child(label)
+	hud_label = Label.new()
+	hud_label.position = Vector2(24.0, 18.0)
+	hud_label.add_theme_color_override("font_color", Color(1.0, 0.96, 0.78, 1.0))
+	hud_label.add_theme_font_size_override("font_size", 22)
+	canvas.add_child(hud_label)
+	_update_hud()
 
 func _get_walkable_rect(index: int, room_rect: Rect2) -> Rect2:
 	var ratio: Rect2 = WALKABLE_AREAS[min(index, WALKABLE_AREAS.size() - 1)]
@@ -266,6 +275,72 @@ func _get_player_spawn() -> Vector2:
 		return Vector2(180.0, 560.0)
 	var first_walkable := walkable_rects[0]
 	return first_walkable.position + Vector2(first_walkable.size.x * 0.12, first_walkable.size.y * 0.5)
+
+func _apply_room_bounds() -> void:
+	if walkable_rects.is_empty():
+		return
+	var walk_rect := walkable_rects[active_room_index]
+	var min_x := walk_rect.position.x + PLAYER_RADIUS
+	var max_x := walk_rect.end.x - PLAYER_RADIUS
+	var min_y := walk_rect.position.y + PLAYER_RADIUS
+	var max_y := walk_rect.end.y - PLAYER_RADIUS
+	if player.position.x >= max_x - ROOM_EXIT_MARGIN and _is_current_room_cleared() and active_room_index < walkable_rects.size() - 1:
+		_transition_to_room(active_room_index + 1)
+		return
+	player.position.x = clampf(player.position.x, min_x, max_x)
+	player.position.y = clampf(player.position.y, min_y, max_y)
+
+func _transition_to_room(next_room_index: int) -> void:
+	active_room_index = clampi(next_room_index, 0, walkable_rects.size() - 1)
+	var walk_rect := walkable_rects[active_room_index]
+	player.position = walk_rect.position + Vector2(PLAYER_RADIUS + 36.0, walk_rect.size.y * 0.5)
+	player.velocity = Vector2.ZERO
+	_update_camera_position(true)
+	_update_hud()
+
+func _mark_current_room_cleared() -> void:
+	if active_room_index < 0 or active_room_index >= room_cleared.size() or room_cleared[active_room_index]:
+		return
+	room_cleared[active_room_index] = true
+	_update_hud()
+
+func _is_current_room_cleared() -> bool:
+	return active_room_index >= 0 and active_room_index < room_cleared.size() and room_cleared[active_room_index]
+
+func _update_camera_position(force: bool = false) -> void:
+	if camera == null or player == null or room_rects.is_empty():
+		return
+	var target := _get_clamped_camera_position(active_room_index, player.position)
+	if force:
+		camera.position_smoothing_enabled = false
+		camera.global_position = target
+		camera.position_smoothing_enabled = true
+	else:
+		camera.global_position = target
+
+func _get_clamped_camera_position(room_index: int, target: Vector2) -> Vector2:
+	var room_rect := room_rects[room_index]
+	var viewport_size := Vector2(get_viewport_rect().size)
+	var visible_size := Vector2(viewport_size.x / CAMERA_ZOOM.x, viewport_size.y / CAMERA_ZOOM.y)
+	var half_size := visible_size * 0.5
+	var min_x := room_rect.position.x + half_size.x
+	var max_x := room_rect.end.x - half_size.x
+	var min_y := room_rect.position.y + half_size.y
+	var max_y := room_rect.end.y - half_size.y
+	var clamped := target
+	clamped.x = room_rect.get_center().x if min_x > max_x else clampf(target.x, min_x, max_x)
+	clamped.y = room_rect.get_center().y if min_y > max_y else clampf(target.y, min_y, max_y)
+	return clamped
+
+func _update_hud() -> void:
+	if hud_label == null:
+		return
+	var status := "CLEARED - walk to OUT" if _is_current_room_cleared() else "LOCKED - press C to simulate all enemies defeated"
+	hud_label.text = "Room %d/%d | %s | WASD/Arrow move | Camera locked to current room" % [
+		active_room_index + 1,
+		room_rects.size(),
+		status
+	]
 
 func _add_room_label(parent: Node, text: String, position: Vector2) -> void:
 	var label := Label.new()

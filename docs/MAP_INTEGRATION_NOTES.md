@@ -41,6 +41,14 @@ For now, `res://tools/map_browser_demo.tscn` is a browsing prototype. It stitche
 
 The demo now uses the matching transparent prop layers under `res://assets/maps/stitched_demo/props/`. Each room has a set of visually checked prop candidates, and every run randomly chooses a few cover props per room. Generated cover props are `StaticBody2D` nodes with their own `CollisionShape2D`, so they can be used as temporary cover against bullets or melee attack traces.
 
+Camera and room flow:
+
+- The camera is locked to the active room and clamps inside that room's bounds.
+- The camera zoom is intentionally closer than the old browser view, so a room is not shown all at once.
+- The player cannot leave through the right exit until the active room is cleared.
+- In this prototype, pressing `C` marks the active room as cleared. In the real integration, replace that with an enemy-death counter from the encounter system.
+- After clearing, walking into the right exit transfers the player to the next room's left entrance.
+
 The same demo also places six enemy material previews on top of the stitched route:
 
 ```text
