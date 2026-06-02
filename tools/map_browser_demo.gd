@@ -65,11 +65,25 @@ const ROOM_GAP := 96.0
 const PLAYER_SPEED := 520.0
 const PLAYER_RADIUS := 22.0
 const ENEMY_PREVIEW_SCALE := Vector2(0.82, 0.82)
+const COLLISION_WALL_THICKNESS := 80.0
+const COLLISION_DEBUG_VISIBLE := true
 
-var player: Node2D
+const WALKABLE_AREAS := [
+	Rect2(0.08, 0.52, 0.84, 0.32),
+	Rect2(0.08, 0.50, 0.84, 0.34),
+	Rect2(0.10, 0.50, 0.82, 0.34),
+	Rect2(0.10, 0.47, 0.82, 0.37),
+	Rect2(0.10, 0.49, 0.82, 0.35),
+	Rect2(0.10, 0.50, 0.82, 0.34),
+	Rect2(0.10, 0.49, 0.82, 0.35),
+	Rect2(0.10, 0.51, 0.82, 0.33)
+]
+
+var player: CharacterBody2D
 var camera: Camera2D
 var map_bounds := Rect2(Vector2.ZERO, Vector2.ZERO)
 var room_rects: Array[Rect2] = []
+var walkable_rects: Array[Rect2] = []
 
 func _ready() -> void:
 	_build_map()
@@ -83,7 +97,8 @@ func _physics_process(delta: float) -> void:
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if input == Vector2.ZERO:
 		input = _fallback_keyboard_vector()
-	player.position += input * PLAYER_SPEED * delta
+	player.velocity = input * PLAYER_SPEED
+	player.move_and_slide()
 	if map_bounds.size != Vector2.ZERO:
 		player.position.x = clampf(player.position.x, map_bounds.position.x + PLAYER_RADIUS, map_bounds.end.x - PLAYER_RADIUS)
 		player.position.y = clampf(player.position.y, map_bounds.position.y + PLAYER_RADIUS, map_bounds.end.y - PLAYER_RADIUS)
@@ -94,6 +109,7 @@ func _build_map() -> void:
 	add_child(map_root)
 
 	room_rects.clear()
+	walkable_rects.clear()
 	var x_cursor := 0.0
 	var max_height := 0.0
 	var previous_center := Vector2.ZERO
@@ -114,6 +130,7 @@ func _build_map() -> void:
 		var size := Vector2(float(texture.get_width()), float(texture.get_height()))
 		var room_rect := Rect2(room.position, size)
 		room_rects.append(room_rect)
+		walkable_rects.append(_get_walkable_rect(index, room_rect))
 		var center := room.position + size * 0.5
 		_add_room_label(map_root, ROOM_TITLES[index], room.position + Vector2(24.0, 24.0))
 		if index > 0:
@@ -125,13 +142,23 @@ func _build_map() -> void:
 
 	map_bounds = Rect2(Vector2.ZERO, Vector2(maxf(x_cursor - ROOM_GAP, 0.0), max_height))
 	_add_bounds_outline(map_root)
+	_add_collision_boxes(map_root)
 	_add_enemy_previews(map_root)
 
 func _build_player() -> void:
-	player = Node2D.new()
+	player = CharacterBody2D.new()
 	player.name = "PlaceholderPlayer"
-	player.position = Vector2(180.0, 560.0)
+	player.collision_layer = 2
+	player.collision_mask = 1
+	player.position = _get_player_spawn()
 	add_child(player)
+
+	var collision := CollisionShape2D.new()
+	collision.name = "CollisionShape2D"
+	var circle := CircleShape2D.new()
+	circle.radius = PLAYER_RADIUS
+	collision.shape = circle
+	player.add_child(collision)
 
 	var body := Polygon2D.new()
 	body.name = "Body"
@@ -169,11 +196,24 @@ func _build_help_label() -> void:
 	add_child(canvas)
 
 	var label := Label.new()
-	label.text = "Map Browser Demo | WASD/Arrow keys move | This is a visual stitching prototype, no collisions yet."
+	label.text = "Map Browser Demo | WASD/Arrow keys move | Rough collision boxes are enabled."
 	label.position = Vector2(24.0, 18.0)
 	label.add_theme_color_override("font_color", Color(1.0, 0.96, 0.78, 1.0))
 	label.add_theme_font_size_override("font_size", 22)
 	canvas.add_child(label)
+
+func _get_walkable_rect(index: int, room_rect: Rect2) -> Rect2:
+	var ratio: Rect2 = WALKABLE_AREAS[min(index, WALKABLE_AREAS.size() - 1)]
+	return Rect2(
+		room_rect.position + Vector2(room_rect.size.x * ratio.position.x, room_rect.size.y * ratio.position.y),
+		Vector2(room_rect.size.x * ratio.size.x, room_rect.size.y * ratio.size.y)
+	)
+
+func _get_player_spawn() -> Vector2:
+	if walkable_rects.is_empty():
+		return Vector2(180.0, 560.0)
+	var first_walkable := walkable_rects[0]
+	return first_walkable.position + Vector2(first_walkable.size.x * 0.12, first_walkable.size.y * 0.5)
 
 func _add_room_label(parent: Node, text: String, position: Vector2) -> void:
 	var label := Label.new()
@@ -209,6 +249,70 @@ func _add_bounds_outline(parent: Node) -> void:
 	outline.add_point(Vector2(map_bounds.position.x, map_bounds.end.y))
 	outline.z_index = 30
 	parent.add_child(outline)
+
+func _add_collision_boxes(parent: Node) -> void:
+	var collision_root := Node2D.new()
+	collision_root.name = "CollisionBoxes"
+	collision_root.z_index = 35
+	parent.add_child(collision_root)
+
+	for index in range(walkable_rects.size()):
+		var room_rect := room_rects[index]
+		var walk_rect := walkable_rects[index]
+		_add_blocker(collision_root, "Room%02dTopWall" % [index + 1], Rect2(room_rect.position, Vector2(room_rect.size.x, walk_rect.position.y - room_rect.position.y)))
+		_add_blocker(collision_root, "Room%02dBottomWall" % [index + 1], Rect2(Vector2(room_rect.position.x, walk_rect.end.y), Vector2(room_rect.size.x, room_rect.end.y - walk_rect.end.y)))
+		if index == 0:
+			_add_blocker(collision_root, "RouteLeftWall", Rect2(Vector2(walk_rect.position.x - COLLISION_WALL_THICKNESS, walk_rect.position.y), Vector2(COLLISION_WALL_THICKNESS, walk_rect.size.y)))
+		if index == walkable_rects.size() - 1:
+			_add_blocker(collision_root, "RouteRightWall", Rect2(Vector2(walk_rect.end.x, walk_rect.position.y), Vector2(COLLISION_WALL_THICKNESS, walk_rect.size.y)))
+
+	for index in range(1, walkable_rects.size()):
+		_add_gap_collision(collision_root, index - 1, index)
+
+func _add_gap_collision(parent: Node, previous_index: int, current_index: int) -> void:
+	var previous_walkable := walkable_rects[previous_index]
+	var current_walkable := walkable_rects[current_index]
+	var gap_x := previous_walkable.end.x
+	var gap_width := current_walkable.position.x - previous_walkable.end.x
+	if gap_width <= 0.0:
+		return
+
+	var corridor_height: float = min(previous_walkable.size.y, current_walkable.size.y) * 0.58
+	var corridor_center_y: float = (previous_walkable.get_center().y + current_walkable.get_center().y) * 0.5
+	var corridor_top: float = corridor_center_y - corridor_height * 0.5
+	var corridor_bottom: float = corridor_center_y + corridor_height * 0.5
+	_add_blocker(parent, "Gap%02dTopWall" % current_index, Rect2(Vector2(gap_x, 0.0), Vector2(gap_width, corridor_top)))
+	_add_blocker(parent, "Gap%02dBottomWall" % current_index, Rect2(Vector2(gap_x, corridor_bottom), Vector2(gap_width, map_bounds.end.y - corridor_bottom)))
+
+func _add_blocker(parent: Node, blocker_name: String, rect: Rect2) -> void:
+	if rect.size.x <= 0.0 or rect.size.y <= 0.0:
+		return
+
+	var body := StaticBody2D.new()
+	body.name = blocker_name
+	body.collision_layer = 1
+	body.collision_mask = 2
+	body.position = rect.get_center()
+	parent.add_child(body)
+
+	var shape := CollisionShape2D.new()
+	shape.name = "CollisionShape2D"
+	var rectangle := RectangleShape2D.new()
+	rectangle.size = rect.size
+	shape.shape = rectangle
+	body.add_child(shape)
+
+	if COLLISION_DEBUG_VISIBLE:
+		var visual := Polygon2D.new()
+		visual.name = "DebugFill"
+		visual.color = Color(1.0, 0.22, 0.14, 0.16)
+		visual.polygon = PackedVector2Array([
+			Vector2(-rect.size.x * 0.5, -rect.size.y * 0.5),
+			Vector2(rect.size.x * 0.5, -rect.size.y * 0.5),
+			Vector2(rect.size.x * 0.5, rect.size.y * 0.5),
+			Vector2(-rect.size.x * 0.5, rect.size.y * 0.5)
+		])
+		body.add_child(visual)
 
 func _add_enemy_previews(parent: Node) -> void:
 	var enemy_root := Node2D.new()
