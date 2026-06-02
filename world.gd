@@ -530,6 +530,7 @@ func _offer_accessory(reason: String, source: String = "route") -> void:
 	if accessory_choice == null or not accessory_choice.has_method("open"):
 		_start_next_encounter()
 		return
+	_play_intermission_audio()
 	waiting_for_accessory_choice = true
 	active_accessory_reason = reason
 	active_accessory_source = source
@@ -553,6 +554,7 @@ func _offer_next_run_event() -> void:
 	if kind == "relic" or run_event_panel == null or not run_event_panel.has_method("open"):
 		_offer_accessory(_ui_text("Victory Relic", "胜利饰品", "勝利飾品"), "victory")
 		return
+	_play_intermission_audio()
 	active_run_event_kind = kind
 	run_event_panel.open(kind, int(RunDirector.gold))
 	_refresh_battle_status(
@@ -1130,10 +1132,18 @@ func _actor_attack_damage(actor: Node) -> float:
 func _play_audio_profile_for_encounter(next_encounter_index: int) -> void:
 	if Music == null:
 		return
-	if next_encounter_index <= 0:
+	if next_encounter_index <= 4:
 		Music.play_profile(&"town_battle")
+	elif next_encounter_index == 5:
+		Music.play_profile(&"palace_explore")
+	elif next_encounter_index == 6:
+		Music.play_profile(&"gate_guard")
 	else:
-		Music.play_profile(&"town_boss")
+		Music.play_profile(&"emperor")
+
+func _play_intermission_audio() -> void:
+	if Music != null:
+		Music.play_profile(&"church_intermission")
 
 func _cancel_scheduled_title_music() -> void:
 	music_request_serial += 1

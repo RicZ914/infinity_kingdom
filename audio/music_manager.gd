@@ -10,8 +10,8 @@ const MASTER_DEFAULT_VOLUME_DB := 0.0
 const SETTINGS_PATH := "user://audio_settings.cfg"
 
 const SEARCH_DIRS := [
-	"res://audio/generated",
 	"res://audio/music",
+	"res://audio/generated",
 	"res://audio/ambience"
 ]
 
@@ -51,6 +51,38 @@ const CUE_LIBRARY := {
 		"loop": true,
 		"fade": 0.75,
 		"preview_from": 4.2,
+		"preview_length": 1.8
+	},
+	"palace_explore": {
+		"file": "music_palace_explore_loop",
+		"volume_db": -2.2,
+		"loop": true,
+		"fade": 0.8,
+		"preview_from": 5.0,
+		"preview_length": 1.8
+	},
+	"gate_guard": {
+		"file": "music_gate_guard_loop",
+		"volume_db": -1.8,
+		"loop": true,
+		"fade": 0.75,
+		"preview_from": 4.8,
+		"preview_length": 1.8
+	},
+	"emperor": {
+		"file": "music_emperor_loop",
+		"volume_db": -1.5,
+		"loop": true,
+		"fade": 0.65,
+		"preview_from": 5.0,
+		"preview_length": 1.8
+	},
+	"church_intermission": {
+		"file": "music_church_intermission_loop",
+		"volume_db": -3.0,
+		"loop": true,
+		"fade": 0.9,
+		"preview_from": 6.0,
 		"preview_length": 1.8
 	},
 	"victory": {
@@ -110,6 +142,22 @@ const PROFILE_LIBRARY := {
 	"town_boss": {
 		"music": &"town_boss",
 		"ambience": &"town_boss"
+	},
+	"palace_explore": {
+		"music": &"palace_explore",
+		"ambience": &"town_boss"
+	},
+	"gate_guard": {
+		"music": &"gate_guard",
+		"ambience": &"town_boss"
+	},
+	"emperor": {
+		"music": &"emperor",
+		"ambience": &"town_boss"
+	},
+	"church_intermission": {
+		"music": &"church_intermission",
+		"ambience": &"title"
 	},
 	"victory": {
 		"music": &"victory",

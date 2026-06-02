@@ -561,6 +561,9 @@ func _distance_to_segment(point: Vector2, start_position: Vector2, end_position:
 func _fire_projectile(damage: float, color: Color, new_speed: float) -> void:
 	if target == null or not is_instance_valid(target):
 		return
+	var scene_root := get_tree().current_scene if get_tree() != null else null
+	if scene_root == null or projectile_spawner == null or not is_instance_valid(projectile_spawner):
+		return
 	var payload := {}
 	match enemy_type:
 		EnemyType.ARCHER:
@@ -580,7 +583,7 @@ func _fire_projectile(damage: float, color: Color, new_speed: float) -> void:
 				payload["slow_multiplier"] = 0.84
 	var projectile := ENEMY_BOLT_SCENE.instantiate()
 	projectile.global_position = projectile_spawner.global_position
-	get_tree().current_scene.add_child(projectile)
+	scene_root.add_child(projectile)
 	projectile.setup(self, (target.global_position - projectile_spawner.global_position).normalized(), damage, color, new_speed, payload)
 
 func _update_visuals() -> void:
