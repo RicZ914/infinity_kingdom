@@ -4,6 +4,7 @@ const KNIGHT_SCENE := preload("res://characters/knight/knight.tscn")
 const RANGER_SCENE := preload("res://characters/ranger/ranger.tscn")
 const MAGE_SCENE := preload("res://characters/mage/mage.tscn")
 const RunEffects := preload("res://systems/run/run_effects.gd")
+const MapBrowserDemo := preload("res://tools/map_browser_demo.gd")
 const DAMAGE_NUMBER_SCENE := preload("res://effects/damage_number.tscn")
 const RUN_PICKUP_SCRIPT := preload("res://systems/pickups/run_pickup.gd")
 const WORLD_HEALTH_BAR_SCRIPT := preload("res://ui/world_health_bar.gd")
@@ -88,6 +89,7 @@ var last_attack_feedback_msec: int = 0
 var reward_rng := RandomNumberGenerator.new()
 var map_root: Node2D = null
 var map_camera: Camera2D = null
+var map_prop_root: Node2D = null
 var map_room_rects: Array[Rect2] = []
 var map_walkable_rects: Array[Rect2] = []
 
@@ -195,6 +197,7 @@ func _build_runtime_map_rooms() -> void:
 		map_walkable_rects.append(_map_walkable_rect(index, room_rect))
 		_add_runtime_room_walls(index, room_rect, map_walkable_rects[index])
 		x_cursor += room_rect.size.x
+	_add_runtime_cover_props()
 
 func _map_walkable_rect(index: int, room_rect: Rect2) -> Rect2:
 	var ratio: Rect2 = MAP_WALKABLE_AREAS[min(index, MAP_WALKABLE_AREAS.size() - 1)]
@@ -216,6 +219,7 @@ func _add_runtime_wall(wall_name: String, rect: Rect2) -> void:
 	body.name = wall_name
 	body.collision_layer = 1
 	body.collision_mask = 2
+	body.add_to_group("projectile_blocker")
 	body.position = rect.get_center()
 	map_root.add_child(body)
 	var shape := CollisionShape2D.new()
@@ -233,6 +237,82 @@ func _activate_map_room(room_index: int) -> void:
 	if player_character != null and is_instance_valid(player_character):
 		player_character.position = spawn_marker.position
 	_update_map_camera(true)
+
+func _add_runtime_cover_props() -> void:
+	if map_root == null:
+		return
+	map_prop_root = Node2D.new()
+	map_prop_root.name = "RuntimeCoverProps"
+	map_prop_root.z_index = 5
+	map_root.add_child(map_prop_root)
+	for room_index in range(map_room_rects.size()):
+		var candidates := _get_cover_candidates_for_room(room_index)
+		if candidates.is_empty():
+			continue
+		candidates.shuffle()
+		var count: int = min(reward_rng.randi_range(2, 4), candidates.size())
+		for index in range(count):
+			_add_runtime_cover_prop(candidates[index])
+
+func _get_cover_candidates_for_room(room_index: int) -> Array:
+	var result := []
+	for candidate in MapBrowserDemo.PROP_CANDIDATES:
+		if int(candidate["room"]) == room_index:
+			result.append(candidate)
+	return result
+
+func _add_runtime_cover_prop(candidate: Dictionary) -> void:
+	var room_index := int(candidate["room"])
+	if map_prop_root == null or room_index < 0 or room_index >= map_room_rects.size() or room_index >= MapBrowserDemo.ROOM_PROP_LAYER_PATHS.size():
+		return
+	var texture := load(String(MapBrowserDemo.ROOM_PROP_LAYER_PATHS[room_index])) as Texture2D
+	if texture == null:
+		push_warning("Missing cover prop layer: %s" % MapBrowserDemo.ROOM_PROP_LAYER_PATHS[room_index])
+		return
+	var room_rect := map_room_rects[room_index]
+	var source_ratio: Rect2 = candidate["source"]
+	var source_rect := Rect2(
+		Vector2(float(texture.get_width()) * source_ratio.position.x, float(texture.get_height()) * source_ratio.position.y),
+		Vector2(float(texture.get_width()) * source_ratio.size.x, float(texture.get_height()) * source_ratio.size.y)
+	)
+	var texture_to_room_scale := Vector2(room_rect.size.x / float(texture.get_width()), room_rect.size.y / float(texture.get_height()))
+	var position_ratio: Vector2 = candidate["position"]
+	var collision_ratio: Vector2 = candidate["collision"]
+	var collision_size := Vector2(room_rect.size.x * collision_ratio.x, room_rect.size.y * collision_ratio.y)
+	var body := StaticBody2D.new()
+	body.name = "%sCover" % String(candidate["name"])
+	body.collision_layer = 1
+	body.collision_mask = 2
+	body.add_to_group("projectile_blocker")
+	body.global_position = room_rect.position + Vector2(room_rect.size.x * position_ratio.x, room_rect.size.y * position_ratio.y)
+	map_prop_root.add_child(body)
+	var sprite := Sprite2D.new()
+	sprite.name = "Sprite"
+	sprite.texture = texture
+	sprite.region_enabled = true
+	sprite.region_rect = source_rect
+	sprite.scale = texture_to_room_scale
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	sprite.z_index = 1
+	body.add_child(sprite)
+	var shape := CollisionShape2D.new()
+	var rectangle := RectangleShape2D.new()
+	rectangle.size = collision_size
+	shape.shape = rectangle
+	body.add_child(shape)
+	_add_cover_collision_debug(body, collision_size)
+
+func _add_cover_collision_debug(parent: Node, size: Vector2) -> void:
+	var outline := Line2D.new()
+	outline.name = "CoverCollisionDebug"
+	outline.width = 2.5
+	outline.closed = true
+	outline.default_color = Color(0.25, 0.9, 1.0, 0.72)
+	outline.add_point(Vector2(-size.x * 0.5, -size.y * 0.5))
+	outline.add_point(Vector2(size.x * 0.5, -size.y * 0.5))
+	outline.add_point(Vector2(size.x * 0.5, size.y * 0.5))
+	outline.add_point(Vector2(-size.x * 0.5, size.y * 0.5))
+	parent.add_child(outline)
 
 func _player_spawn_for_room(room_index: int) -> Vector2:
 	if map_walkable_rects.is_empty():
