@@ -417,6 +417,16 @@ func _refresh_context() -> void:
 	hero_value_label.text = String(context_state.get("hero", ""))
 	relic_value_label.text = String(context_state.get("relic", ""))
 
+func _has_selected_hero() -> bool:
+	var hero_text := String(context_state.get("hero", ""))
+	if hero_text.is_empty():
+		return false
+	return hero_text != _locale_text(
+		"No champion selected.",
+		"褰撳墠杩樻病鏈夐攣瀹氳鑹层€?",
+		"鐣跺墠閭勬矑鏈夐帠瀹氳鑹层€?"
+	)
+
 func _refresh_layout() -> void:
 	if root_margin == null:
 		return
@@ -427,15 +437,17 @@ func _refresh_layout() -> void:
 		viewport_size = Vector2(get_window().size)
 	var compact: bool = viewport_size.x < 980.0 or viewport_size.y < 680.0
 	var very_compact: bool = viewport_size.x < 760.0 or viewport_size.y < 560.0
+	var hero_selected := _has_selected_hero()
+	var show_run_panel := not hero_selected and not very_compact
 	root_margin.offset_right = clampf(
-		viewport_size.x * (0.42 if very_compact else (0.35 if compact else 0.38)),
-		320.0 if very_compact else 360.0,
-		620.0
+		viewport_size.x * (0.34 if hero_selected else (0.42 if very_compact else (0.35 if compact else 0.38))),
+		280.0 if hero_selected else (320.0 if very_compact else 360.0),
+		540.0 if hero_selected else 620.0
 	)
 	root_margin.offset_bottom = clampf(
-		viewport_size.y * (0.46 if very_compact else (0.41 if compact else 0.44)),
-		256.0,
-		420.0
+		viewport_size.y * (0.28 if hero_selected else (0.46 if very_compact else (0.41 if compact else 0.44))),
+		188.0 if hero_selected else 256.0,
+		286.0 if hero_selected else 420.0
 	)
 	panel_margin.add_theme_constant_override("margin_left", 10 if very_compact else (12 if compact else 14))
 	panel_margin.add_theme_constant_override("margin_top", 10 if very_compact else (12 if compact else 14))
@@ -443,9 +455,13 @@ func _refresh_layout() -> void:
 	panel_margin.add_theme_constant_override("margin_bottom", 10 if very_compact else (12 if compact else 14))
 	info_grid.columns = 1 if very_compact else 2
 	metric_grid.columns = 1 if very_compact else 2
+	if run_panel_root != null:
+		run_panel_root.visible = show_run_panel
 	UISkin.label(title_label, 18 if very_compact else (21 if compact else 24), Color(0.98, 0.90, 0.66))
 	UISkin.label(subtitle_label, 12 if very_compact else (13 if compact else 15), Color(0.86, 0.88, 0.92))
 	UISkin.label(detail_label, 10 if very_compact else (11 if compact else 13), Color(0.70, 0.76, 0.84))
+	subtitle_label.visible = not hero_selected
+	detail_label.visible = not hero_selected
 	detail_label.max_lines_visible = 1 if very_compact else 2
 	for value_label in [objective_value_label, threat_value_label, hero_value_label, relic_value_label]:
 		if value_label != null:

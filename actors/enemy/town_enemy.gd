@@ -46,6 +46,10 @@ const ENEMY_WEAPON_SCALES := [
 	Vector2(0.46, 0.46),
 	Vector2(0.48, 0.48)
 ]
+const ARCANIST_LASER_TELEGRAPH_DURATION := 0.72
+const ARCANIST_LASER_LENGTH := 360.0
+const ARCANIST_LASER_WIDTH := 18.0
+const ARCANIST_ELITE_LASER_WIDTH := 26.0
 
 enum EnemyType {
 	SWORDSMAN,
@@ -94,8 +98,13 @@ var root_time_remaining: float = 0.0
 var slow_time_remaining: float = 0.0
 var slow_factor: float = 1.0
 var orbit_direction: float = 1.0
+var movement_rng := RandomNumberGenerator.new()
+var movement_variation_timer: float = 0.0
+var movement_variation_direction: Vector2 = Vector2.ZERO
+var movement_variation_strength: float = 0.0
 
 func _ready() -> void:
+	movement_rng.randomize()
 	add_to_group("damageable")
 	_apply_elite_scaling()
 	_setup_weapon_visual()
@@ -139,6 +148,7 @@ func _physics_process(delta: float) -> void:
 	skill_cooldown = maxf(skill_cooldown - delta, 0.0)
 	state_time += delta
 	_update_targeting()
+	_update_movement_variation(delta)
 	_update_behavior(delta)
 	move_and_slide()
 	_update_visuals()
@@ -384,7 +394,7 @@ func _update_arcanist(delta: float) -> void:
 		return
 	var to_target := target.global_position - global_position
 	var distance := to_target.length()
-	if to_target.length_squared() > 0.0001:
+	if to_target.length_squared() > 0.0001 and state != &"skill_mark" and state != &"skill_laser":
 		line_direction = to_target.normalized()
 	if state == &"basic_cast":
 		velocity = Vector2.ZERO
@@ -400,7 +410,8 @@ func _update_arcanist(delta: float) -> void:
 		telegraph_line.visible = true
 		telegraph_line.global_position = global_position
 		telegraph_line.rotation = line_direction.angle()
-		if state_time >= 0.5:
+		_update_laser_telegraph()
+		if state_time >= ARCANIST_LASER_TELEGRAPH_DURATION:
 			state = &"skill_laser"
 			state_time = 0.0
 			action_committed = false
@@ -409,7 +420,9 @@ func _update_arcanist(delta: float) -> void:
 		velocity = Vector2.ZERO
 		if not action_committed:
 			action_committed = true
-			_hit_target_line(30.0 if not elite else 50.0, 380.0, 24.0)
+			var laser_length := _laser_blocked_length(ARCANIST_LASER_LENGTH)
+			_update_laser_telegraph(laser_length)
+			_hit_target_line(18.0 if not elite else 30.0, laser_length, ARCANIST_LASER_WIDTH if not elite else ARCANIST_ELITE_LASER_WIDTH)
 			telegraph_line.default_color = Color(1.0, 0.58, 0.36, 0.95)
 		if state_time >= 0.12:
 			telegraph_line.visible = false
@@ -419,13 +432,16 @@ func _update_arcanist(delta: float) -> void:
 	if state == &"recover":
 		_process_recover()
 		return
-	if basic_attack_counter >= 2 and skill_cooldown <= 0.0 and _can_use_skills():
+	if basic_attack_counter >= 3 and skill_cooldown <= 0.0 and _can_use_skills():
+		if to_target.length_squared() > 0.0001:
+			line_direction = to_target.normalized()
 		state = &"skill_mark"
 		state_time = 0.0
 		action_committed = false
-		skill_cooldown = 4.5
+		skill_cooldown = 5.4
 		basic_attack_counter = 0
 		telegraph_line.visible = true
+		_update_laser_telegraph()
 		_show_intent_text("Silence Beam", Color(1.0, 0.78, 0.56, 1.0), 0.88)
 		Sfx.play_event(&"enemy_arcanist_cast", global_position)
 		return
@@ -461,10 +477,10 @@ func _set_melee_pressure_velocity(distance: float, preferred_distance: float, mi
 		return
 	var final_speed := move_speed * speed_factor * slow_factor
 	if distance > preferred_distance:
-		velocity = line_direction * final_speed
+		velocity = _blend_wander(line_direction * final_speed, final_speed)
 		return
 	if distance < minimum_distance:
-		velocity = -line_direction * final_speed * 0.75
+		velocity = _blend_wander(-line_direction * final_speed * 0.75, final_speed)
 		return
 	var tangent := Vector2(-line_direction.y, line_direction.x) * orbit_direction
 	if tangent == Vector2.ZERO:
@@ -474,7 +490,7 @@ func _set_melee_pressure_velocity(distance: float, preferred_distance: float, mi
 		state_time = 0.0
 		orbit_direction *= -1.0
 		tangent = Vector2(-line_direction.y, line_direction.x) * orbit_direction
-	velocity = tangent.normalized() * final_speed * orbit_strength
+	velocity = _blend_wander(tangent.normalized() * final_speed * orbit_strength, final_speed)
 
 func _set_ranged_spacing_velocity(distance: float, preferred_min: float, preferred_max: float, speed_factor: float, strafe_strength: float) -> void:
 	if root_time_remaining > 0.0:
@@ -482,10 +498,10 @@ func _set_ranged_spacing_velocity(distance: float, preferred_min: float, preferr
 		return
 	var final_speed := move_speed * speed_factor * slow_factor
 	if distance > preferred_max:
-		velocity = line_direction * final_speed
+		velocity = _blend_wander(line_direction * final_speed, final_speed)
 		return
 	if distance < preferred_min:
-		velocity = -line_direction * final_speed
+		velocity = _blend_wander(-line_direction * final_speed, final_speed)
 		return
 	var strafe := Vector2(-line_direction.y, line_direction.x) * orbit_direction
 	if strafe == Vector2.ZERO:
@@ -495,7 +511,21 @@ func _set_ranged_spacing_velocity(distance: float, preferred_min: float, preferr
 		state_time = 0.0
 		orbit_direction *= -1.0
 		strafe = Vector2(-line_direction.y, line_direction.x) * orbit_direction
-	velocity = strafe.normalized() * final_speed * strafe_strength
+	velocity = _blend_wander(strafe.normalized() * final_speed * strafe_strength, final_speed)
+
+func _update_movement_variation(delta: float) -> void:
+	movement_variation_timer -= delta
+	if movement_variation_timer > 0.0:
+		return
+	movement_variation_timer = movement_rng.randf_range(0.32, 0.84)
+	movement_variation_direction = Vector2.RIGHT.rotated(movement_rng.randf_range(-PI, PI))
+	movement_variation_strength = movement_rng.randf_range(0.06, 0.18)
+
+func _blend_wander(base_velocity: Vector2, max_speed: float) -> Vector2:
+	if movement_variation_direction == Vector2.ZERO or max_speed <= 0.0:
+		return base_velocity
+	var mixed := base_velocity + movement_variation_direction * max_speed * movement_variation_strength
+	return mixed.limit_length(max_speed)
 
 func _enter_recover(duration: float) -> void:
 	state = &"recover"
@@ -592,6 +622,41 @@ func _hit_target_line(damage: float, length: float, width: float) -> void:
 		"damage": damage,
 		"crit_rate": 0.0
 	})
+
+func _update_laser_telegraph(length: float = ARCANIST_LASER_LENGTH) -> void:
+	if telegraph_line == null:
+		return
+	var visible_length := _laser_blocked_length(length)
+	telegraph_line.global_position = global_position
+	telegraph_line.rotation = line_direction.angle()
+	telegraph_line.points = PackedVector2Array([Vector2.ZERO, Vector2(visible_length, 0.0)])
+
+func _laser_blocked_length(length: float) -> float:
+	var world := get_world_2d()
+	if world == null:
+		return length
+	var start_position := global_position
+	var end_position := global_position + line_direction * length
+	var query := PhysicsRayQueryParameters2D.create(start_position, end_position, 1)
+	query.exclude = _laser_raycast_excludes()
+	var result := world.direct_space_state.intersect_ray(query)
+	if result.is_empty():
+		return length
+	var collider := result.get("collider", null) as Node
+	if collider != null and collider.is_in_group("projectile_blocker"):
+		return maxf(0.0, start_position.distance_to(result.get("position", end_position)))
+	return length
+
+func _laser_raycast_excludes() -> Array[RID]:
+	var excludes: Array[RID] = []
+	if self is CollisionObject2D:
+		excludes.append((self as CollisionObject2D).get_rid())
+	if target is CollisionObject2D:
+		excludes.append((target as CollisionObject2D).get_rid())
+	for node in get_tree().get_nodes_in_group("damageable"):
+		if node is CollisionObject2D:
+			excludes.append((node as CollisionObject2D).get_rid())
+	return excludes
 
 func _distance_to_segment(point: Vector2, start_position: Vector2, end_position: Vector2) -> float:
 	var segment := end_position - start_position

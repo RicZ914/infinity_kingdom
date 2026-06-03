@@ -9,6 +9,8 @@ const HUNTER_SCENE := preload("res://actors/enemy/hunter_enemy.tscn")
 const APPRENTICE_SCENE := preload("res://actors/enemy/apprentice_mage_enemy.tscn")
 const ARCANIST_SCENE := preload("res://actors/enemy/arcanist_enemy.tscn")
 const TownEnemy := preload("res://actors/enemy/town_enemy.gd")
+const SAFE_SPAWN_DISTANCE := 210.0
+const SPAWN_CLUSTER_DISTANCE := 64.0
 
 @onready var enemy_layer: Node2D = $EnemyLayer
 @onready var spawn_layer: Node2D = $SpawnLayer
@@ -265,14 +267,16 @@ func _start_next_wave() -> void:
 	active_enemies.clear()
 	var wave: Dictionary = active_waves[wave_index]
 	var final_wave_active := wave_index >= active_waves.size() - 1
+	var used_spawn_indices: Array[int] = []
 	for unit_def in wave["units"]:
 		var scene: PackedScene = unit_def["scene"] as PackedScene
 		var enemy: Node = scene.instantiate()
 		enemy.set("elite", bool(unit_def.get("elite", false)))
 		_apply_modifier_to_enemy(enemy, final_wave_active)
-		var marker: Marker2D = spawn_layer.get_child(int(unit_def["spawn"]))
+		var spawn_index := _pick_spawn_marker_index(int(unit_def["spawn"]), used_spawn_indices)
+		used_spawn_indices.append(spawn_index)
 		enemy_layer.add_child(enemy)
-		enemy.global_position = marker.global_position
+		enemy.global_position = _safe_spawn_position(spawn_index)
 		if enemy.has_method("bind_player"):
 			enemy.bind_player(target)
 		if enemy.has_signal("defeated"):
@@ -299,6 +303,64 @@ func _build_spawn_markers() -> void:
 		marker.name = "Spawn%d" % index
 		marker.position = positions[index]
 		spawn_layer.add_child(marker)
+
+func _pick_spawn_marker_index(preferred_index: int, used_indices: Array[int]) -> int:
+	var marker_count := spawn_layer.get_child_count()
+	if marker_count <= 0:
+		return 0
+	var clamped_preferred := clampi(preferred_index, 0, marker_count - 1)
+	if _spawn_marker_is_safe(clamped_preferred, used_indices):
+		return clamped_preferred
+	var best_index := clamped_preferred
+	var best_score := -INF
+	for index in range(marker_count):
+		var marker := spawn_layer.get_child(index) as Marker2D
+		if marker == null:
+			continue
+		var score := 0.0
+		if target != null and is_instance_valid(target):
+			var distance_to_player := marker.global_position.distance_to(target.global_position)
+			score += distance_to_player
+			if distance_to_player < SAFE_SPAWN_DISTANCE:
+				score -= 1000.0
+		if used_indices.has(index):
+			score -= 180.0
+		for used_index in used_indices:
+			if used_index < 0 or used_index >= marker_count:
+				continue
+			var used_marker := spawn_layer.get_child(used_index) as Marker2D
+			if used_marker != null and marker.global_position.distance_to(used_marker.global_position) < SPAWN_CLUSTER_DISTANCE:
+				score -= 120.0
+		if abs(index - clamped_preferred) <= 1:
+			score += 12.0
+		if score > best_score:
+			best_score = score
+			best_index = index
+	return best_index
+
+func _spawn_marker_is_safe(marker_index: int, used_indices: Array[int]) -> bool:
+	if used_indices.has(marker_index):
+		return false
+	var marker := spawn_layer.get_child(marker_index) as Marker2D
+	if marker == null:
+		return false
+	if target != null and is_instance_valid(target) and marker.global_position.distance_to(target.global_position) < SAFE_SPAWN_DISTANCE:
+		return false
+	return true
+
+func _safe_spawn_position(marker_index: int) -> Vector2:
+	var marker := spawn_layer.get_child(clampi(marker_index, 0, max(spawn_layer.get_child_count() - 1, 0))) as Marker2D
+	if marker == null:
+		return global_position
+	var spawn_position := marker.global_position + Vector2(rng.randf_range(-14.0, 14.0), rng.randf_range(-10.0, 10.0))
+	if target == null or not is_instance_valid(target):
+		return spawn_position
+	var away := spawn_position - target.global_position
+	if away.length() >= SAFE_SPAWN_DISTANCE:
+		return spawn_position
+	if away.length_squared() <= 0.001:
+		away = Vector2.RIGHT
+	return target.global_position + away.normalized() * SAFE_SPAWN_DISTANCE
 
 func _build_active_waves() -> Array[Dictionary]:
 	var pool: Array[Dictionary] = []

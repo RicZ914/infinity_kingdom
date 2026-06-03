@@ -47,6 +47,9 @@ func _on_area_entered(area: Area2D) -> void:
 func _try_hit(target: Variant) -> void:
 	if expired:
 		return
+	if target is Node and (target as Node).is_in_group("projectile_blocker"):
+		_expire_on_blocker()
+		return
 	target = _resolve_damage_target(target)
 	if target == null or target == source:
 		return
@@ -56,6 +59,13 @@ func _try_hit(target: Variant) -> void:
 	target.receive_hit(AccessoryManager.build_hit_payload(source, attack_name, damage, crit_rate))
 	if source != null and source.has_method("on_attack_landed"):
 		source.on_attack_landed(attack_name, target)
+	_spawn_hit_flash()
+	_consume_bolt()
+
+func _expire_on_blocker() -> void:
+	if expired:
+		return
+	expired = true
 	_spawn_hit_flash()
 	_consume_bolt()
 

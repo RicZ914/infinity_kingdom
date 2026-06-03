@@ -76,7 +76,7 @@ func _run() -> void:
 	var base_crit := float(actor.crit_rate)
 	var base_hp := float(actor.max_hp)
 	var high_reward := int(run_director.reward_encounter(0, actor))
-	if high_reward <= 35:
+	if high_reward <= 12:
 		push_error("Performance reward bonus was not applied")
 		quit(1)
 		return

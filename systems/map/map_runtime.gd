@@ -3,9 +3,9 @@ extends Node2D
 const MapBrowserDemo := preload("res://tools/map_browser_demo.gd")
 
 const MAP_CAMERA_ZOOM := Vector2(1.7, 1.7)
-const COVER_COLLISION_DEBUG_VISIBLE := true
-const COVER_PROP_MIN_PER_ROOM := 2
-const COVER_PROP_MAX_PER_ROOM := 4
+const COVER_COLLISION_DEBUG_VISIBLE := false
+const COVER_PROP_MIN_PER_ROOM := 4
+const COVER_PROP_MAX_PER_ROOM := 5
 
 var world_root: Node2D = null
 var spawn_marker: Marker2D = null
@@ -83,7 +83,14 @@ func encounter_spawn_for_room(room_index: int) -> Vector2:
 		return encounter_marker.position if encounter_marker != null else Vector2.ZERO
 	var walk_rect := map_walkable_rects[clampi(room_index, 0, map_walkable_rects.size() - 1)]
 	var y_ratio: float = 0.76 if room_index <= 4 else 0.58
-	return walk_rect.position + Vector2(walk_rect.size.x * 0.56, walk_rect.size.y * y_ratio)
+	return walk_rect.position + Vector2(walk_rect.size.x * 0.62, walk_rect.size.y * y_ratio)
+
+
+func room_exit_target(room_index: int) -> Vector2:
+	if map_walkable_rects.is_empty():
+		return encounter_spawn_for_room(room_index)
+	var walk_rect := map_walkable_rects[clampi(room_index, 0, map_walkable_rects.size() - 1)]
+	return walk_rect.position + Vector2(walk_rect.size.x * 0.93, walk_rect.size.y * 0.54)
 
 
 func _build_runtime_map_rooms() -> void:
@@ -152,10 +159,8 @@ func _add_runtime_cover_props() -> void:
 		var candidates := _get_cover_candidates_for_room(room_index)
 		if candidates.is_empty():
 			continue
-		candidates.shuffle()
-		var count: int = min(reward_rng.randi_range(COVER_PROP_MIN_PER_ROOM, COVER_PROP_MAX_PER_ROOM), candidates.size())
-		for index in range(count):
-			_add_runtime_cover_prop(candidates[index])
+		for candidate in _select_cover_candidates(candidates):
+			_add_runtime_cover_prop(candidate)
 
 
 func _get_cover_candidates_for_room(room_index: int) -> Array:
@@ -164,6 +169,43 @@ func _get_cover_candidates_for_room(room_index: int) -> Array:
 		if int(candidate["room"]) == room_index:
 			result.append(candidate)
 	return result
+
+
+func _select_cover_candidates(candidates: Array) -> Array:
+	var pool: Array = candidates.duplicate(true)
+	var selected: Array = []
+	var left_lane: Array = []
+	var center_lane: Array = []
+	var right_lane: Array = []
+	for candidate_variant in pool:
+		var candidate := candidate_variant as Dictionary
+		var position_ratio := candidate.get("position", Vector2.ZERO) as Vector2
+		if position_ratio.x < 0.34:
+			left_lane.append(candidate)
+		elif position_ratio.x > 0.66:
+			right_lane.append(candidate)
+		else:
+			center_lane.append(candidate)
+	for lane in [left_lane, center_lane, right_lane]:
+		if lane.is_empty():
+			continue
+		lane.shuffle()
+		var chosen: Dictionary = lane[0] as Dictionary
+		selected.append(chosen)
+		_remove_cover_candidate(pool, chosen)
+	pool.shuffle()
+	var target_count: int = mini(reward_rng.randi_range(COVER_PROP_MIN_PER_ROOM, COVER_PROP_MAX_PER_ROOM), selected.size() + pool.size())
+	while selected.size() < target_count and not pool.is_empty():
+		selected.append(pool.pop_front())
+	return selected
+
+
+func _remove_cover_candidate(candidates: Array, target_candidate: Dictionary) -> void:
+	for index in range(candidates.size() - 1, -1, -1):
+		var candidate := candidates[index] as Dictionary
+		if String(candidate.get("name", "")) == String(target_candidate.get("name", "")):
+			candidates.remove_at(index)
+			return
 
 
 func _add_runtime_cover_prop(candidate: Dictionary) -> void:

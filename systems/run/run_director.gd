@@ -103,7 +103,7 @@ func reset_run() -> void:
 
 func reward_encounter(encounter_index: int, actor: Node = null) -> int:
 	cleared_encounters += 1
-	var base_reward: int = 35 + maxi(encounter_index, 0) * 15
+	var base_reward: int = 12 + maxi(encounter_index, 0) * 6
 	var performance_bonus: int = _performance_bonus(actor)
 	last_reward_gold = int(round((base_reward + performance_bonus) * reward_multiplier)) + reward_flat_bonus
 	gold += last_reward_gold
@@ -336,11 +336,11 @@ func _performance_bonus(actor: Node) -> int:
 	var defense_ratio: float = _ratio(actor, "defense", "max_defense")
 	var bonus: int = 0
 	if hp_ratio >= 0.75:
-		bonus += 12
-	elif hp_ratio >= 0.45:
 		bonus += 6
+	elif hp_ratio >= 0.45:
+		bonus += 3
 	if defense_ratio >= 0.60:
-		bonus += 8
+		bonus += 4
 	return bonus
 
 func _build_event_deck() -> Array[String]:

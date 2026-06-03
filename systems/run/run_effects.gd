@@ -54,16 +54,16 @@ const ATTUNEMENT_CHOICE_DATA := {
 const SCOUT_CHOICE_DATA := {
 	"scout_assault": {
 		"title": "Assault Route",
-		"summary": "Next encounter: +14% attack damage, +6% crit chance, and +30 gold on clear.",
+		"summary": "Next encounter: +14% attack damage, +6% crit chance, and +14 gold on clear.",
 		"icon": "res://assets/ui/trait/trait_damage.png",
 		"prep": {
 			"title": "Assault Route",
-			"summary": "Opening assault: +14% attack damage, +6% crit chance, and +30 gold on clear.",
+			"summary": "Opening assault: +14% attack damage, +6% crit chance, and +14 gold on clear.",
 			"temporary_effects": {
 				"attack_damage_pct": 0.14,
 				"crit_rate": 0.06
 			},
-			"reward_bonus": 30
+			"reward_bonus": 14
 		}
 	},
 	"scout_bulwark": {
@@ -253,11 +253,11 @@ static func apply_choice(choice_id: String, actor: Node) -> void:
 		"shop_relic":
 			pass
 		"bounty_cache":
-			RunDirector.grant_gold(40)
+			RunDirector.grant_gold(24)
 		"bounty_contract":
-			RunDirector.add_reward_flat_bonus(18)
+			RunDirector.add_reward_flat_bonus(8)
 		"bounty_tithe":
-			RunDirector.add_reward_multiplier(1.28)
+			RunDirector.add_reward_multiplier(1.15)
 			RunDirector.add_run_modifier("max_hp", -10.0, 1.0, 28.0)
 			persistent_changed = true
 		"rest_heal":
@@ -375,11 +375,11 @@ static func can_pay(choice_id: String, gold: int) -> bool:
 static func cost_for(choice_id: String) -> int:
 	match choice_id:
 		"shop_attack":
-			return 45
+			return 28
 		"shop_defense":
-			return 40
+			return 26
 		"shop_relic":
-			return 55
+			return 36
 		_:
 			return 0
 
@@ -504,6 +504,15 @@ static func display_name(choice_id: String) -> String:
 	return choice_id.capitalize()
 
 static func card_summary(choice_id: String) -> String:
+	match choice_id:
+		"bounty_cache":
+			return _localized_text("Gain 24 gold immediately.", "立刻获得 24 金币。", "立刻獲得 24 金幣。")
+		"bounty_contract":
+			return _localized_text("Future encounters grant +8 gold.", "之后的战斗额外奖励 8 金币。", "之後的戰鬥額外獎勵 8 金幣。")
+		"bounty_tithe":
+			return _localized_text("Future battle gold +15%, but lose 10 max hp.", "之后的战斗金币 +15%，但失去 10 点最大生命。", "之後的戰鬥金幣 +15%，但失去 10 點最大生命。")
+		"scout_assault":
+			return _localized_text("Next encounter: +14% attack damage, +6% crit chance, and +14 gold on clear.", "下一战：攻击伤害 +14%，暴击率 +6%，胜利后额外 +14 金币。", "下一戰：攻擊傷害 +14%，暴擊率 +6%，勝利後額外 +14 金幣。")
 	var localized := _localized_choice_value(choice_id, "card")
 	if not localized.is_empty():
 		return localized

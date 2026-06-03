@@ -41,6 +41,9 @@ func _on_area_entered(area: Area2D) -> void:
 func _try_hit(target: Variant) -> void:
 	if expired:
 		return
+	if target is Node and (target as Node).is_in_group("projectile_blocker"):
+		_expire_on_blocker()
+		return
 	target = _resolve_damage_target(target)
 	if target == null or target == source:
 		return
@@ -55,6 +58,13 @@ func _try_hit(target: Variant) -> void:
 	for key in extra_payload.keys():
 		payload[key] = extra_payload[key]
 	target.receive_hit(payload)
+	_spawn_hit_flash()
+	queue_free()
+
+func _expire_on_blocker() -> void:
+	if expired:
+		return
+	expired = true
 	_spawn_hit_flash()
 	queue_free()
 

@@ -19,8 +19,9 @@ const ENCOUNTER_SCENES := [
 	preload("res://actors/bosses/town/royal_guard_formation.tscn"),
 	preload("res://actors/bosses/town/twin_princes_boss.tscn")
 ]
-const RELIC_REROLL_COST := 20
+const RELIC_REROLL_COST := 12
 const HIT_FEEDBACK_COOLDOWN_MSEC := 55
+const GATE_WALK_FINISH_DISTANCE := 10.0
 const LEVEL_UP_FLASH_COLOR := Color(1.0, 0.92, 0.62, 1.0)
 const XP_FLASH_COLOR := Color(0.68, 0.86, 1.0, 1.0)
 const GOLD_FLASH_COLOR := Color(1.0, 0.88, 0.52, 1.0)
@@ -57,6 +58,9 @@ var return_pause_after_settings_panel: bool = false
 var last_attack_feedback_msec: int = 0
 var reward_rng := RandomNumberGenerator.new()
 var map_runtime: Node = null
+var gate_walk_active: bool = false
+var gate_walk_target: Vector2 = Vector2.ZERO
+var gate_walk_callback: Callable = Callable()
 
 func _ready() -> void:
 	reward_rng.randomize()
@@ -109,9 +113,53 @@ func _ready() -> void:
 	call_deferred("_consume_startup_context")
 
 func _process(_delta: float) -> void:
+	_process_gate_walk()
 	_sync_audio_hint_state()
 	_update_map_camera()
 	_refresh_battle_status()
+
+func _process_gate_walk() -> void:
+	if not gate_walk_active:
+		return
+	if player_character == null or not is_instance_valid(player_character) or not (player_character is Node2D):
+		_clear_player_auto_walk()
+		return
+	var player_node := player_character as Node2D
+	var to_target := gate_walk_target - player_node.global_position
+	if to_target.length() <= GATE_WALK_FINISH_DISTANCE:
+		var callback := gate_walk_callback
+		_clear_player_auto_walk()
+		if callback.is_valid():
+			callback.call()
+		return
+	var direction := to_target.normalized()
+	if player_character.has_method("set_auto_walk_direction"):
+		player_character.set_auto_walk_direction(direction)
+	else:
+		player_node.global_position += direction * 170.0 * get_process_delta_time()
+
+func _walk_player_to_room_exit(callback: Callable) -> void:
+	if player_character == null or not is_instance_valid(player_character) or not (player_character is Node2D):
+		if callback.is_valid():
+			callback.call()
+		return
+	var player_node := player_character as Node2D
+	gate_walk_target = _room_exit_target(encounter_index)
+	if player_node.global_position.distance_to(gate_walk_target) > 900.0:
+		gate_walk_target = player_node.global_position + Vector2(90.0, 0.0)
+	gate_walk_callback = callback
+	gate_walk_active = true
+	if player_character.has_method("clear_control_effects"):
+		player_character.clear_control_effects(true, true, true)
+	if player_character.has_method("set_auto_walk_direction"):
+		player_character.set_auto_walk_direction((gate_walk_target - player_node.global_position).normalized())
+
+func _clear_player_auto_walk() -> void:
+	gate_walk_active = false
+	gate_walk_target = Vector2.ZERO
+	gate_walk_callback = Callable()
+	if player_character != null and is_instance_valid(player_character) and player_character.has_method("set_auto_walk_direction"):
+		player_character.set_auto_walk_direction(Vector2.ZERO)
 
 func _prepare_map_runtime() -> void:
 	_hide_legacy_arena()
@@ -148,6 +196,11 @@ func _encounter_spawn_for_room(room_index: int) -> Vector2:
 	if map_runtime == null:
 		return encounter_marker.position
 	return map_runtime.encounter_spawn_for_room(room_index)
+
+func _room_exit_target(room_index: int) -> Vector2:
+	if map_runtime != null and map_runtime.has_method("room_exit_target"):
+		return map_runtime.room_exit_target(room_index)
+	return _encounter_spawn_for_room(room_index) + Vector2(260.0, 0.0)
 
 func _update_map_camera(force: bool = false) -> void:
 	if map_runtime == null:
@@ -200,6 +253,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_character_selected(character_id: StringName) -> void:
 	_cancel_scheduled_title_music()
+	_clear_player_auto_walk()
 	RunDirector.configure_event_count(maxi(ENCOUNTER_SCENES.size() - 1, 1))
 	if result_screen != null:
 		result_screen.visible = false
@@ -253,6 +307,7 @@ func _consume_startup_context() -> void:
 	_on_character_selected(character_id)
 
 func _start_next_encounter() -> void:
+	_clear_player_auto_walk()
 	waiting_for_accessory_choice = false
 	active_accessory_reason = ""
 	active_accessory_source = ""
@@ -298,16 +353,21 @@ func _on_encounter_defeated() -> void:
 		_ui_text("+%d gold earned.", "获得 +%d 金币。", "獲得 +%d 金幣。") % reward,
 		_localized_detail_text("%s: %d" % [_ui_text("Gold", "金币", "金幣"), int(RunDirector.gold)])
 	)
-	var timer := get_tree().create_timer(1.1)
+	var timer := get_tree().create_timer(0.65)
 	timer.timeout.connect(func() -> void:
 		if is_instance_valid(self) and player_character != null and is_instance_valid(player_character) and float(player_character.hp) > 0.0:
-			if defeated_final_encounter:
-				_complete_run_victory()
-			else:
-				_offer_next_run_event()
+			_walk_player_to_room_exit(func() -> void:
+				if not is_instance_valid(self) or player_character == null or not is_instance_valid(player_character) or float(player_character.hp) <= 0.0:
+					return
+				if defeated_final_encounter:
+					_complete_run_victory()
+				else:
+					_offer_next_run_event()
+			)
 	)
 
 func _on_player_died() -> void:
+	_clear_player_auto_walk()
 	if not active_encounter_prep.is_empty() and player_character != null and is_instance_valid(player_character):
 		RunEffects.refresh_persistent_modifiers(player_character)
 		if bool(active_encounter_prep.get("clear_shield_on_end", false)):
@@ -708,13 +768,14 @@ func _build_defeat_rewards(actor: Node) -> Dictionary:
 		xp_amount = maxi(xp_amount, 20)
 	else:
 		xp_amount = maxi(xp_amount, 10)
-	var gold_total := int(round(2.0 + power_score * (0.72 if boss else (0.56 if elite else 0.38))))
+	var gold_total := int(round(1.0 + power_score * (0.28 if boss else (0.20 if elite else 0.10))))
 	if boss:
-		gold_total = maxi(gold_total, 26)
+		gold_total = maxi(gold_total, 14)
 	elif elite:
-		gold_total = maxi(gold_total, 8)
+		gold_total = maxi(gold_total, 4)
 	else:
-		gold_total = maxi(gold_total, 3)
+		gold_total = maxi(gold_total, 1)
+	gold_total = mini(gold_total, 42 if boss else (14 if elite else 5))
 	var drops: Array[Dictionary] = []
 	var gold_chunks := 1 if gold_total <= 6 else (2 if gold_total <= 16 else 3)
 	for gold_amount in _split_drop_amount(gold_total, gold_chunks):

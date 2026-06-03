@@ -74,9 +74,9 @@ func _rebuild(kind: String, gold: int) -> void:
 		"shop":
 			title_label.text = UIText.text("event_shop_title")
 			subtitle_label.text = UIText.text("event_shop_subtitle")
-			choice_row.add_child(_choice_card("shop_attack", RunEffects.display_name("shop_attack"), RunEffects.card_summary("shop_attack"), "res://assets/ui/consumable/sharpening_oil.png", 45, gold))
-			choice_row.add_child(_choice_card("shop_defense", RunEffects.display_name("shop_defense"), RunEffects.card_summary("shop_defense"), "res://assets/ui/consumable/light_armor_pack.png", 40, gold))
-			choice_row.add_child(_choice_card("shop_relic", RunEffects.display_name("shop_relic"), RunEffects.card_summary("shop_relic"), "res://assets/ui/icon/ui_shop.png", 55, gold))
+			choice_row.add_child(_choice_card("shop_attack", RunEffects.display_name("shop_attack"), RunEffects.card_summary("shop_attack"), "res://assets/ui/consumable/sharpening_oil.png", RunEffects.cost_for("shop_attack"), gold))
+			choice_row.add_child(_choice_card("shop_defense", RunEffects.display_name("shop_defense"), RunEffects.card_summary("shop_defense"), "res://assets/ui/consumable/light_armor_pack.png", RunEffects.cost_for("shop_defense"), gold))
+			choice_row.add_child(_choice_card("shop_relic", RunEffects.display_name("shop_relic"), RunEffects.card_summary("shop_relic"), "res://assets/ui/icon/ui_shop.png", RunEffects.cost_for("shop_relic"), gold))
 			choice_row.add_child(_choice_card("skip", _locale_text("Save Gold", "保留金币", "保留金幣"), _locale_text("Keep your gold for a later event.", "把金币留给后面的事件。", "把金幣留給後面的事件。"), "res://assets/ui/icon/currency_gold_pixel.png", 0, gold))
 		"bounty":
 			title_label.text = UIText.text("event_bounty_title")

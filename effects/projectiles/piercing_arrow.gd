@@ -12,6 +12,7 @@ var source: Node = null
 var attack_name: StringName = &"skill1"
 var hit_targets: Array[Node] = []
 var pulse_time: float = 0.0
+var expired: bool = false
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
@@ -42,6 +43,11 @@ func _on_area_entered(area: Area2D) -> void:
 	_try_hit(area.get_parent())
 
 func _try_hit(target: Variant) -> void:
+	if expired:
+		return
+	if target is Node and (target as Node).is_in_group("projectile_blocker"):
+		_expire_on_blocker()
+		return
 	target = _resolve_damage_target(target)
 	if target == null or target == source:
 		return
@@ -54,6 +60,13 @@ func _try_hit(target: Variant) -> void:
 	if source != null and source.has_method("on_attack_landed"):
 		source.on_attack_landed(attack_name, target)
 	_spawn_hit_flash()
+
+func _expire_on_blocker() -> void:
+	if expired:
+		return
+	expired = true
+	_spawn_hit_flash()
+	queue_free()
 
 func _resolve_damage_target(target: Variant) -> Node:
 	if target == null or not (target is Node):

@@ -117,6 +117,8 @@ static func label(label_value: Label, size: int, color: Color = COLOR_TEXT) -> v
 	label_value.add_theme_font_override("font", active_font())
 	label_value.add_theme_font_size_override("font_size", size)
 	label_value.add_theme_color_override("font_color", color)
+	label_value.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.72))
+	label_value.add_theme_constant_override("outline_size", 2)
 	label_value.add_theme_constant_override("line_spacing", 2)
 
 static func texture_bar(bar: TextureProgressBar, meter: String) -> void:

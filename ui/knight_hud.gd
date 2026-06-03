@@ -28,7 +28,9 @@ var root_margin: MarginContainer
 var root_panel: PanelContainer
 var inner_margin: MarginContainer
 var content: VBoxContainer
+var title_row: HBoxContainer
 var title_label: Label
+var hud_toggle_button: Button
 var vitals_header_label: Label
 var status_header_label: Label
 var skills_header_label: Label
@@ -68,6 +70,7 @@ var run_metric_labels: Dictionary = {}
 var run_panel_root: PanelContainer
 var current_accessory_id: String = "none"
 var current_run_state: Dictionary = {}
+var hud_expanded: bool = false
 var skill_icon_paths := {
 	"Knight": [
 		"res://assets/ui/skill/knight_charge_slash.png",
@@ -172,11 +175,22 @@ func _build_ui() -> void:
 	content.add_theme_constant_override("separation", 8)
 	inner_margin.add_child(content)
 
+	title_row = HBoxContainer.new()
+	title_row.add_theme_constant_override("separation", 8)
+	content.add_child(title_row)
+
 	title_label = Label.new()
 	title_label.text = _locale_text("Character Combat Frame", "角色战斗面板", "角色戰鬥面板")
 	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	UISkin.label(title_label, 20, Color(0.98, 0.90, 0.66))
-	content.add_child(title_label)
+	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_row.add_child(title_label)
+
+	hud_toggle_button = Button.new()
+	hud_toggle_button.text = _hud_toggle_label()
+	UISkin.button_styles(hud_toggle_button, "thin")
+	hud_toggle_button.pressed.connect(_on_hud_toggle_pressed)
+	title_row.add_child(hud_toggle_button)
 
 	vitals_panel_root = PanelContainer.new()
 	vitals_panel_root.add_theme_stylebox_override("panel", _hud_panel_style(Color(0.98, 0.86, 0.58)))
@@ -362,7 +376,30 @@ func _build_ui() -> void:
 	run_state_label = _make_label(_locale_text("Gold 0 | Next Black Market", "金币 0 | 下一步 黑市", "金幣 0 | 下一步 黑市"), 12, Color(0.84, 0.90, 0.98))
 	run_state_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	run_column.add_child(run_state_label)
+	_apply_hud_mode()
 	_refresh_section_emphasis()
+
+func _on_hud_toggle_pressed() -> void:
+	hud_expanded = not hud_expanded
+	_apply_hud_mode()
+	_queue_layout_refresh()
+
+func _apply_hud_mode() -> void:
+	if hud_toggle_button != null:
+		hud_toggle_button.text = _hud_toggle_label()
+		hud_toggle_button.tooltip_text = _hud_toggle_tooltip()
+	if status_panel_root != null:
+		status_panel_root.visible = hud_expanded or not last_control_summary.is_empty()
+	if accessory_panel_root != null:
+		accessory_panel_root.visible = hud_expanded
+	if run_panel_root != null:
+		run_panel_root.visible = hud_expanded
+
+func _hud_toggle_label() -> String:
+	return _locale_text("Lite", "简", "簡") if hud_expanded else _locale_text("Full", "全", "全")
+
+func _hud_toggle_tooltip() -> String:
+	return _locale_text("Compact battle HUD", "切到简洁战斗面板", "切到簡潔戰鬥面板") if hud_expanded else _locale_text("Show full HUD", "展开完整信息", "展開完整資訊")
 
 func _section_label(text_value: String) -> Label:
 	var label := Label.new()
@@ -574,6 +611,7 @@ func _on_control_status_changed(summary: String) -> void:
 		if not last_control_summary.is_empty():
 			_set_combat_feed(_locale_text("Steady again", "状态重新稳定", "狀態重新穩定"), Color(0.98, 0.90, 0.68), 1.05)
 		last_control_summary = ""
+		_apply_hud_mode()
 		_refresh_section_emphasis()
 		return
 	control_label.text = "%s %s" % [_locale_text("Status", "状态", "狀態"), summary]
@@ -581,6 +619,7 @@ func _on_control_status_changed(summary: String) -> void:
 	if summary != last_control_summary:
 		_set_combat_feed(summary, Color(0.90, 0.82, 1.0), 1.04)
 	last_control_summary = summary
+	_apply_hud_mode()
 	_refresh_section_emphasis()
 
 func _on_attack_started(attack_name: StringName) -> void:
@@ -705,6 +744,7 @@ func _on_locale_changed(_locale: String) -> void:
 		_on_accessory_equipped(AccessoryManager.get_equipped_accessory())
 	if RunDirector != null:
 		_refresh_run_state_label(RunDirector.get_state())
+	_apply_hud_mode()
 
 func _refresh_skill_icons() -> void:
 	if player_character == null or not is_instance_valid(player_character):
@@ -938,15 +978,22 @@ func _refresh_layout() -> void:
 		viewport_size = Vector2(get_window().size)
 	var compact: bool = viewport_size.x < 980.0 or viewport_size.y < 720.0
 	var very_compact: bool = viewport_size.x < 780.0 or viewport_size.y < 620.0
+	var collapsed := not hud_expanded
+	var width_ratio := 0.38 if very_compact else (0.24 if collapsed else (0.28 if compact else 0.30))
+	if collapsed and compact and not very_compact:
+		width_ratio = 0.22
 	var panel_width := clampf(
-		viewport_size.x * (0.38 if very_compact else (0.28 if compact else 0.30)),
-		272.0 if very_compact else 292.0,
-		468.0
+		viewport_size.x * width_ratio,
+		236.0 if collapsed else (272.0 if very_compact else 292.0),
+		404.0 if collapsed else 468.0
 	)
+	var height_ratio := 0.86 if very_compact else (0.66 if collapsed else (0.72 if compact else 0.76))
+	if collapsed and compact:
+		height_ratio = 0.60 if not very_compact else 0.80
 	var panel_height := clampf(
-		viewport_size.y * (0.86 if very_compact else (0.72 if compact else 0.76)),
-		438.0 if very_compact else 486.0,
-		668.0
+		viewport_size.y * height_ratio,
+		346.0 if collapsed else (438.0 if very_compact else 486.0),
+		524.0 if collapsed else 668.0
 	)
 	root_margin.offset_right = panel_width
 	root_margin.offset_top = -panel_height
@@ -961,24 +1008,30 @@ func _refresh_layout() -> void:
 	inner_margin.add_theme_constant_override("margin_right", 10 if very_compact else 12)
 	inner_margin.add_theme_constant_override("margin_bottom", 10 if very_compact else 12)
 	content.add_theme_constant_override("separation", 3 if very_compact else (5 if compact else 8))
-	status_grid.columns = 2
-	skill_grid.columns = 4
+	status_grid.columns = 1 if collapsed or very_compact else 2
+	skill_grid.columns = 2 if collapsed and compact else 4
 	skill_grid.add_theme_constant_override("h_separation", 6 if compact else 8)
 	skill_grid.add_theme_constant_override("v_separation", 6 if compact else 8)
 	accessory_grid.columns = 2 if panel_width >= 300.0 else 1
 	accessory_grid.add_theme_constant_override("h_separation", 8 if compact else 10)
 	accessory_grid.add_theme_constant_override("v_separation", 6 if compact else 8)
 	run_metric_grid.columns = 1 if compact else 2
-	run_metric_grid.visible = not compact
+	run_metric_grid.visible = hud_expanded and not compact
 	if run_panel_root != null:
-		run_panel_root.visible = not compact
+		run_panel_root.visible = hud_expanded and not compact
 	if accessory_panel_root != null:
-		accessory_panel_root.visible = not very_compact
+		accessory_panel_root.visible = hud_expanded and not very_compact
+	if status_panel_root != null:
+		status_panel_root.visible = hud_expanded or not last_control_summary.is_empty()
 	accessory_summary_label.max_lines_visible = 1 if very_compact else 3
 	combat_feed_label.max_lines_visible = 1 if very_compact else 2
 	run_state_label.max_lines_visible = 2 if compact else 3
-	title_label.visible = not very_compact
+	title_label.visible = true
+	if title_row != null:
+		title_row.alignment = BoxContainer.ALIGNMENT_BEGIN
 	UISkin.label(title_label, 16 if very_compact else (18 if compact else 20), Color(0.98, 0.90, 0.66))
+	if hud_toggle_button != null:
+		UISkin.button_styles(hud_toggle_button, "thin")
 	for header in [vitals_header_label, status_header_label, skills_header_label, accessory_header_label, run_header_label]:
 		UISkin.label(header, 11 if compact else 12, UISkin.COLOR_ACCENT)
 	UISkin.label(hp_label, 11 if compact else 13, Color(0.86, 0.88, 0.92))

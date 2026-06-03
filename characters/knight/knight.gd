@@ -72,6 +72,7 @@ signal died
 @export_group("Hit / Combat")
 @export var hit_stun_duration: float = 0.25
 @export var hit_threshold: float = 1.0
+@export var hit_invulnerability_duration: float = 0.34
 @export var attack_range: float = 108.0
 @export var attack_arc_degrees: float = 128.0
 @export var shockwave_radius: float = 120.0
@@ -131,6 +132,8 @@ var silenced_time_remaining: float = 0.0
 var root_time_remaining: float = 0.0
 var slow_time_remaining: float = 0.0
 var slow_factor: float = 1.0
+var hit_invulnerability_remaining: float = 0.0
+var auto_walk_direction: Vector2 = Vector2.ZERO
 
 func _ready() -> void:
 	health_component.setup(max_hp, max_defense)
@@ -155,12 +158,13 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	manual_movement_performed = false
-	var requested_move_input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var requested_move_input := auto_walk_direction if _is_auto_walking() else Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if requested_move_input != Vector2.ZERO:
 		facing = requested_move_input.normalized()
-	move_input = Vector2.ZERO if root_time_remaining > 0.0 else requested_move_input
+	move_input = requested_move_input if _is_auto_walking() else (Vector2.ZERO if root_time_remaining > 0.0 else requested_move_input)
 	update_cooldowns(delta)
-	process_instant_skills()
+	if not _is_auto_walking():
+		process_instant_skills()
 	state_machine.physics_update(delta)
 	if not manual_movement_performed:
 		move_and_slide()
@@ -285,6 +289,9 @@ func sync_visuals() -> void:
 		modulate = Color(0.35, 0.35, 0.35, 1.0)
 	elif dodge_invincible:
 		modulate = Color(0.8, 0.88, 1.0, 0.9)
+	elif hit_invulnerability_remaining > 0.0:
+		var invulnerability_pulse := 0.76 + 0.18 * sin(Time.get_ticks_msec() * 0.018)
+		modulate = Color(1.0, 1.0, 1.0, invulnerability_pulse)
 	elif state_machine.get_state_name() == &"Hit":
 		modulate = Color(1.0, 0.65, 0.65, 1.0)
 	elif silenced_time_remaining > 0.0:
@@ -340,6 +347,8 @@ func can_cast_skill(skill_name: StringName) -> bool:
 func get_state_request() -> StringName:
 	if hp <= 0.0:
 		return &"Dead"
+	if _is_auto_walking():
+		return &"Move" if move_input != Vector2.ZERO else &"Idle"
 	if Input.is_action_just_pressed("dodge") and can_dodge():
 		return &"Dodge"
 	if Input.is_action_just_pressed("attack") and can_attack():
@@ -355,6 +364,8 @@ func get_state_request() -> StringName:
 
 func process_instant_skills() -> void:
 	if hp <= 0.0:
+		return
+	if _is_auto_walking():
 		return
 	if state_machine != null and not state_machine.is_current_state_interruptible():
 		return
@@ -641,6 +652,7 @@ func apply_control_effects(payload: Dictionary) -> void:
 	control_status_changed.emit(get_control_status_text())
 
 func _update_control_effects(delta: float) -> void:
+	hit_invulnerability_remaining = maxf(hit_invulnerability_remaining - delta, 0.0)
 	silenced_time_remaining = maxf(silenced_time_remaining - delta, 0.0)
 	root_time_remaining = maxf(root_time_remaining - delta, 0.0)
 	if slow_time_remaining > 0.0:
@@ -704,7 +716,7 @@ func apply_damage_to_targets(base_damage: float, radius: float, attack_name: Str
 		attack_hit.emit(attack_name, target)
 
 func receive_hit(payload: Dictionary) -> void:
-	if dodge_invincible:
+	if dodge_invincible or hit_invulnerability_remaining > 0.0:
 		return
 	var result: Dictionary = health_component.receive_hit(payload)
 	var final_damage := float(result.get("damage", 0.0))
@@ -713,6 +725,7 @@ func receive_hit(payload: Dictionary) -> void:
 		spawn_damage_number(final_damage, is_critical, global_position)
 	if final_damage > 0.0:
 		apply_control_effects(payload)
+		hit_invulnerability_remaining = hit_invulnerability_duration
 	if hp <= 0.0:
 		return
 	if final_damage >= hit_threshold:
@@ -791,6 +804,12 @@ func _get_weapon_side_sign() -> float:
 	if absf(facing.x) > 0.08:
 		return 1.0 if facing.x >= 0.0 else -1.0
 	return -1.0 if sprite.flip_h else 1.0
+
+func set_auto_walk_direction(direction: Vector2) -> void:
+	auto_walk_direction = direction.normalized() if direction.length_squared() > 0.0001 else Vector2.ZERO
+
+func _is_auto_walking() -> bool:
+	return auto_walk_direction.length_squared() > 0.0001
 
 func _flash_melee_impact() -> void:
 	sprite.modulate = Color(1.0, 0.96, 0.82, 1.0)

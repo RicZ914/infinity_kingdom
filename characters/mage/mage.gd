@@ -84,6 +84,7 @@ const BODY_BASE_SCALE := Vector2(0.85, 0.85)
 @export_group("Hit / Combat")
 @export var hit_stun_duration: float = 0.25
 @export var hit_threshold: float = 1.0
+@export var hit_invulnerability_duration: float = 0.34
 
 @onready var state_machine: Node = $StateMachine
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
@@ -126,11 +127,13 @@ var dodge_active: bool = false
 var dodge_invincible: bool = false
 var weapon: Node2D = null
 var weapon_sprite: Sprite2D = null
-var weapon_angle_offset: float = deg_to_rad(74.0)
+var weapon_angle_offset: float = 0.0
 var silenced_time_remaining: float = 0.0
 var root_time_remaining: float = 0.0
 var slow_time_remaining: float = 0.0
 var slow_factor: float = 1.0
+var hit_invulnerability_remaining: float = 0.0
+var auto_walk_direction: Vector2 = Vector2.ZERO
 
 func _ready() -> void:
 	health_component.setup(max_hp, max_defense)
@@ -158,10 +161,10 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	manual_movement_performed = false
-	var requested_move_input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var requested_move_input := auto_walk_direction if _is_auto_walking() else Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if requested_move_input != Vector2.ZERO:
 		facing = requested_move_input.normalized()
-	move_input = Vector2.ZERO if root_time_remaining > 0.0 else requested_move_input
+	move_input = requested_move_input if _is_auto_walking() else (Vector2.ZERO if root_time_remaining > 0.0 else requested_move_input)
 	update_cooldowns(delta)
 	state_machine.physics_update(delta)
 	if not manual_movement_performed:
@@ -302,6 +305,9 @@ func sync_visuals() -> void:
 		modulate = Color(0.35, 0.35, 0.35, 1.0)
 	elif dodge_invincible:
 		modulate = Color(0.84, 0.92, 1.0, 0.9)
+	elif hit_invulnerability_remaining > 0.0:
+		var invulnerability_pulse := 0.76 + 0.18 * sin(Time.get_ticks_msec() * 0.018)
+		modulate = Color(1.0, 1.0, 1.0, invulnerability_pulse)
 	elif state_machine.get_state_name() == &"Hit":
 		modulate = Color(1.0, 0.7, 0.7, 1.0)
 	elif silenced_time_remaining > 0.0:
@@ -347,6 +353,8 @@ func can_cast_skill(skill_name: StringName) -> bool:
 func get_state_request() -> StringName:
 	if hp <= 0.0:
 		return &"Dead"
+	if _is_auto_walking():
+		return &"Move" if move_input != Vector2.ZERO else &"Idle"
 	if Input.is_action_just_pressed("dodge") and can_dodge():
 		return &"Dodge"
 	if Input.is_action_just_pressed("attack") and can_attack():
@@ -385,7 +393,7 @@ func start_attack() -> void:
 	current_attack_name = &"attack"
 	attack_started.emit(current_attack_name)
 	play_animation(&"attack")
-	_animate_weapon_swing(-64.0, 22.0, attack_windup + attack_hit_frame)
+	_animate_weapon_swing(-12.0, 8.0, attack_windup + attack_hit_frame)
 
 func start_dodge() -> void:
 	consume_inspiration(dodge_cost)
@@ -398,7 +406,7 @@ func start_dodge() -> void:
 		dodge_direction = Vector2.RIGHT
 	dodge_direction = dodge_direction.normalized()
 	play_animation(&"dodge")
-	_animate_weapon_swing(-92.0, 44.0, dodge_duration)
+	_animate_weapon_swing(-18.0, 12.0, dodge_duration)
 
 func process_dodge(delta: float) -> bool:
 	dodge_elapsed += delta
@@ -441,7 +449,7 @@ func start_skill1_cast() -> void:
 	start_skill(&"skill1")
 	current_attack_name = &"skill1"
 	play_animation(&"skill1")
-	_animate_weapon_swing(-36.0, 18.0, skill1_cast_duration)
+	_animate_weapon_swing(-10.0, 7.0, skill1_cast_duration)
 
 func cast_skill1_blades() -> void:
 	if skill1_shield_upgrade:
@@ -460,7 +468,7 @@ func start_skill2_cast() -> void:
 	current_attack_name = &"skill2"
 	current_skill_target = queued_skill_payload.get("target", null)
 	play_animation(&"skill2")
-	_animate_weapon_swing(-24.0, 12.0, skill2_cast_duration)
+	_animate_weapon_swing(-8.0, 6.0, skill2_cast_duration)
 
 func release_skill2_burst() -> void:
 	attack_started.emit(&"skill2")
@@ -484,7 +492,7 @@ func start_skill3_cast() -> void:
 	start_skill(&"skill3")
 	current_attack_name = &"skill3"
 	play_animation(&"skill3")
-	_animate_weapon_swing(-48.0, 14.0, skill3_cast_duration)
+	_animate_weapon_swing(-10.0, 8.0, skill3_cast_duration)
 
 func apply_skill3_enchant() -> void:
 	attack_started.emit(&"skill3")
@@ -511,7 +519,7 @@ func clear_skill3_enchant() -> void:
 	enchant_sigil.visible = false
 
 func receive_hit(payload: Dictionary) -> void:
-	if dodge_invincible:
+	if dodge_invincible or hit_invulnerability_remaining > 0.0:
 		return
 	var result: Dictionary = health_component.receive_hit(payload)
 	var final_damage := float(result.get("damage", 0.0))
@@ -520,6 +528,7 @@ func receive_hit(payload: Dictionary) -> void:
 		spawn_damage_number(final_damage, is_critical, global_position)
 	if final_damage > 0.0:
 		apply_control_effects(payload)
+		hit_invulnerability_remaining = hit_invulnerability_duration
 	if hp <= 0.0:
 		return
 	if final_damage >= hit_threshold:
@@ -639,6 +648,7 @@ func apply_control_effects(payload: Dictionary) -> void:
 	control_status_changed.emit(get_control_status_text())
 
 func _update_control_effects(delta: float) -> void:
+	hit_invulnerability_remaining = maxf(hit_invulnerability_remaining - delta, 0.0)
 	silenced_time_remaining = maxf(silenced_time_remaining - delta, 0.0)
 	root_time_remaining = maxf(root_time_remaining - delta, 0.0)
 	if slow_time_remaining > 0.0:
@@ -763,15 +773,30 @@ func _setup_weapon_visual() -> void:
 func _sync_weapon_visual() -> void:
 	if weapon == null:
 		return
-	var facing_direction := facing if facing != Vector2.ZERO else Vector2.RIGHT
+	var side_sign := _get_weapon_side_sign()
+	var vertical_bias := clampf(facing.y, -1.0, 1.0)
+	var base_right_angle := deg_to_rad(78.0)
+	var base_angle := base_right_angle if side_sign > 0.0 else PI - base_right_angle
 	weapon.visible = hp > 0.0
-	weapon.position = facing_direction * 16.0 + Vector2(0.0, -12.0)
-	weapon.rotation = facing_direction.angle() + weapon_angle_offset
+	weapon.position = Vector2(17.0 * side_sign, -16.0 + vertical_bias * 5.0)
+	weapon.rotation = base_angle + deg_to_rad(vertical_bias * 5.0) + weapon_angle_offset * side_sign
 
 func _animate_weapon_swing(start_degrees: float, end_degrees: float, duration: float) -> void:
 	weapon_angle_offset = deg_to_rad(start_degrees)
 	var tween := create_tween()
-	tween.tween_property(self, "weapon_angle_offset", deg_to_rad(end_degrees), maxf(duration, 0.01))
+	tween.tween_property(self, "weapon_angle_offset", deg_to_rad(end_degrees), maxf(duration * 0.66, 0.01)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "weapon_angle_offset", 0.0, maxf(duration * 0.34, 0.01)).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+
+func _get_weapon_side_sign() -> float:
+	if absf(facing.x) > 0.08:
+		return 1.0 if facing.x >= 0.0 else -1.0
+	return -1.0 if body.flip_h else 1.0
+
+func set_auto_walk_direction(direction: Vector2) -> void:
+	auto_walk_direction = direction.normalized() if direction.length_squared() > 0.0001 else Vector2.ZERO
+
+func _is_auto_walking() -> bool:
+	return auto_walk_direction.length_squared() > 0.0001
 
 func _build_ring_points(radius: float, steps: int = 16) -> PackedVector2Array:
 	var points := PackedVector2Array()
