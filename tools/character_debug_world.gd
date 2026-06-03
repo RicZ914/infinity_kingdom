@@ -1,0 +1,137 @@
+extends Node2D
+
+const KNIGHT_SCENE := preload("res://characters/knight/knight.tscn")
+const RANGER_SCENE := preload("res://characters/ranger/ranger.tscn")
+const MAGE_SCENE := preload("res://characters/mage/mage.tscn")
+const TRAINING_DUMMY_SCENE := preload("res://actors/training_dummy.tscn")
+
+const PLAYER_SCENES := {
+	&"knight": KNIGHT_SCENE,
+	&"ranger": RANGER_SCENE,
+	&"mage": MAGE_SCENE
+}
+
+@onready var player_spawn: Marker2D = $PlayerSpawn
+@onready var dummy_spawn: Marker2D = $DummySpawn
+@onready var dummy_root: Node2D = $DummyRoot
+@onready var character_select: CanvasLayer = $CharacterSelect
+@onready var help_label: Label = $DebugOverlay/Panel/Margin/HelpLabel
+@onready var camera: Camera2D = $Camera2D
+
+var player_character: Node2D = null
+var training_dummy: Node2D = null
+
+
+func _ready() -> void:
+	if AccessoryManager != null:
+		AccessoryManager.reset_run()
+	if character_select != null:
+		character_select.character_selected.connect(_on_character_selected)
+		if character_select.has_signal("quit_requested"):
+			character_select.quit_requested.connect(_on_quit_requested)
+	_spawn_training_dummy()
+	_refresh_help_text()
+	if Music != null:
+		Music.play_profile(&"title", true)
+
+
+func _process(_delta: float) -> void:
+	_refresh_help_text()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_R:
+			_reset_debug_room()
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_ESCAPE:
+			_return_to_character_select()
+			get_viewport().set_input_as_handled()
+
+
+func _on_character_selected(character_id: StringName) -> void:
+	_spawn_player(character_id)
+	if character_select != null:
+		character_select.visible = false
+	_refresh_help_text()
+
+
+func _spawn_player(character_id: StringName) -> void:
+	if player_character != null and is_instance_valid(player_character):
+		player_character.queue_free()
+	var scene: PackedScene = PLAYER_SCENES.get(character_id, KNIGHT_SCENE)
+	player_character = scene.instantiate() as Node2D
+	player_character.position = player_spawn.position
+	player_character.z_index = 4
+	add_child(player_character)
+	if player_character.has_signal("died"):
+		player_character.died.connect(_on_player_died)
+	_reset_training_dummy()
+	if camera != null:
+		camera.global_position = Vector2(700.0, 420.0)
+
+
+func _spawn_training_dummy() -> void:
+	if training_dummy != null and is_instance_valid(training_dummy):
+		return
+	training_dummy = TRAINING_DUMMY_SCENE.instantiate() as Node2D
+	training_dummy.position = dummy_spawn.position
+	training_dummy.z_index = 3
+	dummy_root.add_child(training_dummy)
+	if training_dummy.has_signal("defeated"):
+		training_dummy.defeated.connect(_on_training_dummy_defeated)
+
+
+func _reset_training_dummy() -> void:
+	if training_dummy != null and is_instance_valid(training_dummy):
+		training_dummy.queue_free()
+		training_dummy = null
+	call_deferred("_spawn_training_dummy")
+
+
+func _on_training_dummy_defeated() -> void:
+	training_dummy = null
+	var timer := get_tree().create_timer(0.45)
+	timer.timeout.connect(_spawn_training_dummy)
+
+
+func _on_player_died() -> void:
+	var timer := get_tree().create_timer(0.65)
+	timer.timeout.connect(func() -> void:
+		if is_instance_valid(self):
+			_return_to_character_select()
+	)
+
+
+func _reset_debug_room() -> void:
+	if player_character != null and is_instance_valid(player_character):
+		player_character.global_position = player_spawn.global_position
+		if player_character.has_method("emit_stat_signals"):
+			player_character.emit_stat_signals()
+	_reset_training_dummy()
+
+
+func _return_to_character_select() -> void:
+	if player_character != null and is_instance_valid(player_character):
+		player_character.queue_free()
+	player_character = null
+	if character_select != null:
+		character_select.visible = true
+	_reset_training_dummy()
+	_refresh_help_text()
+
+
+func _on_quit_requested() -> void:
+	get_tree().quit()
+
+
+func _refresh_help_text() -> void:
+	if help_label == null:
+		return
+	if player_character == null or not is_instance_valid(player_character):
+		help_label.text = "角色调试入口：选择角色后进入无地图测试场。"
+		return
+	var hp_text := ""
+	if player_character.get("hp") != null and player_character.get("max_hp") != null:
+		hp_text = " HP %d/%d" % [int(round(float(player_character.get("hp")))), int(round(float(player_character.get("max_hp"))))]
+	help_label.text = "角色调试：WASD 移动，J 普攻，K/L/I 技能，空格闪避，R 重置假人，Esc 返回选人。%s" % hp_text
