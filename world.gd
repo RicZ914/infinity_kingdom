@@ -31,6 +31,9 @@ const FINAL_BOSS_SCENES := [
 const RELIC_REROLL_COST := 12
 const HIT_FEEDBACK_COOLDOWN_MSEC := 55
 const GATE_WALK_FINISH_DISTANCE := 10.0
+const GATE_WALK_TIMEOUT_SECONDS := 4.0
+const GATE_WALK_STUCK_SECONDS := 0.75
+const GATE_WALK_PROGRESS_EPSILON := 1.5
 const LEVEL_UP_FLASH_COLOR := Color(1.0, 0.92, 0.62, 1.0)
 const XP_FLASH_COLOR := Color(0.68, 0.86, 1.0, 1.0)
 const GOLD_FLASH_COLOR := Color(1.0, 0.88, 0.52, 1.0)
@@ -70,6 +73,9 @@ var map_runtime: Node = null
 var gate_walk_active: bool = false
 var gate_walk_target: Vector2 = Vector2.ZERO
 var gate_walk_callback: Callable = Callable()
+var gate_walk_elapsed: float = 0.0
+var gate_walk_stuck_elapsed: float = 0.0
+var gate_walk_last_distance: float = INF
 var door_transition_layer: CanvasLayer = null
 var door_transition_backdrop: ColorRect = null
 var inventory_panel: CanvasLayer = null
@@ -140,17 +146,31 @@ func _process_gate_walk() -> void:
 		return
 	var player_node := player_character as Node2D
 	var to_target := gate_walk_target - player_node.global_position
-	if to_target.length() <= GATE_WALK_FINISH_DISTANCE:
-		var callback := gate_walk_callback
-		_clear_player_auto_walk()
-		if callback.is_valid():
-			callback.call()
+	var distance := to_target.length()
+	var delta := get_process_delta_time()
+	gate_walk_elapsed += delta
+	if distance <= GATE_WALK_FINISH_DISTANCE:
+		_finish_gate_walk()
+		return
+	if distance >= gate_walk_last_distance - GATE_WALK_PROGRESS_EPSILON:
+		gate_walk_stuck_elapsed += delta
+	else:
+		gate_walk_stuck_elapsed = 0.0
+	gate_walk_last_distance = distance
+	if gate_walk_elapsed >= GATE_WALK_TIMEOUT_SECONDS or gate_walk_stuck_elapsed >= GATE_WALK_STUCK_SECONDS:
+		_finish_gate_walk()
 		return
 	var direction := to_target.normalized()
 	if player_character.has_method("set_auto_walk_direction"):
 		player_character.set_auto_walk_direction(direction)
 	else:
-		player_node.global_position += direction * 170.0 * get_process_delta_time()
+		player_node.global_position += direction * 170.0 * delta
+
+func _finish_gate_walk() -> void:
+	var callback := gate_walk_callback
+	_clear_player_auto_walk()
+	if callback.is_valid():
+		callback.call()
 
 func _walk_player_to_room_exit(callback: Callable) -> void:
 	if player_character == null or not is_instance_valid(player_character) or not (player_character is Node2D):
@@ -172,6 +192,9 @@ func _walk_player_to_target(target_position: Vector2, callback: Callable) -> voi
 	gate_walk_target = target_position
 	gate_walk_callback = callback
 	gate_walk_active = true
+	gate_walk_elapsed = 0.0
+	gate_walk_stuck_elapsed = 0.0
+	gate_walk_last_distance = player_node.global_position.distance_to(gate_walk_target)
 	if player_character.has_method("clear_control_effects"):
 		player_character.clear_control_effects(true, true, true)
 	if player_character.has_method("set_auto_walk_direction"):
@@ -181,6 +204,9 @@ func _clear_player_auto_walk() -> void:
 	gate_walk_active = false
 	gate_walk_target = Vector2.ZERO
 	gate_walk_callback = Callable()
+	gate_walk_elapsed = 0.0
+	gate_walk_stuck_elapsed = 0.0
+	gate_walk_last_distance = INF
 	if player_character != null and is_instance_valid(player_character) and player_character.has_method("set_auto_walk_direction"):
 		player_character.set_auto_walk_direction(Vector2.ZERO)
 

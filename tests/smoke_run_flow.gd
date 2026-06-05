@@ -212,6 +212,32 @@ func _run() -> void:
 		quit(1)
 		return
 
+	if world.current_encounter != null and is_instance_valid(world.current_encounter):
+		world.current_encounter.queue_free()
+	var first_room_stub := Node.new()
+	world.add_child(first_room_stub)
+	world.current_encounter = first_room_stub
+	world.player_character.global_position = world._room_exit_target(0)
+	world._on_encounter_defeated()
+	await create_timer(0.9).timeout
+	await process_frame
+	if world.run_event_panel == null or not world.run_event_panel.visible:
+		push_error("Run event panel did not open after the first map encounter")
+		quit(1)
+		return
+	world.run_event_panel.close()
+	world._on_run_event_choice_made("skip")
+	await create_timer(1.4).timeout
+	await process_frame
+	if world.encounter_index != 1:
+		push_error("World did not advance to the second map encounter")
+		quit(1)
+		return
+	if world.current_encounter == null or not is_instance_valid(world.current_encounter):
+		push_error("Second map encounter did not begin after first map reward")
+		quit(1)
+		return
+
 	# The final chamber is an extra encounter slot backed by FINAL_BOSS_SCENES.
 	world.encounter_index = world._encounter_count() - 1
 	var stub_encounter := Node.new()
