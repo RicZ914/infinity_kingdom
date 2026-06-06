@@ -749,6 +749,7 @@ func _update_visuals() -> void:
 		var body_node := body as Node2D
 		body_node.position = base_body_position + Vector2(0.0, bob)
 		body_node.rotation = sway
+		body_node.scale.x = -absf(body_node.scale.x) if line_direction.x < -0.05 else absf(body_node.scale.x)
 	if weapon != null:
 		weapon.visible = hp > 0.0
 		if target != null and is_instance_valid(target):
