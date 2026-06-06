@@ -393,7 +393,7 @@ func _setup_weapon_visual() -> void:
 	spear_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	spear_sprite.centered = true
 	spear_sprite.scale = Vector2.ONE * 0.60
-	spear_sprite.position = Vector2(-43.0, 2.0)
+	spear_sprite.position = Vector2(-62.0, 2.0)
 	spear.add_child(spear_sprite)
 	spear.color = Color(1.0, 1.0, 1.0, 0.0)
 

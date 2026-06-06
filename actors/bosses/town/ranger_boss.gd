@@ -223,7 +223,7 @@ func _start_basic_attack() -> void:
 	state_time = 0.0
 	action_committed = false
 	attack_cooldown = _get_attack_interval()
-	_animate_weapon_swing(-42.0, 18.0, 0.2)
+	_animate_weapon_swing(-32.0, 14.0, 0.2)
 	Sfx.play_event(&"ranger_attack", global_position)
 
 func _process_basic_attack() -> void:
@@ -242,7 +242,7 @@ func _start_skill1() -> void:
 	aim_ring.visible = true
 	aim_ring.scale = Vector2.ONE * 0.42
 	aim_ring.modulate = Color(0.72, 1.0, 0.86, 0.88)
-	_animate_weapon_swing(-36.0, 14.0, skill1_cast_duration)
+	_animate_weapon_swing(-28.0, 10.0, skill1_cast_duration)
 
 func _process_skill1_cast() -> void:
 	if not action_committed and state_time >= skill1_cast_duration * 0.65:
@@ -312,7 +312,7 @@ func _start_skill3() -> void:
 	skill3_cooldown_remaining = skill3_cooldown
 	assassination_mark.visible = true
 	assassination_mark.scale = Vector2.ONE * 0.76
-	_animate_weapon_swing(-44.0, 12.0, 0.18)
+	_animate_weapon_swing(-34.0, 12.0, 0.18)
 	Sfx.play_event(&"ranger_skill3_assassinate", global_position)
 
 func _process_skill3_dash(delta: float) -> void:
@@ -465,7 +465,7 @@ func _setup_weapon_visual() -> void:
 	weapon_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	weapon_sprite.centered = true
 	weapon_sprite.scale = Vector2.ONE * 0.66
-	weapon_sprite.position = Vector2(-38.0, 5.0)
+	weapon_sprite.position = Vector2(-60.0, 5.0)
 	weapon.add_child(weapon_sprite)
 
 func _animate_weapon_swing(start_degrees: float, end_degrees: float, duration: float) -> void:

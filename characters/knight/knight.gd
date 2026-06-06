@@ -395,7 +395,7 @@ func start_attack() -> void:
 	slash_arc.position = _attack_visual_offset()
 	slash_arc.rotation = _attack_facing().angle()
 	play_animation(&"attack")
-	_animate_weapon_swing(-44.0, 26.0, 0.12, 0.18)
+	_animate_weapon_swing(-34.0, 20.0, 0.12, 0.18)
 
 func finish_attack() -> void:
 	if current_attack_name != &"":
@@ -435,7 +435,7 @@ func start_dash_from_skill() -> void:
 		dash_direction = facing if facing != Vector2.ZERO else Vector2.RIGHT
 	dash_direction = dash_direction.normalized()
 	play_animation(&"dash")
-	_animate_weapon_swing(-48.0, 18.0, 0.08, 0.12)
+	_animate_weapon_swing(-36.0, 16.0, 0.08, 0.12)
 
 func process_dash(delta: float) -> bool:
 	manual_movement_performed = true
@@ -515,7 +515,7 @@ func start_dodge() -> void:
 		dodge_direction = Vector2.RIGHT
 	dodge_direction = dodge_direction.normalized()
 	play_animation(&"dodge")
-	_animate_weapon_swing(-32.0, 16.0, 0.08, 0.1)
+	_animate_weapon_swing(-24.0, 12.0, 0.08, 0.1)
 
 func process_dodge(delta: float) -> bool:
 	dodge_elapsed += delta
@@ -778,6 +778,7 @@ func _setup_weapon_visual() -> void:
 	weapon_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	weapon_sprite.centered = true
 	weapon_sprite.scale = Vector2.ONE * 0.68
+	weapon_sprite.position = Vector2(27.0, 0.0)
 	weapon.add_child(weapon_sprite)
 
 func _sync_weapon_visual() -> void:

@@ -432,7 +432,7 @@ func _setup_weapon_visual() -> void:
 	sword_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sword_sprite.centered = true
 	sword_sprite.scale = Vector2.ONE * 0.68
-	sword_sprite.position = Vector2(-44.0, 4.0)
+	sword_sprite.position = Vector2(-62.0, 4.0)
 	sword.add_child(sword_sprite)
 	sword.color = Color(1.0, 1.0, 1.0, 0.0)
 

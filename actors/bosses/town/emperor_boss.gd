@@ -161,7 +161,7 @@ func _start_basic_attack() -> void:
 	state_time = 0.0
 	action_committed = false
 	attack_cooldown = attack_interval
-	_animate_weapon_swing(-52.0, 24.0, 0.26)
+	_animate_weapon_swing(-42.0, 20.0, 0.26)
 
 func _process_basic_attack() -> void:
 	if not action_committed and state_time >= 0.24:
@@ -190,7 +190,7 @@ func _start_skill_cast() -> void:
 			charge_direction = (target.global_position - global_position).normalized() if target != null else line_direction
 			if charge_direction == Vector2.ZERO:
 				charge_direction = Vector2.RIGHT
-			_animate_weapon_swing(-58.0, 10.0, 0.32)
+			_animate_weapon_swing(-46.0, 12.0, 0.32)
 		&"burst":
 			state = &"skill_burst"
 			burst_center = target.global_position if target != null else global_position
@@ -200,7 +200,7 @@ func _start_skill_cast() -> void:
 			burst_ring.modulate = Color(0.82, 0.9, 1.0, 0.92)
 		&"volley":
 			state = &"skill_volley"
-			_animate_weapon_swing(-34.0, 16.0, 0.24)
+			_animate_weapon_swing(-28.0, 12.0, 0.24)
 
 func _pick_skill() -> StringName:
 	var pool: Array[StringName] = [&"shadow", &"charge", &"burst", &"volley"]
@@ -216,7 +216,7 @@ func _process_skill_shadow() -> void:
 			line_direction = (target.global_position - global_position).normalized()
 			if line_direction == Vector2.ZERO:
 				line_direction = Vector2.RIGHT
-		_animate_weapon_swing(-54.0, 22.0, 0.18)
+		_animate_weapon_swing(-44.0, 18.0, 0.18)
 		_hit_target_in_arc(112.0, shadow_step_slash_damage, 145.0)
 		_spawn_slash_effect(112.0, Color(0.8, 0.9, 1.0, 0.95))
 	if state_time >= shadow_step_duration:
@@ -368,7 +368,7 @@ func _setup_weapon_visual() -> void:
 	weapon_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	weapon_sprite.centered = true
 	weapon_sprite.scale = Vector2.ONE * 0.70
-	weapon_sprite.position = Vector2(-46.0, 8.0)
+	weapon_sprite.position = Vector2(-64.0, 8.0)
 	weapon.add_child(weapon_sprite)
 
 func _animate_weapon_swing(start_degrees: float, end_degrees: float, duration: float) -> void:

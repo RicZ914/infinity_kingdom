@@ -31,10 +31,10 @@ const ENEMY_WEAPON_TEXTURE_PATHS := [
 	]
 ]
 const ENEMY_WEAPON_OFFSETS := [
-	Vector2(24.0, 0.0),
-	Vector2(22.0, 0.0),
-	Vector2(20.0, 0.0),
-	Vector2(20.0, 0.0),
+	Vector2(17.0, 0.0),
+	Vector2(17.0, 0.0),
+	Vector2(18.0, 0.0),
+	Vector2(16.0, 0.0),
 	Vector2(22.0, 0.0),
 	Vector2(22.0, 0.0)
 ]
@@ -769,19 +769,19 @@ func _weapon_visual_rotation(direction: Vector2) -> float:
 		EnemyType.SWORDSMAN:
 			if state == &"attack_slash":
 				var slash_progress := clampf(state_time / 0.55, 0.0, 1.0)
-				guard_degrees = lerpf(-54.0, 18.0, slash_progress)
+				guard_degrees = lerpf(-42.0, 14.0, slash_progress)
 			else:
 				guard_degrees = -46.0
 		EnemyType.SHIELD:
 			if state == &"shield_bash":
 				var bash_progress := clampf(state_time / 0.5, 0.0, 1.0)
-				guard_degrees = lerpf(-48.0, 12.0, bash_progress)
+				guard_degrees = lerpf(-38.0, 10.0, bash_progress)
 			else:
 				guard_degrees = -42.0
 		EnemyType.HUNTER:
 			if state == &"attack_cut":
 				var cut_progress := clampf(state_time / 0.22, 0.0, 1.0)
-				guard_degrees = lerpf(-40.0, 16.0, cut_progress)
+				guard_degrees = lerpf(-30.0, 12.0, cut_progress)
 			else:
 				guard_degrees = -34.0
 		_:
