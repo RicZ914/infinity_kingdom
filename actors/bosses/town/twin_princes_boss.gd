@@ -49,7 +49,7 @@ var slow_factor: float = 1.0
 var desperation_active: bool = false
 var body_sprite: Sprite2D = null
 var spear_sprite: Sprite2D = null
-var spear_angle_offset: float = deg_to_rad(66.0)
+var spear_angle_offset: float = 0.0
 var visual_last_position: Vector2 = Vector2.ZERO
 var visual_bob_time: float = 0.0
 
@@ -195,7 +195,7 @@ func _process_idle(delta: float) -> void:
 	var to_target := target.global_position - global_position
 	var distance := to_target.length()
 	if distance > 0.0:
-		spear.rotation = to_target.angle()
+		spear.rotation = _weapon_guard_rotation(to_target, -42.0)
 	if current_phase == 2 and _can_use_skills() and barrage_cooldown <= 0.0 and distance >= (120.0 if desperation_active else 150.0):
 		_start_barrage()
 		return
@@ -417,7 +417,7 @@ func _update_visuals() -> void:
 		if to_target != Vector2.ZERO:
 			aim_direction = to_target.normalized()
 	spear.position = aim_direction * 20.0 + Vector2(0.0, 4.0)
-	spear.rotation = aim_direction.angle() + spear_angle_offset
+	spear.rotation = _weapon_guard_rotation(aim_direction, -42.0) + spear_angle_offset
 	_apply_prince_body_motion(aim_direction)
 	var pulse := 0.82 + 0.18 * sin(Time.get_ticks_msec() * 0.01)
 	if teleport_marker.visible:
@@ -432,6 +432,11 @@ func _update_visuals() -> void:
 		phase_ring.width = 3.4 + 1.0 * pulse
 		phase_ring.modulate = Color(1.0, 1.0, 1.0, 0.74 + 0.16 * pulse)
 	visual_last_position = global_position
+
+func _weapon_guard_rotation(direction: Vector2, guard_degrees: float) -> float:
+	var facing := direction.normalized() if direction.length_squared() > 0.0001 else Vector2.RIGHT
+	var side_sign := -1.0 if facing.x < -0.05 else 1.0
+	return facing.angle() + deg_to_rad(guard_degrees * side_sign)
 
 func _apply_prince_body_motion(aim_direction: Vector2) -> void:
 	var movement := global_position - visual_last_position

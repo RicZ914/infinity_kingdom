@@ -53,7 +53,7 @@ var burst_center: Vector2 = Vector2.ZERO
 var shadow_reposition_point: Vector2 = Vector2.ZERO
 var body_sprite: Sprite2D = null
 var weapon_sprite: Sprite2D = null
-var weapon_angle_offset: float = deg_to_rad(64.0)
+var weapon_angle_offset: float = 0.0
 var visual_last_position: Vector2 = Vector2.ZERO
 var visual_bob_time: float = 0.0
 
@@ -161,7 +161,7 @@ func _start_basic_attack() -> void:
 	state_time = 0.0
 	action_committed = false
 	attack_cooldown = attack_interval
-	_animate_weapon_swing(-112.0, 38.0, 0.26)
+	_animate_weapon_swing(-52.0, 24.0, 0.26)
 
 func _process_basic_attack() -> void:
 	if not action_committed and state_time >= 0.24:
@@ -190,7 +190,7 @@ func _start_skill_cast() -> void:
 			charge_direction = (target.global_position - global_position).normalized() if target != null else line_direction
 			if charge_direction == Vector2.ZERO:
 				charge_direction = Vector2.RIGHT
-			_animate_weapon_swing(-124.0, -18.0, 0.32)
+			_animate_weapon_swing(-58.0, 10.0, 0.32)
 		&"burst":
 			state = &"skill_burst"
 			burst_center = target.global_position if target != null else global_position
@@ -200,7 +200,7 @@ func _start_skill_cast() -> void:
 			burst_ring.modulate = Color(0.82, 0.9, 1.0, 0.92)
 		&"volley":
 			state = &"skill_volley"
-			_animate_weapon_swing(-44.0, 18.0, 0.24)
+			_animate_weapon_swing(-34.0, 16.0, 0.24)
 
 func _pick_skill() -> StringName:
 	var pool: Array[StringName] = [&"shadow", &"charge", &"burst", &"volley"]
@@ -216,7 +216,7 @@ func _process_skill_shadow() -> void:
 			line_direction = (target.global_position - global_position).normalized()
 			if line_direction == Vector2.ZERO:
 				line_direction = Vector2.RIGHT
-		_animate_weapon_swing(-138.0, 46.0, 0.18)
+		_animate_weapon_swing(-54.0, 22.0, 0.18)
 		_hit_target_in_arc(112.0, shadow_step_slash_damage, 145.0)
 		_spawn_slash_effect(112.0, Color(0.8, 0.9, 1.0, 0.95))
 	if state_time >= shadow_step_duration:
@@ -389,9 +389,14 @@ func _update_visuals() -> void:
 	_apply_body_motion(0.9, 0.025, 0.012)
 	phase_ring.default_color = Color(1.0, 0.84, 0.52, 0.88)
 	weapon.position = line_direction * 22.0 + Vector2(0.0, 0.0)
-	weapon.rotation = line_direction.angle() + weapon_angle_offset
+	weapon.rotation = _weapon_guard_rotation(line_direction, -48.0) + weapon_angle_offset
 	projectile_spawner.position = line_direction * 24.0
 	visual_last_position = global_position
+
+func _weapon_guard_rotation(direction: Vector2, guard_degrees: float) -> float:
+	var facing := direction.normalized() if direction.length_squared() > 0.0001 else Vector2.RIGHT
+	var side_sign := -1.0 if facing.x < -0.05 else 1.0
+	return facing.angle() + deg_to_rad(guard_degrees * side_sign)
 
 func _apply_body_motion(bob_scale: float, sway_scale: float, idle_sway: float) -> void:
 	var movement := global_position - visual_last_position

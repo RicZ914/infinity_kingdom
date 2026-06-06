@@ -70,7 +70,7 @@ var slow_time_remaining: float = 0.0
 var slow_factor: float = 1.0
 var body_sprite: Sprite2D = null
 var weapon_sprite: Sprite2D = null
-var weapon_angle_offset: float = deg_to_rad(56.0)
+var weapon_angle_offset: float = 0.0
 var visual_last_position: Vector2 = Vector2.ZERO
 var visual_bob_time: float = 0.0
 
@@ -223,7 +223,7 @@ func _start_basic_attack() -> void:
 	state_time = 0.0
 	action_committed = false
 	attack_cooldown = _get_attack_interval()
-	_animate_weapon_swing(-94.0, 34.0, 0.2)
+	_animate_weapon_swing(-42.0, 18.0, 0.2)
 	Sfx.play_event(&"ranger_attack", global_position)
 
 func _process_basic_attack() -> void:
@@ -242,7 +242,7 @@ func _start_skill1() -> void:
 	aim_ring.visible = true
 	aim_ring.scale = Vector2.ONE * 0.42
 	aim_ring.modulate = Color(0.72, 1.0, 0.86, 0.88)
-	_animate_weapon_swing(-74.0, 24.0, skill1_cast_duration)
+	_animate_weapon_swing(-36.0, 14.0, skill1_cast_duration)
 
 func _process_skill1_cast() -> void:
 	if not action_committed and state_time >= skill1_cast_duration * 0.65:
@@ -312,7 +312,7 @@ func _start_skill3() -> void:
 	skill3_cooldown_remaining = skill3_cooldown
 	assassination_mark.visible = true
 	assassination_mark.scale = Vector2.ONE * 0.76
-	_animate_weapon_swing(-104.0, 12.0, 0.18)
+	_animate_weapon_swing(-44.0, 12.0, 0.18)
 	Sfx.play_event(&"ranger_skill3_assassinate", global_position)
 
 func _process_skill3_dash(delta: float) -> void:
@@ -496,10 +496,15 @@ func _update_visuals() -> void:
 		assassination_mark.rotation += 0.16
 	assassination_mark.modulate = Color(1.0, 0.48, 0.42, 0.9)
 	weapon.position = line_direction * 18.0 + Vector2(0.0, -2.0)
-	weapon.rotation = line_direction.angle() + weapon_angle_offset
+	weapon.rotation = _weapon_guard_rotation(line_direction, -38.0) + weapon_angle_offset
 	projectile_spawner.position = line_direction * 28.0
 	_apply_agile_body_motion()
 	visual_last_position = global_position
+
+func _weapon_guard_rotation(direction: Vector2, guard_degrees: float) -> float:
+	var facing := direction.normalized() if direction.length_squared() > 0.0001 else Vector2.RIGHT
+	var side_sign := -1.0 if facing.x < -0.05 else 1.0
+	return facing.angle() + deg_to_rad(guard_degrees * side_sign)
 
 func _apply_agile_body_motion() -> void:
 	var movement := global_position - visual_last_position

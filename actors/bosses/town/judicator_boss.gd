@@ -66,7 +66,7 @@ var slow_time_remaining: float = 0.0
 var slow_factor: float = 1.0
 var body_sprite: Sprite2D = null
 var sword_sprite: Sprite2D = null
-var sword_angle_offset: float = deg_to_rad(56.0)
+var sword_angle_offset: float = 0.0
 var enraged: bool = false
 var slam_aftershock_committed: bool = false
 var barrage_wave_index: int = 0
@@ -455,7 +455,7 @@ func _update_visuals() -> void:
 		if to_target != Vector2.ZERO:
 			sword_direction = to_target.normalized()
 	sword.position = sword_direction * 18.0 + Vector2(0.0, 2.0)
-	sword.rotation = sword_direction.angle() + sword_angle_offset
+	sword.rotation = _weapon_guard_rotation(sword_direction, -46.0) + sword_angle_offset
 	_apply_heavy_body_motion()
 	var pulse := 0.82 + 0.18 * sin(Time.get_ticks_msec() * 0.01)
 	if landing_ring.visible:
@@ -466,6 +466,11 @@ func _update_visuals() -> void:
 		slash_line.width = 4.0 + 1.2 * pulse
 		slash_line.modulate = Color(1.0, 1.0, 1.0, 0.74 + 0.16 * pulse)
 	visual_last_position = global_position
+
+func _weapon_guard_rotation(direction: Vector2, guard_degrees: float) -> float:
+	var facing := direction.normalized() if direction.length_squared() > 0.0001 else Vector2.RIGHT
+	var side_sign := -1.0 if facing.x < -0.05 else 1.0
+	return facing.angle() + deg_to_rad(guard_degrees * side_sign)
 
 func _apply_heavy_body_motion() -> void:
 	var movement := global_position - visual_last_position
