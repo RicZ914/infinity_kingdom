@@ -81,6 +81,8 @@ func encounter_spawn_for_room(room_index: int) -> Vector2:
 	if map_walkable_rects.is_empty():
 		return encounter_marker.position if encounter_marker != null else Vector2.ZERO
 	var walk_rect := map_walkable_rects[clampi(room_index, 0, map_walkable_rects.size() - 1)]
+	if room_index == map_walkable_rects.size() - 1:
+		return walk_rect.position + Vector2(walk_rect.size.x * 0.88, walk_rect.size.y * 0.46)
 	var y_ratio := 0.76 if room_index <= 4 else 0.58
 	return walk_rect.position + Vector2(walk_rect.size.x * 0.62, walk_rect.size.y * y_ratio)
 

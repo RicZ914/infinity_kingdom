@@ -28,6 +28,7 @@ const FINAL_BOSS_SCENES := [
 	RANGER_BOSS_SCENE,
 	MAGE_BOSS_SCENE
 ]
+const ENCOUNTER_ROOM_INDICES := [0, 1, 2, 3, 8, 9, 10, 11, 12]
 const RELIC_REROLL_COST := 12
 const HIT_FEEDBACK_COOLDOWN_MSEC := 55
 const GATE_WALK_FINISH_DISTANCE := 10.0
@@ -226,32 +227,39 @@ func _hide_legacy_arena() -> void:
 func _activate_map_room(room_index: int) -> void:
 	if map_runtime == null:
 		return
-	map_runtime.activate_room(room_index, player_character)
+	map_runtime.activate_room(_map_room_index_for_encounter(room_index), player_character)
 
 func _player_spawn_for_room(room_index: int) -> Vector2:
 	if map_runtime == null:
 		return spawn_marker.position
-	return map_runtime.player_spawn_for_room(room_index)
+	return map_runtime.player_spawn_for_room(_map_room_index_for_encounter(room_index))
 
 func _encounter_spawn_for_room(room_index: int) -> Vector2:
 	if map_runtime == null:
 		return encounter_marker.position
-	return map_runtime.encounter_spawn_for_room(room_index)
+	return map_runtime.encounter_spawn_for_room(_map_room_index_for_encounter(room_index))
 
 func _room_exit_target(room_index: int) -> Vector2:
 	if map_runtime != null and map_runtime.has_method("room_exit_target"):
-		return map_runtime.room_exit_target(room_index)
+		return map_runtime.room_exit_target(_map_room_index_for_encounter(room_index))
 	return _encounter_spawn_for_room(room_index) + Vector2(260.0, 0.0)
 
 func _room_entrance_target(room_index: int) -> Vector2:
 	if map_runtime != null and map_runtime.has_method("room_entrance_target"):
-		return map_runtime.room_entrance_target(room_index)
+		return map_runtime.room_entrance_target(_map_room_index_for_encounter(room_index))
 	return _player_spawn_for_room(room_index) - Vector2(48.0, 0.0)
 
 func _update_map_camera(force: bool = false) -> void:
 	if map_runtime == null:
 		return
-	map_runtime.update_camera(encounter_index, player_character, force)
+	map_runtime.update_camera(_map_room_index_for_encounter(encounter_index), player_character, force)
+
+func _map_room_index_for_encounter(index: int) -> int:
+	if index < 0:
+		return 0
+	if index < ENCOUNTER_ROOM_INDICES.size():
+		return int(ENCOUNTER_ROOM_INDICES[index])
+	return int(ENCOUNTER_ROOM_INDICES[ENCOUNTER_ROOM_INDICES.size() - 1])
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:

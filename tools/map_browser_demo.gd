@@ -5,10 +5,15 @@ const ROOM_PATHS := [
 	"res://assets/maps/stitched_demo/room_02_street_battle_1.png",
 	"res://assets/maps/stitched_demo/room_03_street_battle_2.png",
 	"res://assets/maps/stitched_demo/room_04_central_plaza.png",
+	"res://assets/maps/stitched_demo/room_05_church.png",
+	"res://assets/maps/stitched_demo/room_06_armory.png",
+	"res://assets/maps/stitched_demo/room_07_shop.png",
+	"res://assets/maps/stitched_demo/room_08_inner_gate.png",
 	"res://assets/maps/stitched_demo/room_09_elite_zone.png",
 	"res://assets/maps/stitched_demo/room_10_palace_hall.png",
 	"res://assets/maps/stitched_demo/room_11_palace_corridor.png",
-	"res://assets/maps/stitched_demo/room_12_king_gate.png"
+	"res://assets/maps/stitched_demo/room_12_king_gate.png",
+	"res://assets/maps/stitched_demo/room_13_throne_room.png"
 ]
 
 const ROOM_TITLES := [
@@ -16,10 +21,15 @@ const ROOM_TITLES := [
 	"02 Street Battle 1",
 	"03 Street Battle 2",
 	"04 Central Plaza",
+	"05 Church",
+	"06 Armory",
+	"07 Shop",
+	"08 Inner Gate",
 	"09 Elite Zone",
 	"10 Palace Hall",
 	"11 Palace Corridor",
-	"12 King Gate"
+	"12 King Gate",
+	"13 Throne Room"
 ]
 
 const ROOM_PROP_LAYER_PATHS := [
@@ -27,10 +37,15 @@ const ROOM_PROP_LAYER_PATHS := [
 	"res://assets/maps/stitched_demo/props/room_02_props.png",
 	"res://assets/maps/stitched_demo/props/room_03_props.png",
 	"res://assets/maps/stitched_demo/props/room_04_props.png",
+	"res://assets/maps/stitched_demo/props/room_05_props.png",
+	"res://assets/maps/stitched_demo/props/room_06_props.png",
+	"res://assets/maps/stitched_demo/props/room_07_props.png",
+	"res://assets/maps/stitched_demo/props/room_08_props.png",
 	"res://assets/maps/stitched_demo/props/room_09_props.png",
 	"res://assets/maps/stitched_demo/props/room_10_props.png",
 	"res://assets/maps/stitched_demo/props/room_11_props.png",
-	"res://assets/maps/stitched_demo/props/room_12_props.png"
+	"res://assets/maps/stitched_demo/props/room_12_props.png",
+	"res://assets/maps/stitched_demo/props/room_13_props.png"
 ]
 
 const ENEMY_PREVIEWS := [
@@ -82,72 +97,176 @@ const COLLISION_DEBUG_VISIBLE := false
 const PROP_COLLISION_DEBUG_VISIBLE := true
 const PROP_ALPHA_COLLISION_PADDING := Vector2(8.0, 6.0)
 const PROP_ALPHA_THRESHOLD := 0.08
-const RANDOM_PROP_MIN_PER_ROOM := 2
-const RANDOM_PROP_MAX_PER_ROOM := 4
+const RANDOM_PROP_MIN_PER_ROOM := 0
+const RANDOM_PROP_MAX_PER_ROOM := 0
 
 const WALKABLE_AREAS := [
-	Rect2(0.02, 0.08, 0.96, 0.86),
-	Rect2(0.02, 0.12, 0.96, 0.78),
-	Rect2(0.02, 0.14, 0.96, 0.76),
-	Rect2(0.02, 0.08, 0.96, 0.84),
-	Rect2(0.02, 0.08, 0.96, 0.84),
-	Rect2(0.02, 0.10, 0.96, 0.80),
-	Rect2(0.02, 0.10, 0.96, 0.80),
-	Rect2(0.02, 0.10, 0.96, 0.80)
+	Rect2(0.06, 0.16, 0.88, 0.68),
+	Rect2(0.06, 0.16, 0.88, 0.68),
+	Rect2(0.06, 0.15, 0.88, 0.70),
+	Rect2(0.06, 0.16, 0.84, 0.70),
+	Rect2(0.06, 0.16, 0.88, 0.68),
+	Rect2(0.06, 0.16, 0.88, 0.68),
+	Rect2(0.06, 0.16, 0.88, 0.68),
+	Rect2(0.06, 0.16, 0.86, 0.68),
+	Rect2(0.06, 0.16, 0.86, 0.68),
+	Rect2(0.06, 0.17, 0.86, 0.66),
+	Rect2(0.06, 0.17, 0.86, 0.66),
+	Rect2(0.06, 0.17, 0.86, 0.66),
+	Rect2(0.05, 0.19, 0.70, 0.64)
 ]
 
 const ROOM_WALL_COLLISIONS := [
 	[
-		Rect2(0.84, 0.00, 0.16, 0.46),
-		Rect2(0.88, 0.32, 0.12, 0.68)
-	],
-	[
-		Rect2(0.00, 0.00, 1.00, 0.18),
-		Rect2(0.00, 0.76, 1.00, 0.24),
-		Rect2(0.00, 0.38, 0.04, 0.18),
-		Rect2(0.96, 0.38, 0.04, 0.18)
+		Rect2(0.00, 0.00, 1.00, 0.16),
+		Rect2(0.00, 0.84, 1.00, 0.16),
+		Rect2(0.00, 0.00, 0.055, 0.42),
+		Rect2(0.00, 0.58, 0.055, 0.42),
+		Rect2(0.94, 0.00, 0.06, 0.42),
+		Rect2(0.94, 0.58, 0.06, 0.42)
 	],
 	[
 		Rect2(0.00, 0.00, 1.00, 0.16),
-		Rect2(0.00, 0.78, 1.00, 0.22),
-		Rect2(0.00, 0.38, 0.04, 0.18),
-		Rect2(0.96, 0.38, 0.04, 0.18)
+		Rect2(0.00, 0.84, 1.00, 0.16),
+		Rect2(0.00, 0.00, 0.055, 0.42),
+		Rect2(0.00, 0.58, 0.055, 0.42),
+		Rect2(0.94, 0.00, 0.06, 0.42),
+		Rect2(0.94, 0.58, 0.06, 0.42)
 	],
 	[
-		Rect2(0.00, 0.00, 0.08, 1.00),
-		Rect2(0.10, 0.00, 0.72, 0.16),
-		Rect2(0.10, 0.80, 0.72, 0.20),
-		Rect2(0.86, 0.00, 0.05, 0.30),
-		Rect2(0.86, 0.76, 0.05, 0.24)
+		Rect2(0.00, 0.00, 1.00, 0.16),
+		Rect2(0.00, 0.84, 1.00, 0.16),
+		Rect2(0.00, 0.00, 0.055, 0.42),
+		Rect2(0.00, 0.58, 0.055, 0.42),
+		Rect2(0.94, 0.00, 0.06, 0.42),
+		Rect2(0.94, 0.58, 0.06, 0.42)
 	],
 	[
-		Rect2(0.00, 0.00, 1.00, 0.11),
-		Rect2(0.00, 0.88, 1.00, 0.12),
-		Rect2(0.00, 0.00, 0.05, 1.00),
-		Rect2(0.95, 0.00, 0.05, 1.00)
+		Rect2(0.00, 0.00, 0.08, 0.42),
+		Rect2(0.00, 0.58, 0.08, 0.42),
+		Rect2(0.08, 0.00, 0.76, 0.16),
+		Rect2(0.08, 0.84, 0.76, 0.16),
+		Rect2(0.88, 0.00, 0.06, 0.32),
+		Rect2(0.88, 0.68, 0.06, 0.32)
 	],
 	[
-		Rect2(0.00, 0.00, 1.00, 0.17),
-		Rect2(0.00, 0.86, 1.00, 0.14),
-		Rect2(0.00, 0.00, 0.055, 1.00),
-		Rect2(0.945, 0.00, 0.055, 1.00)
+		Rect2(0.00, 0.00, 1.00, 0.15),
+		Rect2(0.00, 0.84, 1.00, 0.16),
+		Rect2(0.00, 0.00, 0.055, 0.42),
+		Rect2(0.00, 0.58, 0.055, 0.42),
+		Rect2(0.945, 0.00, 0.055, 0.42),
+		Rect2(0.945, 0.58, 0.055, 0.42),
+		Rect2(0.15, 0.25, 0.10, 0.08),
+		Rect2(0.29, 0.25, 0.14, 0.08),
+		Rect2(0.60, 0.25, 0.14, 0.08),
+		Rect2(0.76, 0.25, 0.10, 0.08),
+		Rect2(0.46, 0.45, 0.12, 0.13),
+		Rect2(0.15, 0.66, 0.10, 0.08),
+		Rect2(0.29, 0.66, 0.14, 0.08),
+		Rect2(0.60, 0.66, 0.14, 0.08),
+		Rect2(0.76, 0.66, 0.10, 0.08)
 	],
 	[
-		Rect2(0.00, 0.00, 1.00, 0.17),
-		Rect2(0.00, 0.86, 1.00, 0.14),
-		Rect2(0.00, 0.00, 0.055, 1.00),
-		Rect2(0.945, 0.00, 0.055, 1.00)
+		Rect2(0.00, 0.00, 1.00, 0.15),
+		Rect2(0.00, 0.84, 1.00, 0.16),
+		Rect2(0.00, 0.00, 0.055, 0.42),
+		Rect2(0.00, 0.58, 0.055, 0.42),
+		Rect2(0.945, 0.00, 0.055, 0.42),
+		Rect2(0.945, 0.58, 0.055, 0.42),
+		Rect2(0.18, 0.25, 0.11, 0.09),
+		Rect2(0.43, 0.25, 0.11, 0.09),
+		Rect2(0.68, 0.25, 0.11, 0.09),
+		Rect2(0.21, 0.62, 0.14, 0.11),
+		Rect2(0.50, 0.62, 0.16, 0.11),
+		Rect2(0.77, 0.62, 0.11, 0.10)
+	],
+	[
+		Rect2(0.00, 0.00, 1.00, 0.15),
+		Rect2(0.00, 0.84, 1.00, 0.16),
+		Rect2(0.00, 0.00, 0.055, 0.42),
+		Rect2(0.00, 0.58, 0.055, 0.42),
+		Rect2(0.945, 0.00, 0.055, 0.42),
+		Rect2(0.945, 0.58, 0.055, 0.42),
+		Rect2(0.12, 0.25, 0.24, 0.10),
+		Rect2(0.42, 0.23, 0.12, 0.12),
+		Rect2(0.64, 0.23, 0.12, 0.12),
+		Rect2(0.70, 0.56, 0.18, 0.16)
+	],
+	[
+		Rect2(0.00, 0.00, 1.00, 0.16),
+		Rect2(0.00, 0.84, 1.00, 0.16),
+		Rect2(0.00, 0.00, 0.055, 0.42),
+		Rect2(0.00, 0.58, 0.055, 0.42),
+		Rect2(0.94, 0.00, 0.06, 0.42),
+		Rect2(0.94, 0.58, 0.06, 0.42),
+		Rect2(0.74, 0.36, 0.10, 0.18)
+	],
+	[
+		Rect2(0.00, 0.00, 1.00, 0.15),
+		Rect2(0.00, 0.84, 1.00, 0.16),
+		Rect2(0.00, 0.00, 0.055, 0.42),
+		Rect2(0.00, 0.58, 0.055, 0.42),
+		Rect2(0.945, 0.00, 0.055, 0.42),
+		Rect2(0.945, 0.58, 0.055, 0.42),
+		Rect2(0.18, 0.26, 0.07, 0.10),
+		Rect2(0.40, 0.26, 0.07, 0.10),
+		Rect2(0.63, 0.26, 0.07, 0.10),
+		Rect2(0.75, 0.57, 0.12, 0.10)
+	],
+	[
+		Rect2(0.00, 0.00, 1.00, 0.16),
+		Rect2(0.00, 0.84, 1.00, 0.16),
+		Rect2(0.00, 0.00, 0.055, 0.42),
+		Rect2(0.00, 0.58, 0.055, 0.42),
+		Rect2(0.945, 0.00, 0.055, 0.42),
+		Rect2(0.945, 0.58, 0.055, 0.42),
+		Rect2(0.12, 0.22, 0.08, 0.17),
+		Rect2(0.72, 0.22, 0.08, 0.17),
+		Rect2(0.08, 0.46, 0.16, 0.09),
+		Rect2(0.74, 0.47, 0.12, 0.08)
+	],
+	[
+		Rect2(0.00, 0.00, 1.00, 0.16),
+		Rect2(0.00, 0.84, 1.00, 0.16),
+		Rect2(0.00, 0.00, 0.055, 0.42),
+		Rect2(0.00, 0.58, 0.055, 0.42),
+		Rect2(0.945, 0.00, 0.055, 0.42),
+		Rect2(0.945, 0.58, 0.055, 0.42),
+		Rect2(0.12, 0.22, 0.08, 0.17),
+		Rect2(0.34, 0.22, 0.08, 0.17),
+		Rect2(0.57, 0.22, 0.08, 0.17),
+		Rect2(0.78, 0.22, 0.08, 0.17),
+		Rect2(0.12, 0.65, 0.08, 0.14),
+		Rect2(0.34, 0.65, 0.08, 0.14),
+		Rect2(0.57, 0.65, 0.08, 0.14),
+		Rect2(0.78, 0.65, 0.08, 0.14)
 	],
 	[
 		Rect2(0.00, 0.00, 0.86, 0.17),
 		Rect2(0.00, 0.86, 0.86, 0.14),
-		Rect2(0.00, 0.00, 0.055, 1.00),
-		Rect2(0.88, 0.00, 0.12, 0.38),
-		Rect2(0.88, 0.62, 0.12, 0.38)
+		Rect2(0.00, 0.00, 0.055, 0.42),
+		Rect2(0.00, 0.58, 0.055, 0.42),
+		Rect2(0.90, 0.00, 0.10, 0.35),
+		Rect2(0.90, 0.65, 0.10, 0.35),
+		Rect2(0.79, 0.33, 0.10, 0.12),
+		Rect2(0.79, 0.57, 0.10, 0.12)
+	],
+	[
+		Rect2(0.00, 0.00, 0.77, 0.18),
+		Rect2(0.00, 0.85, 0.77, 0.15),
+		Rect2(0.00, 0.00, 0.045, 0.43),
+		Rect2(0.00, 0.58, 0.045, 0.42),
+		Rect2(0.78, 0.04, 0.22, 0.34),
+		Rect2(0.78, 0.40, 0.22, 0.21),
+		Rect2(0.78, 0.64, 0.22, 0.30),
+		Rect2(0.71, 0.32, 0.055, 0.075),
+		Rect2(0.71, 0.62, 0.055, 0.075)
 	]
 ]
 
-const PROP_CANDIDATES := [
+const PROP_CANDIDATES := []
+
+const LEGACY_PROP_CANDIDATES := [
 	{"room": 0, "name": "WoodCrateLeft", "source": Rect2(0.07, 0.07, 0.17, 0.18), "position": Vector2(0.16, 0.61), "collision": Vector2(0.10, 0.07)},
 	{"room": 0, "name": "WoodBench", "source": Rect2(0.35, 0.35, 0.23, 0.11), "position": Vector2(0.45, 0.63), "collision": Vector2(0.19, 0.06)},
 	{"room": 0, "name": "FireBrazier", "source": Rect2(0.48, 0.50, 0.10, 0.16), "position": Vector2(0.52, 0.70), "collision": Vector2(0.07, 0.06)},
@@ -410,7 +529,7 @@ func _add_room_portals(parent: Node, index: int, room_rect: Rect2, walk_rect: Re
 	var portal_height: float = min(walk_rect.size.y * 0.72, 220.0)
 	var portal_center_y: float = walk_rect.get_center().y
 	var left_text: String = "START" if index == 0 else "IN"
-	var right_text: String = "EXIT" if index == room_rects.size() - 1 else "OUT"
+	var right_text: String = "EXIT" if index == ROOM_PATHS.size() - 1 else "OUT"
 	_add_portal_marker(parent, "%s%02d" % [left_text, index + 1], Vector2(room_rect.position.x, portal_center_y), portal_height, left_text, true)
 	_add_portal_marker(parent, "%s%02d" % [right_text, index + 1], Vector2(room_rect.end.x, portal_center_y), portal_height, right_text, false)
 
