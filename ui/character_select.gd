@@ -321,7 +321,9 @@ func _build_ui() -> void:
 	gallery_button = _menu_button(&"gallery", "", _show_gallery)
 	about_button = _menu_button(&"about", "", _show_about)
 	quit_button = _menu_button(&"quit", "", func() -> void: quit_requested.emit())
-	menu_action_buttons = [primary_start_button, settings_button, audio_button, gallery_button, about_button, quit_button]
+	audio_button.visible = false
+	gallery_button.visible = false
+	menu_action_buttons = [primary_start_button, about_button, settings_button, quit_button]
 	for button in menu_action_buttons:
 		left_column.add_child(button)
 
@@ -630,14 +632,14 @@ func _on_primary_pressed() -> void:
 
 func _show_menu() -> void:
 	screen_mode = "menu"
-	detail_mode = "hero"
+	detail_mode = "menu"
 	menu_preview_key = &""
-	menu_overview_panel.visible = true
+	menu_overview_panel.visible = false
 	cards_panel.visible = false
 	_refresh_menu_overview_copy()
-	_set_selected_hero(selected_hero_index)
+	_apply_title_preview()
 	_refresh_copy()
-	call_deferred("_focus_current_overview_entry")
+	call_deferred("_focus_primary_button")
 
 func _show_hero_select() -> void:
 	screen_mode = "select"
@@ -674,6 +676,10 @@ func _show_about() -> void:
 func _focus_selected_card() -> void:
 	if selected_hero_index >= 0 and selected_hero_index < hero_buttons.size():
 		hero_buttons[selected_hero_index].grab_focus()
+
+func _focus_primary_button() -> void:
+	if primary_start_button != null:
+		primary_start_button.grab_focus()
 
 func _focus_current_overview_entry() -> void:
 	var target_id := ""
@@ -897,9 +903,16 @@ func _refresh_copy(_locale: String = "") -> void:
 	UICardFx.set_button_text(gallery_button, UIText.text("menu_gallery"))
 	UICardFx.set_button_text(about_button, UIText.text("menu_about"))
 	UICardFx.set_button_text(quit_button, UIText.text("menu_quit"))
+	UICardFx.set_button_text(primary_start_button, "Start" if screen_mode == "select" else "New Game")
+	UICardFx.set_button_text(about_button, "About")
+	UICardFx.set_button_text(settings_button, "Setting")
+	UICardFx.set_button_text(quit_button, "Quit")
 	_refresh_menu_button_fx_states()
 	_sync_menu_preview()
 	_refresh_menu_overview_copy()
+	if detail_mode == "menu":
+		_apply_title_preview()
+		return
 	match detail_mode:
 		"gallery":
 			_set_gallery_entry(active_gallery_entry_id)
@@ -907,6 +920,14 @@ func _refresh_copy(_locale: String = "") -> void:
 			_set_about_entry(active_about_entry_id)
 		_:
 			_set_selected_hero(selected_hero_index)
+
+func _apply_title_preview() -> void:
+	detail_mode = "menu"
+	hero_portrait.texture = load("res://assets/ui/background/title_screen_bg.png") as Texture2D
+	hero_detail_title.text = "Town Trial"
+	hero_detail_role.text = "New Game / About / Setting / Quit"
+	hero_detail_desc.text = "Use New Game to choose one champion and enter the run. About stays here for credits and the primer; Setting handles display and language before play."
+	_refresh_card_focus_states()
 
 func _subtitle_for_mode() -> String:
 	match screen_mode:

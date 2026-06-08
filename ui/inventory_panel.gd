@@ -29,12 +29,20 @@ var route_log_label: Label
 var relic_history_label: Label
 var catalog_grid: GridContainer
 var catalog_scroll: ScrollContainer
+var carousel_title_label: Label
+var carousel_row: HBoxContainer
+var carousel_view: Control
+var carousel_prev_button: Button
+var carousel_next_button: Button
 var detail_label: Label
 var footer_label: Label
 var body_row: HBoxContainer
 var left_column_box: VBoxContainer
 var right_column_box: VBoxContainer
 var layout_size_override: Vector2 = Vector2.ZERO
+var carousel_catalog: Array[Dictionary] = []
+var carousel_index: int = 0
+var carousel_card_size: Vector2 = Vector2(292.0, 352.0)
 
 func _ready() -> void:
 	layer = 17
@@ -92,9 +100,9 @@ func record_relic_equipped(accessory: Dictionary) -> void:
 
 func open(actor: Node) -> void:
 	active_actor = actor
-	refresh()
 	visible = true
 	get_tree().paused = true
+	refresh()
 	_focus_first_card()
 
 func toggle(actor: Node) -> void:
@@ -279,10 +287,43 @@ func _build_ui() -> void:
 	catalog_title.text = _locale_text("Relic Codex", "饰品图鉴", "飾品圖鑑")
 	UISkin.label(catalog_title, 14, UISkin.COLOR_ACCENT)
 	catalog_stack.add_child(catalog_title)
+	carousel_title_label = catalog_title
+
+	carousel_row = HBoxContainer.new()
+	carousel_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	carousel_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	carousel_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	carousel_row.add_theme_constant_override("separation", 10)
+	catalog_stack.add_child(carousel_row)
+
+	carousel_prev_button = Button.new()
+	carousel_prev_button.text = "<"
+	carousel_prev_button.tooltip_text = "Previous relic"
+	carousel_prev_button.custom_minimum_size = Vector2(44.0, 84.0)
+	UISkin.button_styles(carousel_prev_button, "thin")
+	carousel_prev_button.pressed.connect(func() -> void: _shift_carousel(-1))
+	carousel_row.add_child(carousel_prev_button)
+
+	carousel_view = Control.new()
+	carousel_view.clip_contents = true
+	carousel_view.custom_minimum_size = Vector2(560.0, 392.0)
+	carousel_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	carousel_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	carousel_view.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	carousel_row.add_child(carousel_view)
+
+	carousel_next_button = Button.new()
+	carousel_next_button.text = ">"
+	carousel_next_button.tooltip_text = "Next relic"
+	carousel_next_button.custom_minimum_size = Vector2(44.0, 84.0)
+	UISkin.button_styles(carousel_next_button, "thin")
+	carousel_next_button.pressed.connect(func() -> void: _shift_carousel(1))
+	carousel_row.add_child(carousel_next_button)
 
 	catalog_scroll = ScrollContainer.new()
-	catalog_scroll.custom_minimum_size = Vector2(0.0, 420.0)
-	catalog_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	catalog_scroll.visible = false
+	catalog_scroll.custom_minimum_size = Vector2(0.0, 1.0)
+	catalog_scroll.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	catalog_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	catalog_stack.add_child(catalog_scroll)
 
@@ -428,10 +469,19 @@ func _rebuild_catalog() -> void:
 	for child in catalog_grid.get_children():
 		catalog_grid.remove_child(child)
 		child.queue_free()
+	carousel_catalog.clear()
 	if AccessoryManager == null:
+		_rebuild_carousel()
 		return
 	for accessory in AccessoryManager.get_catalog():
-		catalog_grid.add_child(_catalog_card(accessory))
+		var accessory_data: Dictionary = accessory as Dictionary
+		carousel_catalog.append(accessory_data)
+		catalog_grid.add_child(_catalog_card(accessory_data))
+	if not carousel_catalog.is_empty():
+		carousel_index = clampi(carousel_index, 0, carousel_catalog.size() - 1)
+	_rebuild_carousel()
+	if not carousel_catalog.is_empty():
+		_preview_accessory(_current_accessory_catalog())
 
 func _catalog_card(accessory: Dictionary) -> Button:
 	var button := Button.new()
@@ -499,6 +549,8 @@ func _catalog_card(accessory: Dictionary) -> Button:
 	return button
 
 func _preview_accessory(accessory: Dictionary) -> void:
+	if detail_label == null:
+		return
 	var effect_text := AccessoryManager.describe_effects(accessory) if AccessoryManager != null else ""
 	var playstyle := AccessoryManager.describe_playstyle(accessory.get("tags", [])) if AccessoryManager != null else ""
 	detail_label.text = "%s\n%s\n%s" % [
@@ -508,12 +560,194 @@ func _preview_accessory(accessory: Dictionary) -> void:
 	]
 
 func _focus_first_card() -> void:
+	if carousel_view != null:
+		var current_card := carousel_view.get_node_or_null("CurrentCard") as Button
+		if current_card != null:
+			current_card.grab_focus()
+			return
 	if catalog_grid == null:
 		return
 	for child in catalog_grid.get_children():
 		if child is Button:
 			(child as Button).grab_focus()
 			return
+
+func _current_accessory_catalog() -> Dictionary:
+	if carousel_catalog.is_empty():
+		return {}
+	carousel_index = clampi(carousel_index, 0, carousel_catalog.size() - 1)
+	return carousel_catalog[carousel_index]
+
+func _shift_carousel(delta: int) -> void:
+	if carousel_catalog.is_empty():
+		return
+	carousel_index = _carousel_index(delta)
+	_rebuild_carousel()
+	_preview_accessory(_current_accessory_catalog())
+	_focus_first_card()
+
+func _carousel_index(offset: int) -> int:
+	var count := carousel_catalog.size()
+	if count <= 0:
+		return 0
+	var next_index := (carousel_index + offset) % count
+	if next_index < 0:
+		next_index += count
+	return next_index
+
+func _rebuild_carousel() -> void:
+	if carousel_view == null:
+		return
+	for child in carousel_view.get_children():
+		carousel_view.remove_child(child)
+		child.queue_free()
+	if carousel_catalog.is_empty():
+		var empty_panel := UISkin.placeholder_box(Vector2(260.0, 180.0), "No relics")
+		empty_panel.position = Vector2(20.0, 20.0)
+		carousel_view.add_child(empty_panel)
+		if carousel_prev_button != null:
+			carousel_prev_button.disabled = true
+		if carousel_next_button != null:
+			carousel_next_button.disabled = true
+		return
+	if carousel_prev_button != null:
+		carousel_prev_button.disabled = carousel_catalog.size() <= 1
+	if carousel_next_button != null:
+		carousel_next_button.disabled = carousel_catalog.size() <= 1
+	var view_size := carousel_view.size
+	if view_size.x <= 1.0 or view_size.y <= 1.0:
+		view_size = carousel_view.custom_minimum_size
+	var used_indices := {}
+	for offset in [-2, -1, 1, 2]:
+		var index := _carousel_index(int(offset))
+		if index == carousel_index or used_indices.has(index):
+			continue
+		used_indices[index] = true
+		carousel_view.add_child(_carousel_card(carousel_catalog[index], int(offset), view_size))
+	carousel_view.add_child(_carousel_card(_current_accessory_catalog(), 0, view_size))
+
+func _carousel_card(accessory: Dictionary, offset: int, view_size: Vector2) -> Button:
+	var is_current := offset == 0
+	var distance := absi(offset)
+	var scale_value := 1.0 if is_current else (0.82 if distance == 1 else 0.68)
+	var card_size := carousel_card_size * scale_value
+	var card := Button.new()
+	card.name = "CurrentCard" if is_current else "StackCard%d" % offset
+	card.text = ""
+	card.custom_minimum_size = card_size
+	card.size = card_size
+	card.tooltip_text = String(accessory.get("name", "Relic"))
+	card.focus_mode = Control.FOCUS_ALL if is_current else Control.FOCUS_CLICK
+	card.modulate = Color(1.0, 1.0, 1.0, 1.0 if is_current else (0.74 if distance == 1 else 0.46))
+	var tint := _rarity_color(String(accessory.get("rarity", "Common")))
+	var bg := Color(0.13, 0.14, 0.17, 0.98)
+	if not is_current:
+		bg = Color(0.09, 0.10, 0.13, 0.94)
+	card.add_theme_stylebox_override("normal", UISkin.flat_style(bg, tint.lerp(UISkin.COLOR_BORDER_ALT, 0.28 if is_current else 0.58), 2 if is_current else 1, 4, Vector4(16, 14, 16, 14)))
+	card.add_theme_stylebox_override("hover", UISkin.flat_style(bg.lightened(0.05), tint, 2, 4, Vector4(16, 14, 16, 14)))
+	card.add_theme_stylebox_override("focus", UISkin.flat_style(bg.lightened(0.07), tint, 2, 4, Vector4(16, 14, 16, 14)))
+	var center := view_size * 0.5
+	var side_gap := carousel_card_size.x * (0.50 if distance == 1 else 0.78)
+	card.position = Vector2(
+		center.x - card_size.x * 0.5 + float(offset) * side_gap,
+		center.y - card_size.y * 0.5 + (0.0 if is_current else (18.0 if distance == 1 else 34.0))
+	)
+	card.pressed.connect(func() -> void:
+		if is_current:
+			_preview_accessory(accessory)
+		else:
+			_shift_carousel(offset)
+	)
+	card.focus_entered.connect(func() -> void:
+		_preview_accessory(accessory)
+	)
+	card.mouse_entered.connect(func() -> void:
+		_preview_accessory(accessory)
+	)
+
+	var margin := MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.offset_left = 14.0 if is_current else 11.0
+	margin.offset_top = 14.0 if is_current else 11.0
+	margin.offset_right = -14.0 if is_current else -11.0
+	margin.offset_bottom = -14.0 if is_current else -11.0
+	card.add_child(margin)
+
+	var stack := VBoxContainer.new()
+	stack.add_theme_constant_override("separation", 8 if is_current else 5)
+	margin.add_child(stack)
+
+	var badge_row := HBoxContainer.new()
+	badge_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	badge_row.add_theme_constant_override("separation", 8)
+	stack.add_child(badge_row)
+	badge_row.add_child(_carousel_badge(String(accessory.get("rarity", "Common")), tint))
+	if is_current:
+		badge_row.add_child(_carousel_badge("%d / %d" % [carousel_index + 1, carousel_catalog.size()], Color(0.72, 0.82, 0.96)))
+
+	var icon_slot := PanelContainer.new()
+	icon_slot.custom_minimum_size = Vector2(96.0, 96.0) if is_current else Vector2(64.0, 64.0)
+	icon_slot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	icon_slot.add_theme_stylebox_override("panel", UISkin.icon_slot_style())
+	stack.add_child(icon_slot)
+
+	var icon := TextureRect.new()
+	icon.set_anchors_preset(Control.PRESET_FULL_RECT)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.texture = load(String(accessory.get("icon", "res://assets/ui/icon/ui_unknown.png"))) as Texture2D
+	icon_slot.add_child(icon)
+
+	var name_label := Label.new()
+	name_label.text = String(accessory.get("name", "Relic"))
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UISkin.label(name_label, 17 if is_current else 12, Color.WHITE)
+	stack.add_child(name_label)
+
+	var summary_label := Label.new()
+	summary_label.text = String(accessory.get("summary", ""))
+	summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary_label.max_lines_visible = 4 if is_current else 2
+	UISkin.label(summary_label, 12 if is_current else 9, Color(0.78, 0.84, 0.92))
+	stack.add_child(summary_label)
+
+	if is_current:
+		var tags := AccessoryManager.describe_tags(accessory.get("tags", [])) if AccessoryManager != null else ""
+		var tag_label := Label.new()
+		tag_label.text = tags
+		tag_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		tag_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		tag_label.max_lines_visible = 2
+		UISkin.label(tag_label, 10, Color(0.88, 0.84, 0.66))
+		stack.add_child(tag_label)
+
+	UISkin.ignore_mouse_recursive(margin)
+	return card
+
+func _carousel_badge(text_value: String, tint: Color) -> PanelContainer:
+	var panel_value := PanelContainer.new()
+	panel_value.add_theme_stylebox_override("panel", UISkin.flat_style(tint.darkened(0.74), tint, 1, 5, Vector4(8, 4, 8, 4)))
+	var label_value := Label.new()
+	label_value.text = text_value
+	label_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	UISkin.label(label_value, 10, Color.WHITE)
+	panel_value.add_child(label_value)
+	return panel_value
+
+func _rarity_color(rarity: String) -> Color:
+	match rarity:
+		"Uncommon":
+			return Color(0.62, 0.90, 0.62)
+		"Rare":
+			return Color(0.54, 0.75, 1.0)
+		"Epic":
+			return Color(0.78, 0.58, 1.0)
+		"Legendary":
+			return Color(1.0, 0.72, 0.35)
+		_:
+			return Color(0.78, 0.80, 0.84)
 
 func _queue_layout_refresh() -> void:
 	call_deferred("_refresh_layout")
@@ -538,8 +772,18 @@ func _refresh_layout() -> void:
 	panel_margin.add_theme_constant_override("margin_bottom", 16 if very_compact else (20 if compact else 24))
 	left_column_box.custom_minimum_size.x = 220.0 if very_compact else (272.0 if compact else 340.0)
 	body_row.add_theme_constant_override("separation", 10 if very_compact else (12 if compact else 14))
+	if carousel_row != null:
+		carousel_row.add_theme_constant_override("separation", 6 if very_compact else (8 if compact else 10))
+	if carousel_view != null:
+		var carousel_height := clampf(panel.custom_minimum_size.y * (0.54 if very_compact else (0.58 if compact else 0.62)), 270.0, 430.0)
+		carousel_view.custom_minimum_size = Vector2(250.0 if very_compact else (380.0 if compact else 560.0), carousel_height)
+		carousel_card_size = Vector2(218.0, 250.0) if very_compact else (Vector2(252.0, 304.0) if compact else Vector2(292.0, 352.0))
+	if carousel_prev_button != null:
+		carousel_prev_button.custom_minimum_size = Vector2(34.0 if very_compact else 44.0, 64.0 if very_compact else 84.0)
+	if carousel_next_button != null:
+		carousel_next_button.custom_minimum_size = Vector2(34.0 if very_compact else 44.0, 64.0 if very_compact else 84.0)
 	if catalog_scroll != null:
-		catalog_scroll.custom_minimum_size.y = clampf(panel.custom_minimum_size.y * (0.28 if very_compact else (0.36 if compact else 0.42)), 170.0, 420.0)
+		catalog_scroll.custom_minimum_size.y = 1.0
 	catalog_grid.columns = 1 if very_compact else (2 if compact else 3)
 	var catalog_card_size := Vector2(142.0, 148.0) if very_compact else (Vector2(156.0, 154.0) if compact else Vector2(176.0, 164.0))
 	for child in catalog_grid.get_children():
@@ -555,9 +799,11 @@ func _refresh_layout() -> void:
 	UISkin.label(pickup_log_label, 10 if compact else 11, Color(0.76, 0.82, 0.90))
 	UISkin.label(route_log_label, 11 if compact else 12, Color(0.90, 0.92, 0.98))
 	UISkin.label(relic_history_label, 10 if compact else 11, Color(0.76, 0.82, 0.90))
+	UISkin.label(carousel_title_label, 12 if compact else 14, UISkin.COLOR_ACCENT)
 	UISkin.label(detail_label, 11 if compact else 12, Color(0.90, 0.86, 0.72))
 	UISkin.label(footer_label, 10 if compact else 12, Color(0.72, 0.78, 0.86))
-	footer_label.text = _locale_text("B / Tab  |  Esc", "B / Tab  |  Esc", "B / Tab  |  Esc") if very_compact else _locale_text("B / Tab close  |  Esc close", "B / Tab 关闭  |  Esc 关闭", "B / Tab 關閉  |  Esc 關閉")
+	footer_label.text = "Left / Right or Q / E  |  B / Tab / Esc" if very_compact else "Left / Right or Q / E switch  |  B / Tab / Esc close"
+	_rebuild_carousel()
 
 func _on_accessory_changed(accessory: Dictionary) -> void:
 	record_relic_equipped(accessory)
@@ -573,7 +819,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_ESCAPE or event.keycode == KEY_B or event.keycode == KEY_TAB:
+		if event.keycode == KEY_LEFT or event.keycode == KEY_Q:
+			_shift_carousel(-1)
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_RIGHT or event.keycode == KEY_E:
+			_shift_carousel(1)
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_ESCAPE or event.keycode == KEY_B or event.keycode == KEY_TAB:
 			close()
 			get_viewport().set_input_as_handled()
 

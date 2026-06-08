@@ -2,6 +2,7 @@ extends CanvasLayer
 
 const RunEffects := preload("res://systems/run/run_effects.gd")
 const UISkin := preload("res://ui/ui_skin.gd")
+const CooldownSkillIcon := preload("res://ui/cooldown_skill_icon.gd")
 const SKILL_SLOT_ACCENTS := {
 	"attack": Color(0.98, 0.86, 0.58),
 	"skill1": Color(0.92, 0.74, 0.70),
@@ -25,6 +26,7 @@ const TAG_LABELS := {
 
 var player_character: Node = null
 var root_margin: MarginContainer
+var skill_bar_margin: MarginContainer
 var root_panel: PanelContainer
 var inner_margin: MarginContainer
 var content: VBoxContainer
@@ -148,12 +150,12 @@ func _process(_delta: float) -> void:
 func _build_ui() -> void:
 	layer = 5
 	root_margin = MarginContainer.new()
-	root_margin.anchor_top = 1.0
-	root_margin.anchor_bottom = 1.0
+	root_margin.anchor_top = 0.0
+	root_margin.anchor_bottom = 0.0
 	root_margin.offset_left = 18.0
-	root_margin.offset_top = -454.0
+	root_margin.offset_top = 18.0
 	root_margin.offset_right = 500.0
-	root_margin.offset_bottom = -18.0
+	root_margin.offset_bottom = 382.0
 	root_margin.add_theme_constant_override("margin_left", 10)
 	root_margin.add_theme_constant_override("margin_top", 10)
 	root_margin.add_theme_constant_override("margin_right", 10)
@@ -261,9 +263,24 @@ func _build_ui() -> void:
 	combat_feed_label.custom_minimum_size.y = 28.0
 	status_column.add_child(combat_feed_label)
 
+	skill_bar_margin = MarginContainer.new()
+	skill_bar_margin.anchor_left = 0.5
+	skill_bar_margin.anchor_right = 0.5
+	skill_bar_margin.anchor_top = 1.0
+	skill_bar_margin.anchor_bottom = 1.0
+	skill_bar_margin.offset_left = -230.0
+	skill_bar_margin.offset_top = -120.0
+	skill_bar_margin.offset_right = 230.0
+	skill_bar_margin.offset_bottom = -18.0
+	skill_bar_margin.add_theme_constant_override("margin_left", 10)
+	skill_bar_margin.add_theme_constant_override("margin_top", 10)
+	skill_bar_margin.add_theme_constant_override("margin_right", 10)
+	skill_bar_margin.add_theme_constant_override("margin_bottom", 10)
+	add_child(skill_bar_margin)
+
 	skills_panel_root = PanelContainer.new()
 	skills_panel_root.add_theme_stylebox_override("panel", _hud_panel_style(Color(0.88, 0.80, 1.0)))
-	content.add_child(skills_panel_root)
+	skill_bar_margin.add_child(skills_panel_root)
 
 	var skills_margin := MarginContainer.new()
 	skills_margin.add_theme_constant_override("margin_left", 10)
@@ -467,34 +484,35 @@ func _meter(meter_id: String, label_text: String, _fill_color: Color) -> VBoxCon
 
 func _skill_slot(key: String, hotkey: String, icon_path: String) -> Dictionary:
 	var root := PanelContainer.new()
-	root.custom_minimum_size = Vector2(84, 78)
+	root.custom_minimum_size = Vector2(96, 86)
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.add_theme_stylebox_override("panel", _skill_slot_style(key, true))
 
 	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 8)
+	margin.add_theme_constant_override("margin_left", 10)
 	margin.add_theme_constant_override("margin_top", 8)
-	margin.add_theme_constant_override("margin_right", 8)
+	margin.add_theme_constant_override("margin_right", 10)
 	margin.add_theme_constant_override("margin_bottom", 8)
 	root.add_child(margin)
 
 	var stack := VBoxContainer.new()
-	stack.add_theme_constant_override("separation", 4)
+	stack.add_theme_constant_override("separation", 2)
+	stack.alignment = BoxContainer.ALIGNMENT_CENTER
 	margin.add_child(stack)
 
-	var icon := TextureRect.new()
-	icon.custom_minimum_size = Vector2(44, 44)
+	var icon := CooldownSkillIcon.new()
+	icon.custom_minimum_size = Vector2(54, 54)
 	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	icon.texture = load(icon_path) as Texture2D
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.hotkey = hotkey
+	icon.accent = SKILL_SLOT_ACCENTS.get(key, UISkin.COLOR_ACCENT) as Color
+	icon.set_icon_texture(load(icon_path) as Texture2D)
 	stack.add_child(icon)
 
 	var label := Label.new()
-	label.text = _skill_ready_text(hotkey)
+	label.text = _locale_text("Ready", "Ready", "Ready")
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	UISkin.label(label, 11, Color(0.86, 0.88, 0.92))
+	UISkin.label(label, 11, Color(0.78, 1.0, 0.78))
 	stack.add_child(label)
 
 	return {"root": root, "icon": icon, "label": label, "hotkey": hotkey, "key": key}
@@ -756,9 +774,9 @@ func _refresh_skill_icons() -> void:
 		if not skill_slots.has(slot_key):
 			continue
 		var slot: Dictionary = skill_slots[slot_key] as Dictionary
-		var icon: TextureRect = slot.get("icon") as TextureRect
+		var icon := slot.get("icon") as Control
 		if icon != null:
-			icon.texture = load(String(icons[index])) as Texture2D
+			icon.call("set_icon_texture", load(String(icons[index])) as Texture2D)
 
 func _update_skill_slots() -> void:
 	if player_character == null or not is_instance_valid(player_character):
@@ -767,17 +785,32 @@ func _update_skill_slots() -> void:
 		var slot: Dictionary = skill_slots[key] as Dictionary
 		var root := slot.get("root") as PanelContainer
 		var label: Label = slot.get("label") as Label
+		var icon := slot.get("icon") as Control
 		var cooldown := float(player_character.cooldowns.get(key, 0.0))
+		var total := _skill_total_cooldown(String(key))
+		if icon != null:
+			icon.call("set_cooldown_state", cooldown, total)
 		if cooldown <= 0.05:
-			label.text = _skill_ready_text(String(slot.get("hotkey", "")))
+			label.text = _locale_text("Ready", "Ready", "Ready")
 			label.modulate = Color(0.78, 1.0, 0.78)
 			if root != null:
 				root.add_theme_stylebox_override("panel", _skill_slot_style(String(slot.get("key", key)), true))
 		else:
-			label.text = "%s %.1f" % [String(slot.get("hotkey", "")), cooldown]
+			label.text = "%.1fs" % cooldown
 			label.modulate = Color(1.0, 0.80, 0.62)
 			if root != null:
 				root.add_theme_stylebox_override("panel", _skill_slot_style(String(slot.get("key", key)), false))
+
+func _skill_total_cooldown(key: String) -> float:
+	if player_character == null or not is_instance_valid(player_character):
+		return 1.0
+	var field := "%s_cooldown" % key
+	if key == "attack":
+		field = "attack_interval"
+	for property in player_character.get_property_list():
+		if String(property.get("name", "")) == field:
+			return maxf(float(player_character.get(field)), 0.1)
+	return 1.0
 
 func _prep_run_text(current_scene: Node, pending_prep: Dictionary) -> String:
 	var active_prep: Dictionary = {}
@@ -979,6 +1012,7 @@ func _refresh_layout() -> void:
 	var compact: bool = viewport_size.x < 980.0 or viewport_size.y < 720.0
 	var very_compact: bool = viewport_size.x < 780.0 or viewport_size.y < 620.0
 	var collapsed := not hud_expanded
+	var edge_pad := 10.0 if very_compact else 18.0
 	var width_ratio := 0.38 if very_compact else (0.24 if collapsed else (0.28 if compact else 0.30))
 	if collapsed and compact and not very_compact:
 		width_ratio = 0.22
@@ -987,18 +1021,18 @@ func _refresh_layout() -> void:
 		236.0 if collapsed else (272.0 if very_compact else 292.0),
 		404.0 if collapsed else 468.0
 	)
-	var height_ratio := 0.86 if very_compact else (0.66 if collapsed else (0.72 if compact else 0.76))
-	if collapsed and compact:
-		height_ratio = 0.60 if not very_compact else 0.80
+	var height_ratio := 0.54 if very_compact else (0.50 if collapsed else (0.72 if compact else 0.76))
+	if collapsed and compact and not very_compact:
+		height_ratio = 0.46
 	var panel_height := clampf(
 		viewport_size.y * height_ratio,
-		346.0 if collapsed else (438.0 if very_compact else 486.0),
-		524.0 if collapsed else 668.0
+		246.0 if collapsed else (438.0 if very_compact else 486.0),
+		360.0 if collapsed else minf(668.0, viewport_size.y - edge_pad * 2.0)
 	)
-	root_margin.offset_right = panel_width
-	root_margin.offset_top = -panel_height
-	root_margin.offset_left = 10.0 if very_compact else 18.0
-	root_margin.offset_bottom = -10.0 if very_compact else -18.0
+	root_margin.offset_left = edge_pad
+	root_margin.offset_top = edge_pad
+	root_margin.offset_right = edge_pad + panel_width
+	root_margin.offset_bottom = edge_pad + panel_height
 	root_margin.add_theme_constant_override("margin_left", 8 if very_compact else 10)
 	root_margin.add_theme_constant_override("margin_top", 8 if very_compact else 10)
 	root_margin.add_theme_constant_override("margin_right", 8 if very_compact else 10)
@@ -1009,7 +1043,7 @@ func _refresh_layout() -> void:
 	inner_margin.add_theme_constant_override("margin_bottom", 10 if very_compact else 12)
 	content.add_theme_constant_override("separation", 3 if very_compact else (5 if compact else 8))
 	status_grid.columns = 1 if collapsed or very_compact else 2
-	skill_grid.columns = 2 if collapsed and compact else 4
+	skill_grid.columns = 4
 	skill_grid.add_theme_constant_override("h_separation", 6 if compact else 8)
 	skill_grid.add_theme_constant_override("v_separation", 6 if compact else 8)
 	accessory_grid.columns = 2 if panel_width >= 300.0 else 1
@@ -1050,10 +1084,22 @@ func _refresh_layout() -> void:
 		bar.custom_minimum_size = Vector2(panel_width - (70.0 if very_compact else 86.0), 16.0 if very_compact else (18.0 if compact else 22.0))
 	var slot_width := 52.0 if very_compact else (68.0 if compact else 84.0)
 	var slot_height := 56.0 if very_compact else (68.0 if compact else 78.0)
+	if skill_bar_margin != null:
+		var skill_bar_width := clampf(slot_width * 4.0 + (6.0 if compact else 8.0) * 3.0 + (48.0 if very_compact else 56.0), 300.0, minf(540.0, viewport_size.x - edge_pad * 2.0))
+		var skill_bar_height := 104.0 if very_compact else (120.0 if compact else 132.0)
+		var bottom_pad := 8.0 if very_compact else 18.0
+		skill_bar_margin.offset_left = -skill_bar_width * 0.5
+		skill_bar_margin.offset_right = skill_bar_width * 0.5
+		skill_bar_margin.offset_top = -skill_bar_height - bottom_pad
+		skill_bar_margin.offset_bottom = -bottom_pad
+		skill_bar_margin.add_theme_constant_override("margin_left", 8 if very_compact else 10)
+		skill_bar_margin.add_theme_constant_override("margin_top", 8 if very_compact else 10)
+		skill_bar_margin.add_theme_constant_override("margin_right", 8 if very_compact else 10)
+		skill_bar_margin.add_theme_constant_override("margin_bottom", 8 if very_compact else 10)
 	for slot_data in skill_slots.values():
 		var slot_dict: Dictionary = slot_data as Dictionary
 		var root := slot_dict.get("root") as PanelContainer
-		var icon := slot_dict.get("icon") as TextureRect
+		var icon := slot_dict.get("icon") as Control
 		var label := slot_dict.get("label") as Label
 		if root != null:
 			root.custom_minimum_size = Vector2(slot_width, slot_height)

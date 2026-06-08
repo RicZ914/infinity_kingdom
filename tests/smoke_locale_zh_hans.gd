@@ -22,21 +22,31 @@ func _run() -> void:
 	var start_button := world.character_select.get("primary_start_button") as Button
 	var settings_button := world.character_select.get("settings_button") as Button
 	var audio_button := world.character_select.get("audio_button") as Button
+	var gallery_button := world.character_select.get("gallery_button") as Button
+	var about_button := world.character_select.get("about_button") as Button
 	var quit_button := world.character_select.get("quit_button") as Button
-	if start_button == null or start_button.text != "开始":
-		push_error("Title start button did not switch to Simplified Chinese")
+	if start_button == null or start_button.text != "New Game":
+		push_error("Title start button did not use the requested New Game label")
 		quit(1)
 		return
-	if settings_button == null or settings_button.text != "设置":
-		push_error("Title settings button did not switch to Simplified Chinese")
+	if about_button == null or about_button.text != "About":
+		push_error("Title about button did not use the requested About label")
 		quit(1)
 		return
-	if audio_button == null or audio_button.text != "音频混音":
-		push_error("Title audio button did not switch to Simplified Chinese")
+	if settings_button == null or settings_button.text != "Setting":
+		push_error("Title settings button did not use the requested Setting label")
 		quit(1)
 		return
-	if quit_button == null or quit_button.text != "退出游戏":
-		push_error("Title quit button did not switch to Simplified Chinese")
+	if quit_button == null or quit_button.text != "Quit":
+		push_error("Title quit button did not use the requested Quit label")
+		quit(1)
+		return
+	if audio_button == null or audio_button.visible:
+		push_error("Title audio button should be hidden")
+		quit(1)
+		return
+	if gallery_button == null or gallery_button.visible:
+		push_error("Title gallery button should be hidden")
 		quit(1)
 		return
 

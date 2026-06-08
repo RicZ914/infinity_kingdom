@@ -67,13 +67,33 @@ func _run() -> void:
 		quit(1)
 		return
 	var start_button := world.character_select.get("primary_start_button") as Button
+	var about_button := world.character_select.get("about_button") as Button
+	var settings_button := world.character_select.get("settings_button") as Button
 	var audio_button := world.character_select.get("audio_button") as Button
-	if start_button == null or start_button.text != "Start":
+	var gallery_button := world.character_select.get("gallery_button") as Button
+	var quit_button := world.character_select.get("quit_button") as Button
+	if start_button == null or start_button.text != "New Game":
 		push_error("Character select start button did not initialize")
 		quit(1)
 		return
-	if audio_button == null or audio_button.text != "Audio Mix":
-		push_error("Character select audio button did not initialize")
+	if about_button == null or about_button.text != "About":
+		push_error("Character select about button did not initialize")
+		quit(1)
+		return
+	if settings_button == null or settings_button.text != "Setting":
+		push_error("Character select settings button did not initialize")
+		quit(1)
+		return
+	if quit_button == null or quit_button.text != "Quit":
+		push_error("Character select quit button did not initialize")
+		quit(1)
+		return
+	if audio_button == null or audio_button.visible:
+		push_error("Character select audio button should be hidden on title")
+		quit(1)
+		return
+	if gallery_button == null or gallery_button.visible:
+		push_error("Character select gallery button should be hidden on title")
 		quit(1)
 		return
 	var background_rect := world.character_select.get("background_rect") as TextureRect
