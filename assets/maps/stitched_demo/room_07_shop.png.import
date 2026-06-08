@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://room07shop"
-path="res://.godot/imported/room_07_shop.png-5a18c061a8a54ad1813c919749fc81c2.ctex"
+path="res://.godot/imported/room_07_shop.png-a4bd6c461e4fc091c1bc99b25576a1c1.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/maps/stitched_demo/room_07_shop.png"
-dest_files=["res://.godot/imported/room_07_shop.png-5a18c061a8a54ad1813c919749fc81c2.ctex"]
+dest_files=["res://.godot/imported/room_07_shop.png-a4bd6c461e4fc091c1bc99b25576a1c1.ctex"]
 
 [params]
 

@@ -76,6 +76,8 @@ try {
         Invoke-Godot @("--headless", "--path", ".", "--script", "res://tests/smoke_run_flow.gd")
         Invoke-Godot @("--headless", "--path", ".", "--script", "res://tests/smoke_locale_zh_hans.gd")
         Invoke-Godot @("--headless", "--path", ".", "--script", "res://tests/smoke_ui_screens.gd")
+        Invoke-Godot @("--headless", "--path", ".", "--script", "res://tests/smoke_boss_visuals.gd")
+        Invoke-Godot @("--headless", "--path", ".", "--script", "res://tests/smoke_map_random_props.gd")
         exit 0
     }
 

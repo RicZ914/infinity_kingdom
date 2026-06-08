@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://room05props"
-path="res://.godot/imported/room_05_props.png-0ea24aafeb724befa085d29223cd84bf.ctex"
+path="res://.godot/imported/room_05_props.png-8bf729b5782bd203d429b7f96c57983a.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/maps/stitched_demo/props/room_05_props.png"
-dest_files=["res://.godot/imported/room_05_props.png-0ea24aafeb724befa085d29223cd84bf.ctex"]
+dest_files=["res://.godot/imported/room_05_props.png-8bf729b5782bd203d429b7f96c57983a.ctex"]
 
 [params]
 

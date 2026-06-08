@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://room08innergate"
-path="res://.godot/imported/room_08_inner_gate.png-76f231d07a604f96995a3b43bda3d705.ctex"
+uid="uid://cf65kitpqpg0i"
+path="res://.godot/imported/room_08_inner_gate.png-c0df20c61179bb65f0284408435d0493.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/maps/stitched_demo/room_08_inner_gate.png"
-dest_files=["res://.godot/imported/room_08_inner_gate.png-76f231d07a604f96995a3b43bda3d705.ctex"]
+dest_files=["res://.godot/imported/room_08_inner_gate.png-c0df20c61179bb65f0284408435d0493.ctex"]
 
 [params]
 

@@ -1,0 +1,6742 @@
+{
+  "rooms": [
+    {
+      "room": 0,
+      "source": "room_01_props.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "props": [
+        {
+          "name": "Room01Prop01",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_01.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            414,
+            54,
+            169,
+            237
+          ],
+          "size": [
+            169,
+            237
+          ],
+          "opaque_area": 38278
+        },
+        {
+          "name": "Room01Prop02",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_02.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            110,
+            85,
+            181,
+            203
+          ],
+          "size": [
+            181,
+            203
+          ],
+          "opaque_area": 35093
+        },
+        {
+          "name": "Room01Prop03",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_03.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            696,
+            96,
+            270,
+            193
+          ],
+          "size": [
+            270,
+            193
+          ],
+          "opaque_area": 49691
+        },
+        {
+          "name": "Room01Prop04",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_04.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            1072,
+            107,
+            155,
+            182
+          ],
+          "size": [
+            155,
+            182
+          ],
+          "opaque_area": 25899
+        },
+        {
+          "name": "Room01Prop05",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_05.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            1005,
+            320,
+            266,
+            188
+          ],
+          "size": [
+            266,
+            188
+          ],
+          "opaque_area": 25868
+        },
+        {
+          "name": "Room01Prop06",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_06.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            101,
+            336,
+            332,
+            173
+          ],
+          "size": [
+            332,
+            173
+          ],
+          "opaque_area": 31973
+        },
+        {
+          "name": "Room01Prop07",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_07.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            585,
+            352,
+            290,
+            157
+          ],
+          "size": [
+            290,
+            157
+          ],
+          "opaque_area": 28916
+        },
+        {
+          "name": "Room01Prop08",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_08.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            622,
+            557,
+            130,
+            182
+          ],
+          "size": [
+            130,
+            182
+          ],
+          "opaque_area": 18452
+        },
+        {
+          "name": "Room01Prop09",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_09.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            1004,
+            569,
+            146,
+            172
+          ],
+          "size": [
+            146,
+            172
+          ],
+          "opaque_area": 15672
+        },
+        {
+          "name": "Room01Prop10",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_10.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            195,
+            570,
+            156,
+            163
+          ],
+          "size": [
+            156,
+            163
+          ],
+          "opaque_area": 17717
+        },
+        {
+          "name": "Room01Prop11",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_11.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            763,
+            768,
+            275,
+            181
+          ],
+          "size": [
+            275,
+            181
+          ],
+          "opaque_area": 27745
+        },
+        {
+          "name": "Room01Prop12",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_12.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            82,
+            777,
+            267,
+            176
+          ],
+          "size": [
+            267,
+            176
+          ],
+          "opaque_area": 27571
+        },
+        {
+          "name": "Room01Prop13",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_13.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            1126,
+            785,
+            300,
+            164
+          ],
+          "size": [
+            300,
+            164
+          ],
+          "opaque_area": 30388
+        },
+        {
+          "name": "Room01Prop14",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_01_prop_14.png",
+          "source": "room_01_props.png",
+          "source_rect": [
+            436,
+            799,
+            238,
+            147
+          ],
+          "size": [
+            238,
+            147
+          ],
+          "opaque_area": 19777
+        }
+      ]
+    },
+    {
+      "room": 1,
+      "source": "room_02_props.png",
+      "source_size": [
+        1448,
+        1086
+      ],
+      "props": [
+        {
+          "name": "Room02Prop01",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_01.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            351,
+            59,
+            169,
+            240
+          ],
+          "size": [
+            169,
+            240
+          ],
+          "opaque_area": 38904
+        },
+        {
+          "name": "Room02Prop02",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_02.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            90,
+            88,
+            181,
+            207
+          ],
+          "size": [
+            181,
+            207
+          ],
+          "opaque_area": 35730
+        },
+        {
+          "name": "Room02Prop03",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_03.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            602,
+            98,
+            271,
+            198
+          ],
+          "size": [
+            271,
+            198
+          ],
+          "opaque_area": 51563
+        },
+        {
+          "name": "Room02Prop04",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_04.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            959,
+            116,
+            157,
+            182
+          ],
+          "size": [
+            157,
+            182
+          ],
+          "opaque_area": 26496
+        },
+        {
+          "name": "Room02Prop05",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_05.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            1203,
+            171,
+            112,
+            128
+          ],
+          "size": [
+            112,
+            128
+          ],
+          "opaque_area": 13064
+        },
+        {
+          "name": "Room02Prop06",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_06.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            1108,
+            337,
+            273,
+            198
+          ],
+          "size": [
+            273,
+            198
+          ],
+          "opaque_area": 28395
+        },
+        {
+          "name": "Room02Prop07",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_07.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            71,
+            338,
+            340,
+            181
+          ],
+          "size": [
+            340,
+            181
+          ],
+          "opaque_area": 34505
+        },
+        {
+          "name": "Room02Prop08",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_08.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            819,
+            372,
+            234,
+            162
+          ],
+          "size": [
+            234,
+            162
+          ],
+          "opaque_area": 28571
+        },
+        {
+          "name": "Room02Prop09",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_09.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            467,
+            376,
+            289,
+            159
+          ],
+          "size": [
+            289,
+            159
+          ],
+          "opaque_area": 28291
+        },
+        {
+          "name": "Room02Prop10",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_10.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            517,
+            573,
+            145,
+            192
+          ],
+          "size": [
+            145,
+            192
+          ],
+          "opaque_area": 23359
+        },
+        {
+          "name": "Room02Prop11",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_11.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            152,
+            583,
+            164,
+            173
+          ],
+          "size": [
+            164,
+            173
+          ],
+          "opaque_area": 20262
+        },
+        {
+          "name": "Room02Prop12",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_12.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            1167,
+            583,
+            98,
+            183
+          ],
+          "size": [
+            98,
+            183
+          ],
+          "opaque_area": 11221
+        },
+        {
+          "name": "Room02Prop13",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_13.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            859,
+            591,
+            148,
+            175
+          ],
+          "size": [
+            148,
+            175
+          ],
+          "opaque_area": 17158
+        },
+        {
+          "name": "Room02Prop14",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_14.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            718,
+            811,
+            278,
+            185
+          ],
+          "size": [
+            278,
+            185
+          ],
+          "opaque_area": 28509
+        },
+        {
+          "name": "Room02Prop15",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_15.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            67,
+            816,
+            275,
+            183
+          ],
+          "size": [
+            275,
+            183
+          ],
+          "opaque_area": 29741
+        },
+        {
+          "name": "Room02Prop16",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_16.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            1040,
+            821,
+            308,
+            173
+          ],
+          "size": [
+            308,
+            173
+          ],
+          "opaque_area": 32957
+        },
+        {
+          "name": "Room02Prop17",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_02_prop_17.png",
+          "source": "room_02_props.png",
+          "source_rect": [
+            405,
+            836,
+            251,
+            155
+          ],
+          "size": [
+            251,
+            155
+          ],
+          "opaque_area": 21717
+        }
+      ]
+    },
+    {
+      "room": 2,
+      "source": "room_03_props.png",
+      "source_size": [
+        1402,
+        1122
+      ],
+      "props": [
+        {
+          "name": "Room03Prop01",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_01.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            351,
+            130,
+            351,
+            247
+          ],
+          "size": [
+            351,
+            247
+          ],
+          "opaque_area": 60275
+        },
+        {
+          "name": "Room03Prop02",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_02.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            745,
+            130,
+            231,
+            239
+          ],
+          "size": [
+            231,
+            239
+          ],
+          "opaque_area": 32660
+        },
+        {
+          "name": "Room03Prop03",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_03.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            72,
+            174,
+            232,
+            188
+          ],
+          "size": [
+            232,
+            188
+          ],
+          "opaque_area": 28216
+        },
+        {
+          "name": "Room03Prop04",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_04.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            1033,
+            187,
+            285,
+            180
+          ],
+          "size": [
+            285,
+            180
+          ],
+          "opaque_area": 34696
+        },
+        {
+          "name": "Room03Prop05",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_05.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            587,
+            447,
+            149,
+            122
+          ],
+          "size": [
+            149,
+            122
+          ],
+          "opaque_area": 10461
+        },
+        {
+          "name": "Room03Prop06",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_06.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            801,
+            458,
+            172,
+            110
+          ],
+          "size": [
+            172,
+            110
+          ],
+          "opaque_area": 12118
+        },
+        {
+          "name": "Room03Prop07",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_07.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            1172,
+            458,
+            151,
+            110
+          ],
+          "size": [
+            151,
+            110
+          ],
+          "opaque_area": 9634
+        },
+        {
+          "name": "Room03Prop08",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_08.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            68,
+            460,
+            214,
+            108
+          ],
+          "size": [
+            214,
+            108
+          ],
+          "opaque_area": 14074
+        },
+        {
+          "name": "Room03Prop09",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_09.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            338,
+            473,
+            192,
+            101
+          ],
+          "size": [
+            192,
+            101
+          ],
+          "opaque_area": 12557
+        },
+        {
+          "name": "Room03Prop10",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_10.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            1013,
+            483,
+            119,
+            82
+          ],
+          "size": [
+            119,
+            82
+          ],
+          "opaque_area": 6277
+        },
+        {
+          "name": "Room03Prop11",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_11.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            854,
+            623,
+            157,
+            182
+          ],
+          "size": [
+            157,
+            182
+          ],
+          "opaque_area": 13990
+        },
+        {
+          "name": "Room03Prop12",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_12.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            674,
+            637,
+            97,
+            158
+          ],
+          "size": [
+            97,
+            158
+          ],
+          "opaque_area": 6966
+        },
+        {
+          "name": "Room03Prop13",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_13.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            1080,
+            637,
+            231,
+            162
+          ],
+          "size": [
+            231,
+            162
+          ],
+          "opaque_area": 21398
+        },
+        {
+          "name": "Room03Prop14",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_14.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            369,
+            665,
+            224,
+            134
+          ],
+          "size": [
+            224,
+            134
+          ],
+          "opaque_area": 20702
+        },
+        {
+          "name": "Room03Prop15",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_15.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            68,
+            668,
+            244,
+            130
+          ],
+          "size": [
+            244,
+            130
+          ],
+          "opaque_area": 21826
+        },
+        {
+          "name": "Room03Prop16",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_16.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            407,
+            868,
+            267,
+            158
+          ],
+          "size": [
+            267,
+            158
+          ],
+          "opaque_area": 24633
+        },
+        {
+          "name": "Room03Prop17",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_17.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            65,
+            873,
+            285,
+            151
+          ],
+          "size": [
+            285,
+            151
+          ],
+          "opaque_area": 28138
+        },
+        {
+          "name": "Room03Prop18",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_18.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            1044,
+            873,
+            276,
+            149
+          ],
+          "size": [
+            276,
+            149
+          ],
+          "opaque_area": 26448
+        },
+        {
+          "name": "Room03Prop19",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_03_prop_19.png",
+          "source": "room_03_props.png",
+          "source_rect": [
+            737,
+            889,
+            236,
+            132
+          ],
+          "size": [
+            236,
+            132
+          ],
+          "opaque_area": 20211
+        }
+      ]
+    },
+    {
+      "room": 3,
+      "source": "room_04_props.png",
+      "source_size": [
+        1560,
+        1008
+      ],
+      "props": [
+        {
+          "name": "Room04Prop01",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_01.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            804,
+            21,
+            254,
+            223
+          ],
+          "size": [
+            254,
+            223
+          ],
+          "opaque_area": 45601
+        },
+        {
+          "name": "Room04Prop02",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_02.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            1091,
+            21,
+            294,
+            258
+          ],
+          "size": [
+            294,
+            258
+          ],
+          "opaque_area": 62994
+        },
+        {
+          "name": "Room04Prop03",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_03.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            252,
+            41,
+            161,
+            156
+          ],
+          "size": [
+            161,
+            156
+          ],
+          "opaque_area": 20465
+        },
+        {
+          "name": "Room04Prop04",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_04.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            443,
+            41,
+            219,
+            156
+          ],
+          "size": [
+            219,
+            156
+          ],
+          "opaque_area": 27774
+        },
+        {
+          "name": "Room04Prop05",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_05.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            1433,
+            42,
+            74,
+            119
+          ],
+          "size": [
+            74,
+            119
+          ],
+          "opaque_area": 5338
+        },
+        {
+          "name": "Room04Prop06",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_06.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            26,
+            50,
+            46,
+            147
+          ],
+          "size": [
+            46,
+            147
+          ],
+          "opaque_area": 5422
+        },
+        {
+          "name": "Room04Prop07",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_07.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            693,
+            51,
+            48,
+            147
+          ],
+          "size": [
+            48,
+            147
+          ],
+          "opaque_area": 5400
+        },
+        {
+          "name": "Room04Prop08",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_08.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            102,
+            59,
+            81,
+            131
+          ],
+          "size": [
+            81,
+            131
+          ],
+          "opaque_area": 9690
+        },
+        {
+          "name": "Room04Prop09",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_09.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            203,
+            59,
+            19,
+            130
+          ],
+          "size": [
+            19,
+            130
+          ],
+          "opaque_area": 1873
+        },
+        {
+          "name": "Room04Prop10",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_10.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            1433,
+            176,
+            74,
+            123
+          ],
+          "size": [
+            74,
+            123
+          ],
+          "opaque_area": 5619
+        },
+        {
+          "name": "Room04Prop11",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_11.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            167,
+            240,
+            66,
+            77
+          ],
+          "size": [
+            66,
+            77
+          ],
+          "opaque_area": 4085
+        },
+        {
+          "name": "Room04Prop12",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_12.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            343,
+            240,
+            57,
+            80
+          ],
+          "size": [
+            57,
+            80
+          ],
+          "opaque_area": 3440
+        },
+        {
+          "name": "Room04Prop13",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_13.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            509,
+            246,
+            105,
+            74
+          ],
+          "size": [
+            105,
+            74
+          ],
+          "opaque_area": 4774
+        },
+        {
+          "name": "Room04Prop14",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_14.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            241,
+            252,
+            77,
+            65
+          ],
+          "size": [
+            77,
+            65
+          ],
+          "opaque_area": 3796
+        },
+        {
+          "name": "Room04Prop15",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_15.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            693,
+            255,
+            54,
+            62
+          ],
+          "size": [
+            54,
+            62
+          ],
+          "opaque_area": 2469
+        },
+        {
+          "name": "Room04Prop16",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_16.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            814,
+            259,
+            71,
+            58
+          ],
+          "size": [
+            71,
+            58
+          ],
+          "opaque_area": 3316
+        },
+        {
+          "name": "Room04Prop17",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_17.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            98,
+            264,
+            43,
+            53
+          ],
+          "size": [
+            43,
+            53
+          ],
+          "opaque_area": 1885
+        },
+        {
+          "name": "Room04Prop18",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_18.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            28,
+            265,
+            43,
+            52
+          ],
+          "size": [
+            43,
+            52
+          ],
+          "opaque_area": 1864
+        },
+        {
+          "name": "Room04Prop19",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_19.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            1433,
+            326,
+            74,
+            122
+          ],
+          "size": [
+            74,
+            122
+          ],
+          "opaque_area": 5474
+        },
+        {
+          "name": "Room04Prop20",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_20.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            46,
+            362,
+            310,
+            294
+          ],
+          "size": [
+            310,
+            294
+          ],
+          "opaque_area": 60109
+        },
+        {
+          "name": "Room04Prop21",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_21.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            721,
+            408,
+            58,
+            165
+          ],
+          "size": [
+            58,
+            165
+          ],
+          "opaque_area": 6719
+        },
+        {
+          "name": "Room04Prop22",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_22.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            809,
+            420,
+            57,
+            153
+          ],
+          "size": [
+            57,
+            153
+          ],
+          "opaque_area": 6011
+        },
+        {
+          "name": "Room04Prop23",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_23.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            393,
+            424,
+            281,
+            231
+          ],
+          "size": [
+            281,
+            231
+          ],
+          "opaque_area": 46488
+        },
+        {
+          "name": "Room04Prop24",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_24.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            892,
+            455,
+            60,
+            118
+          ],
+          "size": [
+            60,
+            118
+          ],
+          "opaque_area": 4688
+        },
+        {
+          "name": "Room04Prop25",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_25.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            975,
+            504,
+            73,
+            77
+          ],
+          "size": [
+            73,
+            77
+          ],
+          "opaque_area": 3384
+        },
+        {
+          "name": "Room04Prop26",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_26.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            1062,
+            522,
+            65,
+            86
+          ],
+          "size": [
+            65,
+            86
+          ],
+          "opaque_area": 3573
+        },
+        {
+          "name": "Room04Prop27",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_27.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            1452,
+            531,
+            70,
+            100
+          ],
+          "size": [
+            70,
+            100
+          ],
+          "opaque_area": 3651
+        },
+        {
+          "name": "Room04Prop28",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_28.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            1156,
+            544,
+            53,
+            64
+          ],
+          "size": [
+            53,
+            64
+          ],
+          "opaque_area": 2532
+        },
+        {
+          "name": "Room04Prop29",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_29.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            1354,
+            545,
+            53,
+            91
+          ],
+          "size": [
+            53,
+            91
+          ],
+          "opaque_area": 3616
+        },
+        {
+          "name": "Room04Prop30",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_30.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            1268,
+            628,
+            60,
+            116
+          ],
+          "size": [
+            60,
+            116
+          ],
+          "opaque_area": 4992
+        },
+        {
+          "name": "Room04Prop31",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_31.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            1180,
+            639,
+            61,
+            105
+          ],
+          "size": [
+            61,
+            105
+          ],
+          "opaque_area": 5073
+        },
+        {
+          "name": "Room04Prop32",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_32.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            1360,
+            673,
+            37,
+            71
+          ],
+          "size": [
+            37,
+            71
+          ],
+          "opaque_area": 1965
+        },
+        {
+          "name": "Room04Prop33",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_33.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            596,
+            692,
+            89,
+            55
+          ],
+          "size": [
+            89,
+            55
+          ],
+          "opaque_area": 2221
+        },
+        {
+          "name": "Room04Prop34",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_34.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            835,
+            695,
+            97,
+            49
+          ],
+          "size": [
+            97,
+            49
+          ],
+          "opaque_area": 2806
+        },
+        {
+          "name": "Room04Prop35",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_35.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            46,
+            800,
+            150,
+            145
+          ],
+          "size": [
+            150,
+            145
+          ],
+          "opaque_area": 16245
+        },
+        {
+          "name": "Room04Prop36",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_36.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            233,
+            800,
+            149,
+            145
+          ],
+          "size": [
+            149,
+            145
+          ],
+          "opaque_area": 16197
+        },
+        {
+          "name": "Room04Prop37",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_37.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            420,
+            800,
+            151,
+            145
+          ],
+          "size": [
+            151,
+            145
+          ],
+          "opaque_area": 16326
+        },
+        {
+          "name": "Room04Prop38",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_38.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            656,
+            807,
+            90,
+            132
+          ],
+          "size": [
+            90,
+            132
+          ],
+          "opaque_area": 4638
+        },
+        {
+          "name": "Room04Prop39",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_39.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            785,
+            836,
+            107,
+            103
+          ],
+          "size": [
+            107,
+            103
+          ],
+          "opaque_area": 9308
+        },
+        {
+          "name": "Room04Prop40",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_40.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            941,
+            850,
+            59,
+            89
+          ],
+          "size": [
+            59,
+            89
+          ],
+          "opaque_area": 2123
+        },
+        {
+          "name": "Room04Prop41",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_41.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            1154,
+            858,
+            99,
+            81
+          ],
+          "size": [
+            99,
+            81
+          ],
+          "opaque_area": 3970
+        },
+        {
+          "name": "Room04Prop42",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_04_prop_42.png",
+          "source": "room_04_props.png",
+          "source_rect": [
+            1029,
+            877,
+            98,
+            62
+          ],
+          "size": [
+            98,
+            62
+          ],
+          "opaque_area": 3919
+        }
+      ]
+    },
+    {
+      "room": 4,
+      "source": "room_05_props.png",
+      "source_size": [
+        1672,
+        941
+      ],
+      "props": [
+        {
+          "name": "Room05Prop01",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_01.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            362,
+            38,
+            313,
+            233
+          ],
+          "size": [
+            313,
+            233
+          ],
+          "opaque_area": 63417
+        },
+        {
+          "name": "Room05Prop02",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_02.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            50,
+            66,
+            215,
+            205
+          ],
+          "size": [
+            215,
+            205
+          ],
+          "opaque_area": 40486
+        },
+        {
+          "name": "Room05Prop03",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_03.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            1377,
+            71,
+            96,
+            113
+          ],
+          "size": [
+            96,
+            113
+          ],
+          "opaque_area": 6585
+        },
+        {
+          "name": "Room05Prop04",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_04.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            762,
+            72,
+            222,
+            195
+          ],
+          "size": [
+            222,
+            195
+          ],
+          "opaque_area": 39423
+        },
+        {
+          "name": "Room05Prop05",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_05.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            1541,
+            79,
+            73,
+            134
+          ],
+          "size": [
+            73,
+            134
+          ],
+          "opaque_area": 4862
+        },
+        {
+          "name": "Room05Prop06",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_06.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            1198,
+            90,
+            97,
+            89
+          ],
+          "size": [
+            97,
+            89
+          ],
+          "opaque_area": 4771
+        },
+        {
+          "name": "Room05Prop07",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_07.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            1081,
+            96,
+            45,
+            83
+          ],
+          "size": [
+            45,
+            83
+          ],
+          "opaque_area": 2099
+        },
+        {
+          "name": "Room05Prop08",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_08.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            1095,
+            236,
+            91,
+            212
+          ],
+          "size": [
+            91,
+            212
+          ],
+          "opaque_area": 7691
+        },
+        {
+          "name": "Room05Prop09",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_09.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            1292,
+            319,
+            75,
+            134
+          ],
+          "size": [
+            75,
+            134
+          ],
+          "opaque_area": 7171
+        },
+        {
+          "name": "Room05Prop10",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_10.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            48,
+            324,
+            337,
+            143
+          ],
+          "size": [
+            337,
+            143
+          ],
+          "opaque_area": 36151
+        },
+        {
+          "name": "Room05Prop11",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_11.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            1487,
+            334,
+            50,
+            115
+          ],
+          "size": [
+            50,
+            115
+          ],
+          "opaque_area": 3525
+        },
+        {
+          "name": "Room05Prop12",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_12.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            452,
+            335,
+            239,
+            132
+          ],
+          "size": [
+            239,
+            132
+          ],
+          "opaque_area": 25606
+        },
+        {
+          "name": "Room05Prop13",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_13.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            753,
+            335,
+            246,
+            132
+          ],
+          "size": [
+            246,
+            132
+          ],
+          "opaque_area": 25136
+        },
+        {
+          "name": "Room05Prop14",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_14.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            1441,
+            500,
+            139,
+            213
+          ],
+          "size": [
+            139,
+            213
+          ],
+          "opaque_area": 24016
+        },
+        {
+          "name": "Room05Prop15",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_15.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            61,
+            503,
+            117,
+            217
+          ],
+          "size": [
+            117,
+            217
+          ],
+          "opaque_area": 21082
+        },
+        {
+          "name": "Room05Prop16",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_16.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            247,
+            504,
+            118,
+            216
+          ],
+          "size": [
+            118,
+            216
+          ],
+          "opaque_area": 21447
+        },
+        {
+          "name": "Room05Prop17",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_17.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            1236,
+            514,
+            118,
+            189
+          ],
+          "size": [
+            118,
+            189
+          ],
+          "opaque_area": 13448
+        },
+        {
+          "name": "Room05Prop18",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_18.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            1066,
+            520,
+            110,
+            178
+          ],
+          "size": [
+            110,
+            178
+          ],
+          "opaque_area": 14754
+        },
+        {
+          "name": "Room05Prop19",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_19.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            438,
+            524,
+            61,
+            172
+          ],
+          "size": [
+            61,
+            172
+          ],
+          "opaque_area": 5877
+        },
+        {
+          "name": "Room05Prop20",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_20.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            669,
+            567,
+            104,
+            123
+          ],
+          "size": [
+            104,
+            123
+          ],
+          "opaque_area": 8087
+        },
+        {
+          "name": "Room05Prop21",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_21.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            530,
+            574,
+            93,
+            116
+          ],
+          "size": [
+            93,
+            116
+          ],
+          "opaque_area": 7005
+        },
+        {
+          "name": "Room05Prop22",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_22.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            820,
+            601,
+            65,
+            82
+          ],
+          "size": [
+            65,
+            82
+          ],
+          "opaque_area": 3025
+        },
+        {
+          "name": "Room05Prop23",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_23.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            930,
+            603,
+            67,
+            79
+          ],
+          "size": [
+            67,
+            79
+          ],
+          "opaque_area": 3198
+        },
+        {
+          "name": "Room05Prop24",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_24.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            1252,
+            746,
+            130,
+            153
+          ],
+          "size": [
+            130,
+            153
+          ],
+          "opaque_area": 17127
+        },
+        {
+          "name": "Room05Prop25",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_25.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            1076,
+            748,
+            99,
+            144
+          ],
+          "size": [
+            99,
+            144
+          ],
+          "opaque_area": 12436
+        },
+        {
+          "name": "Room05Prop26",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_26.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            1463,
+            759,
+            107,
+            133
+          ],
+          "size": [
+            107,
+            133
+          ],
+          "opaque_area": 12868
+        },
+        {
+          "name": "Room05Prop27",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_27.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            921,
+            769,
+            83,
+            102
+          ],
+          "size": [
+            83,
+            102
+          ],
+          "opaque_area": 6386
+        },
+        {
+          "name": "Room05Prop28",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_28.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            797,
+            772,
+            71,
+            99
+          ],
+          "size": [
+            71,
+            99
+          ],
+          "opaque_area": 5281
+        },
+        {
+          "name": "Room05Prop29",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_29.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            423,
+            790,
+            80,
+            66
+          ],
+          "size": [
+            80,
+            66
+          ],
+          "opaque_area": 3273
+        },
+        {
+          "name": "Room05Prop30",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_30.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            201,
+            793,
+            117,
+            73
+          ],
+          "size": [
+            117,
+            73
+          ],
+          "opaque_area": 4944
+        },
+        {
+          "name": "Room05Prop31",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_31.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            52,
+            794,
+            110,
+            77
+          ],
+          "size": [
+            110,
+            77
+          ],
+          "opaque_area": 5136
+        },
+        {
+          "name": "Room05Prop32",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_05_prop_32.png",
+          "source": "room_05_props.png",
+          "source_rect": [
+            685,
+            805,
+            64,
+            53
+          ],
+          "size": [
+            64,
+            53
+          ],
+          "opaque_area": 2085
+        }
+      ]
+    },
+    {
+      "room": 5,
+      "source": "room_06_props.png",
+      "source_size": [
+        1492,
+        1054
+      ],
+      "props": [
+        {
+          "name": "Room06Prop01",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_01.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            307,
+            28,
+            175,
+            227
+          ],
+          "size": [
+            175,
+            227
+          ],
+          "opaque_area": 17841
+        },
+        {
+          "name": "Room06Prop02",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_02.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            521,
+            44,
+            177,
+            211
+          ],
+          "size": [
+            177,
+            211
+          ],
+          "opaque_area": 23113
+        },
+        {
+          "name": "Room06Prop03",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_03.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            732,
+            73,
+            206,
+            182
+          ],
+          "size": [
+            206,
+            182
+          ],
+          "opaque_area": 20828
+        },
+        {
+          "name": "Room06Prop04",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_04.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            70,
+            86,
+            209,
+            169
+          ],
+          "size": [
+            209,
+            169
+          ],
+          "opaque_area": 22355
+        },
+        {
+          "name": "Room06Prop05",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_05.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            1276,
+            100,
+            114,
+            144
+          ],
+          "size": [
+            114,
+            144
+          ],
+          "opaque_area": 12483
+        },
+        {
+          "name": "Room06Prop06",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_06.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            986,
+            101,
+            99,
+            151
+          ],
+          "size": [
+            99,
+            151
+          ],
+          "opaque_area": 11298
+        },
+        {
+          "name": "Room06Prop07",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_07.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            1113,
+            106,
+            129,
+            136
+          ],
+          "size": [
+            129,
+            136
+          ],
+          "opaque_area": 13059
+        },
+        {
+          "name": "Room06Prop08",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_08.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            90,
+            295,
+            290,
+            169
+          ],
+          "size": [
+            290,
+            169
+          ],
+          "opaque_area": 42000
+        },
+        {
+          "name": "Room06Prop09",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_09.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            1087,
+            308,
+            92,
+            135
+          ],
+          "size": [
+            92,
+            135
+          ],
+          "opaque_area": 9971
+        },
+        {
+          "name": "Room06Prop10",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_10.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            982,
+            309,
+            93,
+            134
+          ],
+          "size": [
+            93,
+            134
+          ],
+          "opaque_area": 9276
+        },
+        {
+          "name": "Room06Prop11",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_11.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            427,
+            312,
+            269,
+            151
+          ],
+          "size": [
+            269,
+            151
+          ],
+          "opaque_area": 32208
+        },
+        {
+          "name": "Room06Prop12",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_12.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            752,
+            316,
+            178,
+            141
+          ],
+          "size": [
+            178,
+            141
+          ],
+          "opaque_area": 19901
+        },
+        {
+          "name": "Room06Prop13",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_13.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            1195,
+            336,
+            75,
+            105
+          ],
+          "size": [
+            75,
+            105
+          ],
+          "opaque_area": 6164
+        },
+        {
+          "name": "Room06Prop14",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_14.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            1300,
+            340,
+            77,
+            101
+          ],
+          "size": [
+            77,
+            101
+          ],
+          "opaque_area": 6069
+        },
+        {
+          "name": "Room06Prop15",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_15.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            63,
+            487,
+            239,
+            136
+          ],
+          "size": [
+            239,
+            136
+          ],
+          "opaque_area": 20305
+        },
+        {
+          "name": "Room06Prop16",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_16.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            1153,
+            491,
+            89,
+            115
+          ],
+          "size": [
+            89,
+            115
+          ],
+          "opaque_area": 8182
+        },
+        {
+          "name": "Room06Prop17",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_17.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            374,
+            492,
+            112,
+            107
+          ],
+          "size": [
+            112,
+            107
+          ],
+          "opaque_area": 10932
+        },
+        {
+          "name": "Room06Prop18",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_18.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            539,
+            493,
+            97,
+            107
+          ],
+          "size": [
+            97,
+            107
+          ],
+          "opaque_area": 9397
+        },
+        {
+          "name": "Room06Prop19",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_19.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            1034,
+            497,
+            86,
+            109
+          ],
+          "size": [
+            86,
+            109
+          ],
+          "opaque_area": 7335
+        },
+        {
+          "name": "Room06Prop20",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_20.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            817,
+            502,
+            172,
+            98
+          ],
+          "size": [
+            172,
+            98
+          ],
+          "opaque_area": 14868
+        },
+        {
+          "name": "Room06Prop21",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_21.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            1272,
+            514,
+            72,
+            92
+          ],
+          "size": [
+            72,
+            92
+          ],
+          "opaque_area": 4910
+        },
+        {
+          "name": "Room06Prop22",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_22.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            674,
+            516,
+            95,
+            84
+          ],
+          "size": [
+            95,
+            84
+          ],
+          "opaque_area": 7065
+        },
+        {
+          "name": "Room06Prop23",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_23.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            1218,
+            630,
+            175,
+            138
+          ],
+          "size": [
+            175,
+            138
+          ],
+          "opaque_area": 17275
+        },
+        {
+          "name": "Room06Prop24",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_24.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            1038,
+            644,
+            134,
+            124
+          ],
+          "size": [
+            134,
+            124
+          ],
+          "opaque_area": 13362
+        },
+        {
+          "name": "Room06Prop25",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_25.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            70,
+            647,
+            132,
+            123
+          ],
+          "size": [
+            132,
+            123
+          ],
+          "opaque_area": 12937
+        },
+        {
+          "name": "Room06Prop26",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_26.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            800,
+            653,
+            149,
+            112
+          ],
+          "size": [
+            149,
+            112
+          ],
+          "opaque_area": 14297
+        },
+        {
+          "name": "Room06Prop27",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_27.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            608,
+            654,
+            145,
+            114
+          ],
+          "size": [
+            145,
+            114
+          ],
+          "opaque_area": 14077
+        },
+        {
+          "name": "Room06Prop28",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_28.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            241,
+            659,
+            148,
+            109
+          ],
+          "size": [
+            148,
+            109
+          ],
+          "opaque_area": 14828
+        },
+        {
+          "name": "Room06Prop29",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_29.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            426,
+            659,
+            145,
+            109
+          ],
+          "size": [
+            145,
+            109
+          ],
+          "opaque_area": 14718
+        },
+        {
+          "name": "Room06Prop30",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_30.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            238,
+            798,
+            122,
+            188
+          ],
+          "size": [
+            122,
+            188
+          ],
+          "opaque_area": 12987
+        },
+        {
+          "name": "Room06Prop31",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_31.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            839,
+            798,
+            136,
+            190
+          ],
+          "size": [
+            136,
+            190
+          ],
+          "opaque_area": 13916
+        },
+        {
+          "name": "Room06Prop32",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_32.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            75,
+            800,
+            123,
+            186
+          ],
+          "size": [
+            123,
+            186
+          ],
+          "opaque_area": 13148
+        },
+        {
+          "name": "Room06Prop33",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_33.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            1266,
+            803,
+            92,
+            175
+          ],
+          "size": [
+            92,
+            175
+          ],
+          "opaque_area": 11134
+        },
+        {
+          "name": "Room06Prop34",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_34.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            404,
+            807,
+            169,
+            173
+          ],
+          "size": [
+            169,
+            173
+          ],
+          "opaque_area": 14896
+        },
+        {
+          "name": "Room06Prop35",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_35.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            1036,
+            807,
+            141,
+            171
+          ],
+          "size": [
+            141,
+            171
+          ],
+          "opaque_area": 17754
+        },
+        {
+          "name": "Room06Prop36",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_06_prop_36.png",
+          "source": "room_06_props.png",
+          "source_rect": [
+            600,
+            826,
+            192,
+            157
+          ],
+          "size": [
+            192,
+            157
+          ],
+          "opaque_area": 16817
+        }
+      ]
+    },
+    {
+      "room": 6,
+      "source": "room_07_props.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "props": [
+        {
+          "name": "Room07Prop01",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_01.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            949,
+            62,
+            539,
+            158
+          ],
+          "size": [
+            539,
+            158
+          ],
+          "opaque_area": 57684
+        },
+        {
+          "name": "Room07Prop02",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_02.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            443,
+            63,
+            315,
+            141
+          ],
+          "size": [
+            315,
+            141
+          ],
+          "opaque_area": 33861
+        },
+        {
+          "name": "Room07Prop03",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_03.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            806,
+            63,
+            89,
+            120
+          ],
+          "size": [
+            89,
+            120
+          ],
+          "opaque_area": 9402
+        },
+        {
+          "name": "Room07Prop04",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_04.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            55,
+            76,
+            363,
+            119
+          ],
+          "size": [
+            363,
+            119
+          ],
+          "opaque_area": 38843
+        },
+        {
+          "name": "Room07Prop05",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_05.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            59,
+            223,
+            177,
+            149
+          ],
+          "size": [
+            177,
+            149
+          ],
+          "opaque_area": 23193
+        },
+        {
+          "name": "Room07Prop06",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_06.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            286,
+            223,
+            178,
+            149
+          ],
+          "size": [
+            178,
+            149
+          ],
+          "opaque_area": 23217
+        },
+        {
+          "name": "Room07Prop07",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_07.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            511,
+            223,
+            177,
+            149
+          ],
+          "size": [
+            177,
+            149
+          ],
+          "opaque_area": 23296
+        },
+        {
+          "name": "Room07Prop08",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_08.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            735,
+            223,
+            178,
+            149
+          ],
+          "size": [
+            178,
+            149
+          ],
+          "opaque_area": 23233
+        },
+        {
+          "name": "Room07Prop09",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_09.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            975,
+            239,
+            213,
+            134
+          ],
+          "size": [
+            213,
+            134
+          ],
+          "opaque_area": 25213
+        },
+        {
+          "name": "Room07Prop10",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_10.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            1260,
+            256,
+            191,
+            101
+          ],
+          "size": [
+            191,
+            101
+          ],
+          "opaque_area": 18120
+        },
+        {
+          "name": "Room07Prop11",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_11.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            1215,
+            380,
+            104,
+            123
+          ],
+          "size": [
+            104,
+            123
+          ],
+          "opaque_area": 9000
+        },
+        {
+          "name": "Room07Prop12",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_12.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            1353,
+            391,
+            98,
+            118
+          ],
+          "size": [
+            98,
+            118
+          ],
+          "opaque_area": 10370
+        },
+        {
+          "name": "Room07Prop13",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_13.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            1082,
+            402,
+            96,
+            101
+          ],
+          "size": [
+            96,
+            101
+          ],
+          "opaque_area": 6796
+        },
+        {
+          "name": "Room07Prop14",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_14.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            535,
+            406,
+            34,
+            86
+          ],
+          "size": [
+            34,
+            86
+          ],
+          "opaque_area": 2292
+        },
+        {
+          "name": "Room07Prop15",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_15.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            787,
+            406,
+            103,
+            98
+          ],
+          "size": [
+            103,
+            98
+          ],
+          "opaque_area": 9016
+        },
+        {
+          "name": "Room07Prop16",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_16.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            957,
+            409,
+            80,
+            91
+          ],
+          "size": [
+            80,
+            91
+          ],
+          "opaque_area": 4719
+        },
+        {
+          "name": "Room07Prop17",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_17.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            64,
+            419,
+            110,
+            77
+          ],
+          "size": [
+            110,
+            77
+          ],
+          "opaque_area": 5511
+        },
+        {
+          "name": "Room07Prop18",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_18.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            625,
+            426,
+            120,
+            77
+          ],
+          "size": [
+            120,
+            77
+          ],
+          "opaque_area": 8241
+        },
+        {
+          "name": "Room07Prop19",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_19.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            207,
+            436,
+            87,
+            53
+          ],
+          "size": [
+            87,
+            53
+          ],
+          "opaque_area": 2771
+        },
+        {
+          "name": "Room07Prop20",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_20.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            332,
+            436,
+            52,
+            53
+          ],
+          "size": [
+            52,
+            53
+          ],
+          "opaque_area": 1845
+        },
+        {
+          "name": "Room07Prop21",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_21.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            62,
+            537,
+            96,
+            117
+          ],
+          "size": [
+            96,
+            117
+          ],
+          "opaque_area": 8694
+        },
+        {
+          "name": "Room07Prop22",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_22.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            181,
+            539,
+            85,
+            115
+          ],
+          "size": [
+            85,
+            115
+          ],
+          "opaque_area": 7750
+        },
+        {
+          "name": "Room07Prop23",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_23.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            440,
+            540,
+            42,
+            107
+          ],
+          "size": [
+            42,
+            107
+          ],
+          "opaque_area": 3045
+        },
+        {
+          "name": "Room07Prop24",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_24.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            289,
+            544,
+            98,
+            110
+          ],
+          "size": [
+            98,
+            110
+          ],
+          "opaque_area": 7663
+        },
+        {
+          "name": "Room07Prop25",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_25.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            1032,
+            550,
+            80,
+            104
+          ],
+          "size": [
+            80,
+            104
+          ],
+          "opaque_area": 5904
+        },
+        {
+          "name": "Room07Prop26",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_26.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            1287,
+            550,
+            170,
+            102
+          ],
+          "size": [
+            170,
+            102
+          ],
+          "opaque_area": 13299
+        },
+        {
+          "name": "Room07Prop27",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_27.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            521,
+            552,
+            44,
+            95
+          ],
+          "size": [
+            44,
+            95
+          ],
+          "opaque_area": 2811
+        },
+        {
+          "name": "Room07Prop28",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_28.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            595,
+            552,
+            63,
+            96
+          ],
+          "size": [
+            63,
+            96
+          ],
+          "opaque_area": 3610
+        },
+        {
+          "name": "Room07Prop29",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_29.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            772,
+            552,
+            63,
+            94
+          ],
+          "size": [
+            63,
+            94
+          ],
+          "opaque_area": 4562
+        },
+        {
+          "name": "Room07Prop30",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_30.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            1136,
+            553,
+            119,
+            104
+          ],
+          "size": [
+            119,
+            104
+          ],
+          "opaque_area": 9267
+        },
+        {
+          "name": "Room07Prop31",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_31.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            688,
+            558,
+            44,
+            89
+          ],
+          "size": [
+            44,
+            89
+          ],
+          "opaque_area": 2719
+        },
+        {
+          "name": "Room07Prop32",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_32.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            852,
+            574,
+            58,
+            73
+          ],
+          "size": [
+            58,
+            73
+          ],
+          "opaque_area": 3128
+        },
+        {
+          "name": "Room07Prop33",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_33.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            932,
+            580,
+            54,
+            67
+          ],
+          "size": [
+            54,
+            67
+          ],
+          "opaque_area": 2720
+        },
+        {
+          "name": "Room07Prop34",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_34.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            66,
+            683,
+            69,
+            146
+          ],
+          "size": [
+            69,
+            146
+          ],
+          "opaque_area": 6284
+        },
+        {
+          "name": "Room07Prop35",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_35.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            1349,
+            687,
+            115,
+            153
+          ],
+          "size": [
+            115,
+            153
+          ],
+          "opaque_area": 10418
+        },
+        {
+          "name": "Room07Prop36",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_36.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            728,
+            688,
+            73,
+            141
+          ],
+          "size": [
+            73,
+            141
+          ],
+          "opaque_area": 6712
+        },
+        {
+          "name": "Room07Prop37",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_37.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            873,
+            690,
+            147,
+            162
+          ],
+          "size": [
+            147,
+            162
+          ],
+          "opaque_area": 15117
+        },
+        {
+          "name": "Room07Prop38",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_38.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            194,
+            693,
+            79,
+            123
+          ],
+          "size": [
+            79,
+            123
+          ],
+          "opaque_area": 5482
+        },
+        {
+          "name": "Room07Prop39",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_39.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            1056,
+            693,
+            245,
+            159
+          ],
+          "size": [
+            245,
+            159
+          ],
+          "opaque_area": 20490
+        },
+        {
+          "name": "Room07Prop40",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_40.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            333,
+            699,
+            70,
+            118
+          ],
+          "size": [
+            70,
+            118
+          ],
+          "opaque_area": 4341
+        },
+        {
+          "name": "Room07Prop41",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_41.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            580,
+            721,
+            76,
+            96
+          ],
+          "size": [
+            76,
+            96
+          ],
+          "opaque_area": 3550
+        },
+        {
+          "name": "Room07Prop42",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_42.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            458,
+            727,
+            73,
+            90
+          ],
+          "size": [
+            73,
+            90
+          ],
+          "opaque_area": 3202
+        },
+        {
+          "name": "Room07Prop43",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_43.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            49,
+            859,
+            108,
+            112
+          ],
+          "size": [
+            108,
+            112
+          ],
+          "opaque_area": 8773
+        },
+        {
+          "name": "Room07Prop44",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_44.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            335,
+            871,
+            82,
+            88
+          ],
+          "size": [
+            82,
+            88
+          ],
+          "opaque_area": 2581
+        },
+        {
+          "name": "Room07Prop45",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_45.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            1305,
+            871,
+            53,
+            89
+          ],
+          "size": [
+            53,
+            89
+          ],
+          "opaque_area": 2433
+        },
+        {
+          "name": "Room07Prop46",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_46.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            592,
+            873,
+            89,
+            88
+          ],
+          "size": [
+            89,
+            88
+          ],
+          "opaque_area": 4296
+        },
+        {
+          "name": "Room07Prop47",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_47.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            1024,
+            877,
+            85,
+            92
+          ],
+          "size": [
+            85,
+            92
+          ],
+          "opaque_area": 6636
+        },
+        {
+          "name": "Room07Prop48",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_48.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            466,
+            879,
+            80,
+            86
+          ],
+          "size": [
+            80,
+            86
+          ],
+          "opaque_area": 3622
+        },
+        {
+          "name": "Room07Prop49",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_49.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            728,
+            881,
+            85,
+            84
+          ],
+          "size": [
+            85,
+            84
+          ],
+          "opaque_area": 4266
+        },
+        {
+          "name": "Room07Prop50",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_50.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            1405,
+            883,
+            66,
+            78
+          ],
+          "size": [
+            66,
+            78
+          ],
+          "opaque_area": 2461
+        },
+        {
+          "name": "Room07Prop51",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_51.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            876,
+            884,
+            87,
+            85
+          ],
+          "size": [
+            87,
+            85
+          ],
+          "opaque_area": 6561
+        },
+        {
+          "name": "Room07Prop52",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_52.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            1167,
+            884,
+            85,
+            77
+          ],
+          "size": [
+            85,
+            77
+          ],
+          "opaque_area": 5234
+        },
+        {
+          "name": "Room07Prop53",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_07_prop_53.png",
+          "source": "room_07_props.png",
+          "source_rect": [
+            188,
+            893,
+            104,
+            76
+          ],
+          "size": [
+            104,
+            76
+          ],
+          "opaque_area": 4814
+        }
+      ]
+    },
+    {
+      "room": 7,
+      "source": "room_08_props.png",
+      "source_size": [
+        1448,
+        1086
+      ],
+      "props": [
+        {
+          "name": "Room08Prop01",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_01.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            29,
+            51,
+            378,
+            282
+          ],
+          "size": [
+            378,
+            282
+          ],
+          "opaque_area": 90593
+        },
+        {
+          "name": "Room08Prop02",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_02.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            461,
+            51,
+            253,
+            282
+          ],
+          "size": [
+            253,
+            282
+          ],
+          "opaque_area": 61128
+        },
+        {
+          "name": "Room08Prop03",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_03.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            748,
+            51,
+            327,
+            282
+          ],
+          "size": [
+            327,
+            282
+          ],
+          "opaque_area": 65043
+        },
+        {
+          "name": "Room08Prop04",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_04.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            1109,
+            95,
+            159,
+            231
+          ],
+          "size": [
+            159,
+            231
+          ],
+          "opaque_area": 23491
+        },
+        {
+          "name": "Room08Prop05",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_05.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            1293,
+            95,
+            111,
+            231
+          ],
+          "size": [
+            111,
+            231
+          ],
+          "opaque_area": 16645
+        },
+        {
+          "name": "Room08Prop06",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_06.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            510,
+            370,
+            154,
+            203
+          ],
+          "size": [
+            154,
+            203
+          ],
+          "opaque_area": 23714
+        },
+        {
+          "name": "Room08Prop07",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_07.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            772,
+            370,
+            113,
+            200
+          ],
+          "size": [
+            113,
+            200
+          ],
+          "opaque_area": 17042
+        },
+        {
+          "name": "Room08Prop08",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_08.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            64,
+            404,
+            99,
+            143
+          ],
+          "size": [
+            99,
+            143
+          ],
+          "opaque_area": 9538
+        },
+        {
+          "name": "Room08Prop09",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_09.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            273,
+            425,
+            129,
+            129
+          ],
+          "size": [
+            129,
+            129
+          ],
+          "opaque_area": 13901
+        },
+        {
+          "name": "Room08Prop10",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_10.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            307,
+            602,
+            198,
+            167
+          ],
+          "size": [
+            198,
+            167
+          ],
+          "opaque_area": 17455
+        },
+        {
+          "name": "Room08Prop11",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_11.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            29,
+            608,
+            234,
+            166
+          ],
+          "size": [
+            234,
+            166
+          ],
+          "opaque_area": 22552
+        },
+        {
+          "name": "Room08Prop12",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_12.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            1162,
+            608,
+            267,
+            164
+          ],
+          "size": [
+            267,
+            164
+          ],
+          "opaque_area": 31857
+        },
+        {
+          "name": "Room08Prop13",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_13.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            858,
+            617,
+            244,
+            155
+          ],
+          "size": [
+            244,
+            155
+          ],
+          "opaque_area": 23014
+        },
+        {
+          "name": "Room08Prop14",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_14.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            554,
+            622,
+            266,
+            144
+          ],
+          "size": [
+            266,
+            144
+          ],
+          "opaque_area": 30890
+        },
+        {
+          "name": "Room08Prop15",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_15.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            438,
+            806,
+            115,
+            223
+          ],
+          "size": [
+            115,
+            223
+          ],
+          "opaque_area": 12666
+        },
+        {
+          "name": "Room08Prop16",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_16.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            268,
+            822,
+            139,
+            199
+          ],
+          "size": [
+            139,
+            199
+          ],
+          "opaque_area": 14644
+        },
+        {
+          "name": "Room08Prop17",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_17.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            596,
+            826,
+            84,
+            203
+          ],
+          "size": [
+            84,
+            203
+          ],
+          "opaque_area": 8244
+        },
+        {
+          "name": "Room08Prop18",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_18.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            1229,
+            837,
+            168,
+            178
+          ],
+          "size": [
+            168,
+            178
+          ],
+          "opaque_area": 20880
+        },
+        {
+          "name": "Room08Prop19",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_19.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            33,
+            842,
+            187,
+            179
+          ],
+          "size": [
+            187,
+            179
+          ],
+          "opaque_area": 23364
+        },
+        {
+          "name": "Room08Prop20",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_20.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            993,
+            843,
+            196,
+            183
+          ],
+          "size": [
+            196,
+            183
+          ],
+          "opaque_area": 28214
+        },
+        {
+          "name": "Room08Prop21",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_08_prop_21.png",
+          "source": "room_08_props.png",
+          "source_rect": [
+            732,
+            860,
+            210,
+            162
+          ],
+          "size": [
+            210,
+            162
+          ],
+          "opaque_area": 25583
+        }
+      ]
+    },
+    {
+      "room": 8,
+      "source": "room_09_props.png",
+      "source_size": [
+        1448,
+        1086
+      ],
+      "props": [
+        {
+          "name": "Room09Prop01",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_01.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            791,
+            46,
+            181,
+            245
+          ],
+          "size": [
+            181,
+            245
+          ],
+          "opaque_area": 32831
+        },
+        {
+          "name": "Room09Prop02",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_02.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            1025,
+            46,
+            173,
+            245
+          ],
+          "size": [
+            173,
+            245
+          ],
+          "opaque_area": 25524
+        },
+        {
+          "name": "Room09Prop03",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_03.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            40,
+            50,
+            409,
+            186
+          ],
+          "size": [
+            409,
+            186
+          ],
+          "opaque_area": 64888
+        },
+        {
+          "name": "Room09Prop04",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_04.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            509,
+            50,
+            208,
+            186
+          ],
+          "size": [
+            208,
+            186
+          ],
+          "opaque_area": 32551
+        },
+        {
+          "name": "Room09Prop05",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_05.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            1266,
+            50,
+            148,
+            186
+          ],
+          "size": [
+            148,
+            186
+          ],
+          "opaque_area": 21995
+        },
+        {
+          "name": "Room09Prop06",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_06.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            53,
+            272,
+            294,
+            197
+          ],
+          "size": [
+            294,
+            197
+          ],
+          "opaque_area": 46937
+        },
+        {
+          "name": "Room09Prop07",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_07.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            441,
+            272,
+            97,
+            190
+          ],
+          "size": [
+            97,
+            190
+          ],
+          "opaque_area": 14536
+        },
+        {
+          "name": "Room09Prop08",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_08.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            619,
+            295,
+            94,
+            161
+          ],
+          "size": [
+            94,
+            161
+          ],
+          "opaque_area": 12347
+        },
+        {
+          "name": "Room09Prop09",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_09.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            892,
+            433,
+            81,
+            257
+          ],
+          "size": [
+            81,
+            257
+          ],
+          "opaque_area": 12080
+        },
+        {
+          "name": "Room09Prop10",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_10.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            293,
+            511,
+            97,
+            179
+          ],
+          "size": [
+            97,
+            179
+          ],
+          "opaque_area": 12044
+        },
+        {
+          "name": "Room09Prop11",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_11.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            490,
+            511,
+            107,
+            187
+          ],
+          "size": [
+            107,
+            187
+          ],
+          "opaque_area": 11406
+        },
+        {
+          "name": "Room09Prop12",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_12.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            681,
+            588,
+            101,
+            102
+          ],
+          "size": [
+            101,
+            102
+          ],
+          "opaque_area": 8038
+        },
+        {
+          "name": "Room09Prop13",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_13.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            671,
+            723,
+            206,
+            167
+          ],
+          "size": [
+            206,
+            167
+          ],
+          "opaque_area": 27345
+        },
+        {
+          "name": "Room09Prop14",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_14.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            471,
+            724,
+            101,
+            152
+          ],
+          "size": [
+            101,
+            152
+          ],
+          "opaque_area": 10440
+        },
+        {
+          "name": "Room09Prop15",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_15.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            250,
+            758,
+            130,
+            119
+          ],
+          "size": [
+            130,
+            119
+          ],
+          "opaque_area": 11364
+        },
+        {
+          "name": "Room09Prop16",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_16.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            974,
+            761,
+            133,
+            115
+          ],
+          "size": [
+            133,
+            115
+          ],
+          "opaque_area": 12830
+        },
+        {
+          "name": "Room09Prop17",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_17.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            704,
+            919,
+            201,
+            123
+          ],
+          "size": [
+            201,
+            123
+          ],
+          "opaque_area": 14185
+        },
+        {
+          "name": "Room09Prop18",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_18.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            961,
+            930,
+            228,
+            112
+          ],
+          "size": [
+            228,
+            112
+          ],
+          "opaque_area": 19866
+        },
+        {
+          "name": "Room09Prop19",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_19.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            164,
+            942,
+            269,
+            101
+          ],
+          "size": [
+            269,
+            101
+          ],
+          "opaque_area": 21796
+        },
+        {
+          "name": "Room09Prop20",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_09_prop_20.png",
+          "source": "room_09_props.png",
+          "source_rect": [
+            502,
+            967,
+            134,
+            75
+          ],
+          "size": [
+            134,
+            75
+          ],
+          "opaque_area": 8726
+        }
+      ]
+    },
+    {
+      "room": 9,
+      "source": "room_10_props.png",
+      "source_size": [
+        1448,
+        1086
+      ],
+      "props": [
+        {
+          "name": "Room10Prop01",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_01.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            66,
+            38,
+            89,
+            342
+          ],
+          "size": [
+            89,
+            342
+          ],
+          "opaque_area": 25164
+        },
+        {
+          "name": "Room10Prop02",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_02.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            486,
+            38,
+            89,
+            341
+          ],
+          "size": [
+            89,
+            341
+          ],
+          "opaque_area": 24997
+        },
+        {
+          "name": "Room10Prop03",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_03.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            328,
+            39,
+            120,
+            340
+          ],
+          "size": [
+            120,
+            340
+          ],
+          "opaque_area": 35010
+        },
+        {
+          "name": "Room10Prop04",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_04.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            198,
+            43,
+            86,
+            337
+          ],
+          "size": [
+            86,
+            337
+          ],
+          "opaque_area": 22643
+        },
+        {
+          "name": "Room10Prop05",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_05.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            606,
+            78,
+            131,
+            301
+          ],
+          "size": [
+            131,
+            301
+          ],
+          "opaque_area": 23462
+        },
+        {
+          "name": "Room10Prop06",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_06.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            1168,
+            181,
+            93,
+            101
+          ],
+          "size": [
+            93,
+            101
+          ],
+          "opaque_area": 8125
+        },
+        {
+          "name": "Room10Prop07",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_07.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            1300,
+            181,
+            98,
+            101
+          ],
+          "size": [
+            98,
+            101
+          ],
+          "opaque_area": 8233
+        },
+        {
+          "name": "Room10Prop08",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_08.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            772,
+            186,
+            82,
+            193
+          ],
+          "size": [
+            82,
+            193
+          ],
+          "opaque_area": 13588
+        },
+        {
+          "name": "Room10Prop09",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_09.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            1037,
+            186,
+            94,
+            96
+          ],
+          "size": [
+            94,
+            96
+          ],
+          "opaque_area": 7972
+        },
+        {
+          "name": "Room10Prop10",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_10.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            898,
+            188,
+            88,
+            192
+          ],
+          "size": [
+            88,
+            192
+          ],
+          "opaque_area": 13970
+        },
+        {
+          "name": "Room10Prop11",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_11.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            1067,
+            306,
+            106,
+            80
+          ],
+          "size": [
+            106,
+            80
+          ],
+          "opaque_area": 6397
+        },
+        {
+          "name": "Room10Prop12",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_12.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            1229,
+            306,
+            105,
+            80
+          ],
+          "size": [
+            105,
+            80
+          ],
+          "opaque_area": 6144
+        },
+        {
+          "name": "Room10Prop13",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_13.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            227,
+            401,
+            99,
+            215
+          ],
+          "size": [
+            99,
+            215
+          ],
+          "opaque_area": 14748
+        },
+        {
+          "name": "Room10Prop14",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_14.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            861,
+            441,
+            98,
+            175
+          ],
+          "size": [
+            98,
+            175
+          ],
+          "opaque_area": 12946
+        },
+        {
+          "name": "Room10Prop15",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_15.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            57,
+            446,
+            127,
+            165
+          ],
+          "size": [
+            127,
+            165
+          ],
+          "opaque_area": 13660
+        },
+        {
+          "name": "Room10Prop16",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_16.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            531,
+            447,
+            147,
+            164
+          ],
+          "size": [
+            147,
+            164
+          ],
+          "opaque_area": 16208
+        },
+        {
+          "name": "Room10Prop17",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_17.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            362,
+            454,
+            130,
+            162
+          ],
+          "size": [
+            130,
+            162
+          ],
+          "opaque_area": 15737
+        },
+        {
+          "name": "Room10Prop18",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_18.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            1316,
+            462,
+            64,
+            149
+          ],
+          "size": [
+            64,
+            149
+          ],
+          "opaque_area": 7182
+        },
+        {
+          "name": "Room10Prop19",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_19.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            1140,
+            480,
+            133,
+            131
+          ],
+          "size": [
+            133,
+            131
+          ],
+          "opaque_area": 13356
+        },
+        {
+          "name": "Room10Prop20",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_20.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            728,
+            484,
+            118,
+            127
+          ],
+          "size": [
+            118,
+            127
+          ],
+          "opaque_area": 11916
+        },
+        {
+          "name": "Room10Prop21",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_21.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            979,
+            489,
+            122,
+            127
+          ],
+          "size": [
+            122,
+            127
+          ],
+          "opaque_area": 13886
+        },
+        {
+          "name": "Room10Prop22",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_22.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            1076,
+            647,
+            312,
+            207
+          ],
+          "size": [
+            312,
+            207
+          ],
+          "opaque_area": 49830
+        },
+        {
+          "name": "Room10Prop23",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_23.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            921,
+            650,
+            112,
+            205
+          ],
+          "size": [
+            112,
+            205
+          ],
+          "opaque_area": 13777
+        },
+        {
+          "name": "Room10Prop24",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_24.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            619,
+            663,
+            254,
+            155
+          ],
+          "size": [
+            254,
+            155
+          ],
+          "opaque_area": 34138
+        },
+        {
+          "name": "Room10Prop25",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_25.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            56,
+            664,
+            504,
+            154
+          ],
+          "size": [
+            504,
+            154
+          ],
+          "opaque_area": 74745
+        },
+        {
+          "name": "Room10Prop26",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_26.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            72,
+            874,
+            154,
+            155
+          ],
+          "size": [
+            154,
+            155
+          ],
+          "opaque_area": 21689
+        },
+        {
+          "name": "Room10Prop27",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_27.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            292,
+            875,
+            100,
+            154
+          ],
+          "size": [
+            100,
+            154
+          ],
+          "opaque_area": 12784
+        },
+        {
+          "name": "Room10Prop28",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_28.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            1192,
+            886,
+            145,
+            142
+          ],
+          "size": [
+            145,
+            142
+          ],
+          "opaque_area": 19313
+        },
+        {
+          "name": "Room10Prop29",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_29.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            457,
+            887,
+            301,
+            142
+          ],
+          "size": [
+            301,
+            142
+          ],
+          "opaque_area": 33374
+        },
+        {
+          "name": "Room10Prop30",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_10_prop_30.png",
+          "source": "room_10_props.png",
+          "source_rect": [
+            817,
+            899,
+            311,
+            125
+          ],
+          "size": [
+            311,
+            125
+          ],
+          "opaque_area": 37088
+        }
+      ]
+    },
+    {
+      "room": 10,
+      "source": "room_11_props.png",
+      "source_size": [
+        1672,
+        941
+      ],
+      "props": [
+        {
+          "name": "Room11Prop01",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_01.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            34,
+            29,
+            600,
+            108
+          ],
+          "size": [
+            600,
+            108
+          ],
+          "opaque_area": 60501
+        },
+        {
+          "name": "Room11Prop02",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_02.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            667,
+            30,
+            192,
+            107
+          ],
+          "size": [
+            192,
+            107
+          ],
+          "opaque_area": 17516
+        },
+        {
+          "name": "Room11Prop03",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_03.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            894,
+            30,
+            250,
+            107
+          ],
+          "size": [
+            250,
+            107
+          ],
+          "opaque_area": 23528
+        },
+        {
+          "name": "Room11Prop04",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_04.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1192,
+            30,
+            159,
+            107
+          ],
+          "size": [
+            159,
+            107
+          ],
+          "opaque_area": 14177
+        },
+        {
+          "name": "Room11Prop05",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_05.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1412,
+            30,
+            125,
+            107
+          ],
+          "size": [
+            125,
+            107
+          ],
+          "opaque_area": 10634
+        },
+        {
+          "name": "Room11Prop06",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_06.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            35,
+            165,
+            600,
+            108
+          ],
+          "size": [
+            600,
+            108
+          ],
+          "opaque_area": 60333
+        },
+        {
+          "name": "Room11Prop07",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_07.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            668,
+            165,
+            192,
+            108
+          ],
+          "size": [
+            192,
+            108
+          ],
+          "opaque_area": 17694
+        },
+        {
+          "name": "Room11Prop08",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_08.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            895,
+            165,
+            250,
+            108
+          ],
+          "size": [
+            250,
+            108
+          ],
+          "opaque_area": 23740
+        },
+        {
+          "name": "Room11Prop09",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_09.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1192,
+            165,
+            160,
+            108
+          ],
+          "size": [
+            160,
+            108
+          ],
+          "opaque_area": 14334
+        },
+        {
+          "name": "Room11Prop10",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_10.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            35,
+            301,
+            223,
+            148
+          ],
+          "size": [
+            223,
+            148
+          ],
+          "opaque_area": 27893
+        },
+        {
+          "name": "Room11Prop11",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_11.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            930,
+            308,
+            51,
+            142
+          ],
+          "size": [
+            51,
+            142
+          ],
+          "opaque_area": 5415
+        },
+        {
+          "name": "Room11Prop12",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_12.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1017,
+            308,
+            52,
+            142
+          ],
+          "size": [
+            52,
+            142
+          ],
+          "opaque_area": 5764
+        },
+        {
+          "name": "Room11Prop13",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_13.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            836,
+            311,
+            60,
+            138
+          ],
+          "size": [
+            60,
+            138
+          ],
+          "opaque_area": 6881
+        },
+        {
+          "name": "Room11Prop14",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_14.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            736,
+            315,
+            64,
+            129
+          ],
+          "size": [
+            64,
+            129
+          ],
+          "opaque_area": 7262
+        },
+        {
+          "name": "Room11Prop15",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_15.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            613,
+            321,
+            89,
+            121
+          ],
+          "size": [
+            89,
+            121
+          ],
+          "opaque_area": 9473
+        },
+        {
+          "name": "Room11Prop16",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_16.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            288,
+            324,
+            159,
+            111
+          ],
+          "size": [
+            159,
+            111
+          ],
+          "opaque_area": 16475
+        },
+        {
+          "name": "Room11Prop17",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_17.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            477,
+            324,
+            106,
+            115
+          ],
+          "size": [
+            106,
+            115
+          ],
+          "opaque_area": 11231
+        },
+        {
+          "name": "Room11Prop18",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_18.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1272,
+            348,
+            368,
+            101
+          ],
+          "size": [
+            368,
+            101
+          ],
+          "opaque_area": 34941
+        },
+        {
+          "name": "Room11Prop19",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_19.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1184,
+            362,
+            60,
+            87
+          ],
+          "size": [
+            60,
+            87
+          ],
+          "opaque_area": 4209
+        },
+        {
+          "name": "Room11Prop20",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_20.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1098,
+            363,
+            60,
+            86
+          ],
+          "size": [
+            60,
+            86
+          ],
+          "opaque_area": 4055
+        },
+        {
+          "name": "Room11Prop21",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_21.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            295,
+            482,
+            72,
+            114
+          ],
+          "size": [
+            72,
+            114
+          ],
+          "opaque_area": 6470
+        },
+        {
+          "name": "Room11Prop22",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_22.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            404,
+            482,
+            62,
+            115
+          ],
+          "size": [
+            62,
+            115
+          ],
+          "opaque_area": 5638
+        },
+        {
+          "name": "Room11Prop23",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_23.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1006,
+            482,
+            107,
+            142
+          ],
+          "size": [
+            107,
+            142
+          ],
+          "opaque_area": 9038
+        },
+        {
+          "name": "Room11Prop24",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_24.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            784,
+            483,
+            100,
+            141
+          ],
+          "size": [
+            100,
+            141
+          ],
+          "opaque_area": 8644
+        },
+        {
+          "name": "Room11Prop25",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_25.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            892,
+            483,
+            101,
+            138
+          ],
+          "size": [
+            101,
+            138
+          ],
+          "opaque_area": 7854
+        },
+        {
+          "name": "Room11Prop26",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_26.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            30,
+            484,
+            229,
+            112
+          ],
+          "size": [
+            229,
+            112
+          ],
+          "opaque_area": 19868
+        },
+        {
+          "name": "Room11Prop27",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_27.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            682,
+            484,
+            94,
+            140
+          ],
+          "size": [
+            94,
+            140
+          ],
+          "opaque_area": 7290
+        },
+        {
+          "name": "Room11Prop28",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_28.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1398,
+            485,
+            240,
+            101
+          ],
+          "size": [
+            240,
+            101
+          ],
+          "opaque_area": 14912
+        },
+        {
+          "name": "Room11Prop29",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_29.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1131,
+            486,
+            241,
+            100
+          ],
+          "size": [
+            241,
+            100
+          ],
+          "opaque_area": 16718
+        },
+        {
+          "name": "Room11Prop30",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_30.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            498,
+            502,
+            70,
+            94
+          ],
+          "size": [
+            70,
+            94
+          ],
+          "opaque_area": 4964
+        },
+        {
+          "name": "Room11Prop31",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_31.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            595,
+            508,
+            63,
+            88
+          ],
+          "size": [
+            63,
+            88
+          ],
+          "opaque_area": 3881
+        },
+        {
+          "name": "Room11Prop32",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_32.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            330,
+            643,
+            86,
+            92
+          ],
+          "size": [
+            86,
+            92
+          ],
+          "opaque_area": 7203
+        },
+        {
+          "name": "Room11Prop33",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_33.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            440,
+            649,
+            71,
+            86
+          ],
+          "size": [
+            71,
+            86
+          ],
+          "opaque_area": 5391
+        },
+        {
+          "name": "Room11Prop34",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_34.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            535,
+            650,
+            71,
+            85
+          ],
+          "size": [
+            71,
+            85
+          ],
+          "opaque_area": 5398
+        },
+        {
+          "name": "Room11Prop35",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_35.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            811,
+            651,
+            70,
+            84
+          ],
+          "size": [
+            70,
+            84
+          ],
+          "opaque_area": 4998
+        },
+        {
+          "name": "Room11Prop36",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_36.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            904,
+            651,
+            73,
+            84
+          ],
+          "size": [
+            73,
+            84
+          ],
+          "opaque_area": 5134
+        },
+        {
+          "name": "Room11Prop37",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_37.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1000,
+            651,
+            69,
+            84
+          ],
+          "size": [
+            69,
+            84
+          ],
+          "opaque_area": 4977
+        },
+        {
+          "name": "Room11Prop38",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_38.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            632,
+            656,
+            71,
+            79
+          ],
+          "size": [
+            71,
+            79
+          ],
+          "opaque_area": 5005
+        },
+        {
+          "name": "Room11Prop39",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_39.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            32,
+            658,
+            173,
+            75
+          ],
+          "size": [
+            173,
+            75
+          ],
+          "opaque_area": 11991
+        },
+        {
+          "name": "Room11Prop40",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_40.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            231,
+            658,
+            73,
+            76
+          ],
+          "size": [
+            73,
+            76
+          ],
+          "opaque_area": 4955
+        },
+        {
+          "name": "Room11Prop41",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_41.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1094,
+            658,
+            62,
+            78
+          ],
+          "size": [
+            62,
+            78
+          ],
+          "opaque_area": 4176
+        },
+        {
+          "name": "Room11Prop42",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_42.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1359,
+            658,
+            65,
+            78
+          ],
+          "size": [
+            65,
+            78
+          ],
+          "opaque_area": 3549
+        },
+        {
+          "name": "Room11Prop43",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_43.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            729,
+            663,
+            55,
+            72
+          ],
+          "size": [
+            55,
+            72
+          ],
+          "opaque_area": 3414
+        },
+        {
+          "name": "Room11Prop44",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_44.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1269,
+            663,
+            66,
+            73
+          ],
+          "size": [
+            66,
+            73
+          ],
+          "opaque_area": 3346
+        },
+        {
+          "name": "Room11Prop45",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_45.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1179,
+            664,
+            64,
+            72
+          ],
+          "size": [
+            64,
+            72
+          ],
+          "opaque_area": 3874
+        },
+        {
+          "name": "Room11Prop46",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_46.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1448,
+            668,
+            61,
+            68
+          ],
+          "size": [
+            61,
+            68
+          ],
+          "opaque_area": 2819
+        },
+        {
+          "name": "Room11Prop47",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_47.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            514,
+            760,
+            90,
+            130
+          ],
+          "size": [
+            90,
+            130
+          ],
+          "opaque_area": 7329
+        },
+        {
+          "name": "Room11Prop48",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_48.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            379,
+            763,
+            104,
+            127
+          ],
+          "size": [
+            104,
+            127
+          ],
+          "opaque_area": 8309
+        },
+        {
+          "name": "Room11Prop49",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_49.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            151,
+            766,
+            64,
+            119
+          ],
+          "size": [
+            64,
+            119
+          ],
+          "opaque_area": 3184
+        },
+        {
+          "name": "Room11Prop50",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_50.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            47,
+            772,
+            64,
+            113
+          ],
+          "size": [
+            64,
+            113
+          ],
+          "opaque_area": 3069
+        },
+        {
+          "name": "Room11Prop51",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_51.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            850,
+            788,
+            73,
+            106
+          ],
+          "size": [
+            73,
+            106
+          ],
+          "opaque_area": 6531
+        },
+        {
+          "name": "Room11Prop52",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_52.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            960,
+            793,
+            74,
+            101
+          ],
+          "size": [
+            74,
+            101
+          ],
+          "opaque_area": 6223
+        },
+        {
+          "name": "Room11Prop53",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_53.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            244,
+            794,
+            101,
+            95
+          ],
+          "size": [
+            101,
+            95
+          ],
+          "opaque_area": 7118
+        },
+        {
+          "name": "Room11Prop54",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_54.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            635,
+            794,
+            88,
+            95
+          ],
+          "size": [
+            88,
+            95
+          ],
+          "opaque_area": 6146
+        },
+        {
+          "name": "Room11Prop55",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_55.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1065,
+            794,
+            84,
+            99
+          ],
+          "size": [
+            84,
+            99
+          ],
+          "opaque_area": 6204
+        },
+        {
+          "name": "Room11Prop56",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_56.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1273,
+            796,
+            94,
+            98
+          ],
+          "size": [
+            94,
+            98
+          ],
+          "opaque_area": 5152
+        },
+        {
+          "name": "Room11Prop57",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_57.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1168,
+            799,
+            91,
+            95
+          ],
+          "size": [
+            91,
+            95
+          ],
+          "opaque_area": 4795
+        },
+        {
+          "name": "Room11Prop58",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_58.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            749,
+            817,
+            69,
+            72
+          ],
+          "size": [
+            69,
+            72
+          ],
+          "opaque_area": 3834
+        },
+        {
+          "name": "Room11Prop59",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_59.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1386,
+            822,
+            67,
+            61
+          ],
+          "size": [
+            67,
+            61
+          ],
+          "opaque_area": 2714
+        },
+        {
+          "name": "Room11Prop60",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_11_prop_60.png",
+          "source": "room_11_props.png",
+          "source_rect": [
+            1475,
+            832,
+            64,
+            51
+          ],
+          "size": [
+            64,
+            51
+          ],
+          "opaque_area": 2015
+        }
+      ]
+    },
+    {
+      "room": 11,
+      "source": "room_12_props.png",
+      "source_size": [
+        1448,
+        1086
+      ],
+      "props": [
+        {
+          "name": "Room12Prop01",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_01.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            270,
+            30,
+            89,
+            162
+          ],
+          "size": [
+            89,
+            162
+          ],
+          "opaque_area": 9813
+        },
+        {
+          "name": "Room12Prop02",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_02.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            390,
+            30,
+            89,
+            162
+          ],
+          "size": [
+            89,
+            162
+          ],
+          "opaque_area": 9624
+        },
+        {
+          "name": "Room12Prop03",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_03.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            626,
+            31,
+            83,
+            170
+          ],
+          "size": [
+            83,
+            170
+          ],
+          "opaque_area": 7010
+        },
+        {
+          "name": "Room12Prop04",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_04.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            1278,
+            42,
+            118,
+            253
+          ],
+          "size": [
+            118,
+            253
+          ],
+          "opaque_area": 19093
+        },
+        {
+          "name": "Room12Prop05",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_05.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            913,
+            52,
+            179,
+            180
+          ],
+          "size": [
+            179,
+            180
+          ],
+          "opaque_area": 15756
+        },
+        {
+          "name": "Room12Prop06",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_06.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            1122,
+            56,
+            105,
+            145
+          ],
+          "size": [
+            105,
+            145
+          ],
+          "opaque_area": 12305
+        },
+        {
+          "name": "Room12Prop07",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_07.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            33,
+            64,
+            89,
+            126
+          ],
+          "size": [
+            89,
+            126
+          ],
+          "opaque_area": 8222
+        },
+        {
+          "name": "Room12Prop08",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_08.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            149,
+            64,
+            86,
+            123
+          ],
+          "size": [
+            86,
+            123
+          ],
+          "opaque_area": 7933
+        },
+        {
+          "name": "Room12Prop09",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_09.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            511,
+            64,
+            88,
+            126
+          ],
+          "size": [
+            88,
+            126
+          ],
+          "opaque_area": 8013
+        },
+        {
+          "name": "Room12Prop10",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_10.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            734,
+            64,
+            87,
+            126
+          ],
+          "size": [
+            87,
+            126
+          ],
+          "opaque_area": 8040
+        },
+        {
+          "name": "Room12Prop11",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_11.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            1046,
+            233,
+            98,
+            212
+          ],
+          "size": [
+            98,
+            212
+          ],
+          "opaque_area": 12324
+        },
+        {
+          "name": "Room12Prop12",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_12.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            1169,
+            233,
+            84,
+            215
+          ],
+          "size": [
+            84,
+            215
+          ],
+          "opaque_area": 9269
+        },
+        {
+          "name": "Room12Prop13",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_13.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            28,
+            236,
+            945,
+            159
+          ],
+          "size": [
+            945,
+            159
+          ],
+          "opaque_area": 145090
+        },
+        {
+          "name": "Room12Prop14",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_14.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            1267,
+            309,
+            139,
+            281
+          ],
+          "size": [
+            139,
+            281
+          ],
+          "opaque_area": 22558
+        },
+        {
+          "name": "Room12Prop15",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_15.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            338,
+            412,
+            158,
+            193
+          ],
+          "size": [
+            158,
+            193
+          ],
+          "opaque_area": 29091
+        },
+        {
+          "name": "Room12Prop16",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_16.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            514,
+            412,
+            259,
+            193
+          ],
+          "size": [
+            259,
+            193
+          ],
+          "opaque_area": 45142
+        },
+        {
+          "name": "Room12Prop17",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_17.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            794,
+            412,
+            202,
+            245
+          ],
+          "size": [
+            202,
+            245
+          ],
+          "opaque_area": 41747
+        },
+        {
+          "name": "Room12Prop18",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_18.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            28,
+            413,
+            293,
+            175
+          ],
+          "size": [
+            293,
+            175
+          ],
+          "opaque_area": 49416
+        },
+        {
+          "name": "Room12Prop19",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_19.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            1013,
+            462,
+            215,
+            245
+          ],
+          "size": [
+            215,
+            245
+          ],
+          "opaque_area": 41905
+        },
+        {
+          "name": "Room12Prop20",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_20.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            678,
+            638,
+            69,
+            145
+          ],
+          "size": [
+            69,
+            145
+          ],
+          "opaque_area": 8223
+        },
+        {
+          "name": "Room12Prop21",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_21.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            1246,
+            643,
+            111,
+            200
+          ],
+          "size": [
+            111,
+            200
+          ],
+          "opaque_area": 7851
+        },
+        {
+          "name": "Room12Prop22",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_22.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            32,
+            649,
+            93,
+            134
+          ],
+          "size": [
+            93,
+            134
+          ],
+          "opaque_area": 9826
+        },
+        {
+          "name": "Room12Prop23",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_23.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            538,
+            649,
+            97,
+            137
+          ],
+          "size": [
+            97,
+            137
+          ],
+          "opaque_area": 9259
+        },
+        {
+          "name": "Room12Prop24",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_24.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            175,
+            657,
+            64,
+            129
+          ],
+          "size": [
+            64,
+            129
+          ],
+          "opaque_area": 7187
+        },
+        {
+          "name": "Room12Prop25",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_25.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            284,
+            661,
+            75,
+            125
+          ],
+          "size": [
+            75,
+            125
+          ],
+          "opaque_area": 8486
+        },
+        {
+          "name": "Room12Prop26",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_26.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            412,
+            661,
+            75,
+            125
+          ],
+          "size": [
+            75,
+            125
+          ],
+          "opaque_area": 8379
+        },
+        {
+          "name": "Room12Prop27",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_27.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            892,
+            686,
+            36,
+            107
+          ],
+          "size": [
+            36,
+            107
+          ],
+          "opaque_area": 2252
+        },
+        {
+          "name": "Room12Prop28",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_28.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            972,
+            695,
+            35,
+            107
+          ],
+          "size": [
+            35,
+            107
+          ],
+          "opaque_area": 2319
+        },
+        {
+          "name": "Room12Prop29",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_29.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            801,
+            699,
+            44,
+            97
+          ],
+          "size": [
+            44,
+            97
+          ],
+          "opaque_area": 3018
+        },
+        {
+          "name": "Room12Prop30",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_30.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            1139,
+            745,
+            86,
+            142
+          ],
+          "size": [
+            86,
+            142
+          ],
+          "opaque_area": 8901
+        },
+        {
+          "name": "Room12Prop31",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_31.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            613,
+            802,
+            124,
+            215
+          ],
+          "size": [
+            124,
+            215
+          ],
+          "opaque_area": 21217
+        },
+        {
+          "name": "Room12Prop32",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_32.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            36,
+            828,
+            182,
+            192
+          ],
+          "size": [
+            182,
+            192
+          ],
+          "opaque_area": 23502
+        },
+        {
+          "name": "Room12Prop33",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_33.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            424,
+            858,
+            154,
+            162
+          ],
+          "size": [
+            154,
+            162
+          ],
+          "opaque_area": 23490
+        },
+        {
+          "name": "Room12Prop34",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_34.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            903,
+            877,
+            90,
+            135
+          ],
+          "size": [
+            90,
+            135
+          ],
+          "opaque_area": 7829
+        },
+        {
+          "name": "Room12Prop35",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_35.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            762,
+            878,
+            105,
+            134
+          ],
+          "size": [
+            105,
+            134
+          ],
+          "opaque_area": 9231
+        },
+        {
+          "name": "Room12Prop36",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_36.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            256,
+            884,
+            120,
+            124
+          ],
+          "size": [
+            120,
+            124
+          ],
+          "opaque_area": 13566
+        },
+        {
+          "name": "Room12Prop37",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_12_prop_37.png",
+          "source": "room_12_props.png",
+          "source_rect": [
+            1038,
+            884,
+            268,
+            130
+          ],
+          "size": [
+            268,
+            130
+          ],
+          "opaque_area": 24832
+        }
+      ]
+    },
+    {
+      "room": 12,
+      "source": "room_13_props.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "props": [
+        {
+          "name": "Room13Prop01",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_01.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            1138,
+            47,
+            249,
+            161
+          ],
+          "size": [
+            249,
+            161
+          ],
+          "opaque_area": 32307
+        },
+        {
+          "name": "Room13Prop02",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_02.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            43,
+            60,
+            403,
+            121
+          ],
+          "size": [
+            403,
+            121
+          ],
+          "opaque_area": 46632
+        },
+        {
+          "name": "Room13Prop03",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_03.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            493,
+            60,
+            191,
+            121
+          ],
+          "size": [
+            191,
+            121
+          ],
+          "opaque_area": 21812
+        },
+        {
+          "name": "Room13Prop04",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_04.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            730,
+            60,
+            72,
+            121
+          ],
+          "size": [
+            72,
+            121
+          ],
+          "opaque_area": 7620
+        },
+        {
+          "name": "Room13Prop05",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_05.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            851,
+            60,
+            237,
+            121
+          ],
+          "size": [
+            237,
+            121
+          ],
+          "opaque_area": 27204
+        },
+        {
+          "name": "Room13Prop06",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_06.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            660,
+            226,
+            188,
+            247
+          ],
+          "size": [
+            188,
+            247
+          ],
+          "opaque_area": 35415
+        },
+        {
+          "name": "Room13Prop07",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_07.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            44,
+            239,
+            308,
+            234
+          ],
+          "size": [
+            308,
+            234
+          ],
+          "opaque_area": 57965
+        },
+        {
+          "name": "Room13Prop08",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_08.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            1078,
+            252,
+            102,
+            232
+          ],
+          "size": [
+            102,
+            232
+          ],
+          "opaque_area": 14920
+        },
+        {
+          "name": "Room13Prop09",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_09.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            893,
+            253,
+            119,
+            231
+          ],
+          "size": [
+            119,
+            231
+          ],
+          "opaque_area": 15418
+        },
+        {
+          "name": "Room13Prop10",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_10.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            392,
+            279,
+            228,
+            198
+          ],
+          "size": [
+            228,
+            198
+          ],
+          "opaque_area": 38290
+        },
+        {
+          "name": "Room13Prop11",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_11.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            1235,
+            292,
+            84,
+            169
+          ],
+          "size": [
+            84,
+            169
+          ],
+          "opaque_area": 9286
+        },
+        {
+          "name": "Room13Prop12",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_12.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            1386,
+            306,
+            81,
+            155
+          ],
+          "size": [
+            81,
+            155
+          ],
+          "opaque_area": 8396
+        },
+        {
+          "name": "Room13Prop13",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_13.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            1202,
+            517,
+            110,
+            211
+          ],
+          "size": [
+            110,
+            211
+          ],
+          "opaque_area": 19486
+        },
+        {
+          "name": "Room13Prop14",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_14.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            298,
+            520,
+            67,
+            207
+          ],
+          "size": [
+            67,
+            207
+          ],
+          "opaque_area": 10213
+        },
+        {
+          "name": "Room13Prop15",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_15.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            419,
+            520,
+            68,
+            207
+          ],
+          "size": [
+            68,
+            207
+          ],
+          "opaque_area": 10448
+        },
+        {
+          "name": "Room13Prop16",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_16.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            525,
+            520,
+            68,
+            207
+          ],
+          "size": [
+            68,
+            207
+          ],
+          "opaque_area": 10465
+        },
+        {
+          "name": "Room13Prop17",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_17.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            47,
+            528,
+            70,
+            198
+          ],
+          "size": [
+            70,
+            198
+          ],
+          "opaque_area": 10956
+        },
+        {
+          "name": "Room13Prop18",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_18.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            173,
+            528,
+            68,
+            198
+          ],
+          "size": [
+            68,
+            198
+          ],
+          "opaque_area": 10881
+        },
+        {
+          "name": "Room13Prop19",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_19.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            1353,
+            528,
+            123,
+            199
+          ],
+          "size": [
+            123,
+            199
+          ],
+          "opaque_area": 19699
+        },
+        {
+          "name": "Room13Prop20",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_20.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            645,
+            531,
+            87,
+            197
+          ],
+          "size": [
+            87,
+            197
+          ],
+          "opaque_area": 14955
+        },
+        {
+          "name": "Room13Prop21",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_21.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            781,
+            531,
+            93,
+            197
+          ],
+          "size": [
+            93,
+            197
+          ],
+          "opaque_area": 16031
+        },
+        {
+          "name": "Room13Prop22",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_22.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            918,
+            533,
+            89,
+            195
+          ],
+          "size": [
+            89,
+            195
+          ],
+          "opaque_area": 15172
+        },
+        {
+          "name": "Room13Prop23",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_23.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            1046,
+            533,
+            96,
+            195
+          ],
+          "size": [
+            96,
+            195
+          ],
+          "opaque_area": 16205
+        },
+        {
+          "name": "Room13Prop24",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_24.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            39,
+            788,
+            135,
+            163
+          ],
+          "size": [
+            135,
+            163
+          ],
+          "opaque_area": 17925
+        },
+        {
+          "name": "Room13Prop25",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_25.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            466,
+            790,
+            129,
+            176
+          ],
+          "size": [
+            129,
+            176
+          ],
+          "opaque_area": 20447
+        },
+        {
+          "name": "Room13Prop26",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_26.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            629,
+            790,
+            138,
+            176
+          ],
+          "size": [
+            138,
+            176
+          ],
+          "opaque_area": 21905
+        },
+        {
+          "name": "Room13Prop27",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_27.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            802,
+            790,
+            143,
+            176
+          ],
+          "size": [
+            143,
+            176
+          ],
+          "opaque_area": 22750
+        },
+        {
+          "name": "Room13Prop28",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_28.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            985,
+            790,
+            140,
+            176
+          ],
+          "size": [
+            140,
+            176
+          ],
+          "opaque_area": 22219
+        },
+        {
+          "name": "Room13Prop29",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_29.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            204,
+            805,
+            105,
+            130
+          ],
+          "size": [
+            105,
+            130
+          ],
+          "opaque_area": 11056
+        },
+        {
+          "name": "Room13Prop30",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_30.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            1181,
+            806,
+            107,
+            115
+          ],
+          "size": [
+            107,
+            115
+          ],
+          "opaque_area": 11426
+        },
+        {
+          "name": "Room13Prop31",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_31.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            1332,
+            806,
+            112,
+            115
+          ],
+          "size": [
+            112,
+            115
+          ],
+          "opaque_area": 11984
+        },
+        {
+          "name": "Room13Prop32",
+          "path": "res://assets/maps/stitched_demo/generated_props/room_13_prop_32.png",
+          "source": "room_13_props.png",
+          "source_rect": [
+            338,
+            807,
+            85,
+            112
+          ],
+          "size": [
+            85,
+            112
+          ],
+          "opaque_area": 7709
+        }
+      ]
+    }
+  ]
+}

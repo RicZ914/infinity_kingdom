@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://throneroom13map"
-path="res://.godot/imported/room_13_throne_room.png-5c789c1cf9963a40e45af3f73a8f13f0.ctex"
+uid="uid://d0qx18aoqrsi6"
+path="res://.godot/imported/room_13_throne_room.png-005326374ea2332d723dfa6276033f3b.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/maps/stitched_demo/room_13_throne_room.png"
-dest_files=["res://.godot/imported/room_13_throne_room.png-5c789c1cf9963a40e45af3f73a8f13f0.ctex"]
+dest_files=["res://.godot/imported/room_13_throne_room.png-005326374ea2332d723dfa6276033f3b.ctex"]
 
 [params]
 

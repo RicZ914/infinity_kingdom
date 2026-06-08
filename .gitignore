@@ -9,6 +9,7 @@ build/
 bin/
 .sconsign.dblite
 *.obj
+*.obj.import
 *.tmp
 *.log
 

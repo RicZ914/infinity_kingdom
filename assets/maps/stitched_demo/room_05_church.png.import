@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://room05church"
-path="res://.godot/imported/room_05_church.png-8fdd7f94242d4f1f9fd3383d8a78e0a5.ctex"
+path="res://.godot/imported/room_05_church.png-aefaa91f90d586276a507b0c48f9281f.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/maps/stitched_demo/room_05_church.png"
-dest_files=["res://.godot/imported/room_05_church.png-8fdd7f94242d4f1f9fd3383d8a78e0a5.ctex"]
+dest_files=["res://.godot/imported/room_05_church.png-aefaa91f90d586276a507b0c48f9281f.ctex"]
 
 [params]
 

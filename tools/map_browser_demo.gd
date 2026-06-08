@@ -97,8 +97,20 @@ const COLLISION_DEBUG_VISIBLE := false
 const PROP_COLLISION_DEBUG_VISIBLE := true
 const PROP_ALPHA_COLLISION_PADDING := Vector2(8.0, 6.0)
 const PROP_ALPHA_THRESHOLD := 0.08
-const RANDOM_PROP_MIN_PER_ROOM := 0
-const RANDOM_PROP_MAX_PER_ROOM := 0
+const GENERATED_PROP_MANIFEST_PATH := "res://assets/maps/stitched_demo/generated_props/manifest.json"
+const RANDOM_PROP_MIN_PER_ROOM := 2
+const RANDOM_PROP_MAX_PER_ROOM := 4
+const RANDOM_PROP_PLACEMENT_ATTEMPTS := 56
+const RANDOM_PROP_MIN_WIDTH_RATIO := 0.045
+const RANDOM_PROP_MIN_HEIGHT_RATIO := 0.050
+const RANDOM_PROP_MIN_AREA_RATIO := 0.0040
+const RANDOM_PROP_MAX_WIDTH_RATIO := 0.205
+const RANDOM_PROP_MAX_HEIGHT_RATIO := 0.220
+const RANDOM_PROP_MAX_AREA_RATIO := 0.030
+const RANDOM_PROP_MAX_ASPECT_RATIO := 2.65
+const RANDOM_PROP_MAIN_LANE_HEIGHT_RATIO := 0.38
+const RANDOM_PROP_DOOR_LANE_WIDTH_RATIO := 0.22
+const RANDOM_PROP_SAFE_RADIUS := 92.0
 
 const WALKABLE_AREAS := [
 	Rect2(0.06, 0.16, 0.88, 0.68),
@@ -622,14 +634,20 @@ func _add_random_cover_props(parent: Node) -> void:
 	prop_root.z_index = 38
 	parent.add_child(prop_root)
 
+	var manifest := load_generated_prop_manifest()
 	for room_index in range(room_rects.size()):
-		var candidates := _get_prop_candidates_for_room(room_index)
+		var candidates := get_generated_prop_candidates(manifest, room_index)
 		if candidates.is_empty():
 			continue
 		candidates.shuffle()
 		var count: int = min(rng.randi_range(RANDOM_PROP_MIN_PER_ROOM, RANDOM_PROP_MAX_PER_ROOM), candidates.size())
-		for index in range(count):
-			_add_cover_prop(prop_root, candidates[index])
+		var placed_rects: Array[Rect2] = []
+		var placed := 0
+		for candidate in candidates:
+			if placed >= count:
+				break
+			if _try_add_random_cover_prop(prop_root, room_index, candidate, placed_rects):
+				placed += 1
 
 func _get_prop_candidates_for_room(room_index: int) -> Array:
 	var result := []
@@ -637,6 +655,71 @@ func _get_prop_candidates_for_room(room_index: int) -> Array:
 		if int(candidate["room"]) == room_index:
 			result.append(candidate)
 	return result
+
+func _try_add_random_cover_prop(parent: Node, room_index: int, candidate: Dictionary, placed_rects: Array[Rect2]) -> bool:
+	if room_index < 0 or room_index >= room_rects.size() or room_index >= walkable_rects.size():
+		return false
+	var texture := load(String(candidate.get("path", ""))) as Texture2D
+	if texture == null:
+		return false
+	var room_rect := room_rects[room_index]
+	var source_size := candidate.get("source_size", [texture.get_width(), texture.get_height()]) as Array
+	var source_width := maxf(1.0, float(source_size[0]))
+	var source_height := maxf(1.0, float(source_size[1]))
+	var texture_to_room_scale := Vector2(room_rect.size.x / source_width, room_rect.size.y / source_height)
+	var prop_size := Vector2(float(texture.get_width()) * texture_to_room_scale.x, float(texture.get_height()) * texture_to_room_scale.y)
+	if not is_generated_prop_size_usable(prop_size, room_rect.size):
+		return false
+
+	for attempt in range(RANDOM_PROP_PLACEMENT_ATTEMPTS):
+		var position := random_cover_position_for_room(rng, walkable_rects[room_index], prop_size)
+		var prop_rect := Rect2(position - prop_size * 0.5, prop_size)
+		if not is_cover_position_valid(prop_rect, walkable_rects[room_index], placed_rects, player_spawn_for_room_index(room_index), encounter_position_for_room_index(room_index)):
+			continue
+		placed_rects.append(prop_rect.grow(20.0))
+		_add_generated_cover_prop(parent, candidate, texture, texture_to_room_scale, position)
+		return true
+	return false
+
+func player_spawn_for_room_index(room_index: int) -> Vector2:
+	if room_index < 0 or room_index >= walkable_rects.size():
+		return Vector2.ZERO
+	var walk_rect := walkable_rects[room_index]
+	return walk_rect.position + Vector2(walk_rect.size.x * 0.07, walk_rect.size.y * 0.54)
+
+func encounter_position_for_room_index(room_index: int) -> Vector2:
+	if room_index < 0 or room_index >= walkable_rects.size():
+		return Vector2.ZERO
+	var walk_rect := walkable_rects[room_index]
+	return walk_rect.position + Vector2(walk_rect.size.x * 0.62, walk_rect.size.y * 0.60)
+
+func _add_generated_cover_prop(parent: Node, candidate: Dictionary, texture: Texture2D, texture_to_room_scale: Vector2, world_position: Vector2) -> void:
+	var body := StaticBody2D.new()
+	body.name = "%sCover" % String(candidate.get("name", "GeneratedProp"))
+	body.collision_layer = 1
+	body.collision_mask = 2
+	body.add_to_group("projectile_blocker")
+	body.position = world_position
+	body.set_meta("room_index", int(candidate.get("room", -1)))
+	body.set_meta("prop_size", Vector2(float(texture.get_width()) * texture_to_room_scale.x, float(texture.get_height()) * texture_to_room_scale.y))
+	parent.add_child(body)
+
+	var sprite := Sprite2D.new()
+	sprite.name = "Sprite"
+	sprite.texture = texture
+	sprite.scale = texture_to_room_scale
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	sprite.z_index = 1
+	body.add_child(sprite)
+
+	var polygons := build_alpha_collision_polygons(texture, texture_to_room_scale)
+	for index in range(polygons.size()):
+		var collision := CollisionPolygon2D.new()
+		collision.name = "AlphaCollision%02d" % [index + 1]
+		collision.polygon = polygons[index]
+		body.add_child(collision)
+		if PROP_COLLISION_DEBUG_VISIBLE:
+			_add_collision_polygon_debug(body, polygons[index])
 
 func _add_cover_prop(parent: Node, candidate: Dictionary) -> void:
 	var room_index := int(candidate["room"])
@@ -687,6 +770,15 @@ func _add_cover_prop(parent: Node, candidate: Dictionary) -> void:
 	if PROP_COLLISION_DEBUG_VISIBLE:
 		_add_collision_debug_outline(body, collision_rect)
 
+func _add_collision_polygon_debug(parent: Node, polygon: PackedVector2Array) -> void:
+	var outline := Line2D.new()
+	outline.name = "AlphaCollisionDebug"
+	outline.width = 2.0
+	outline.closed = true
+	outline.default_color = Color(0.25, 0.9, 1.0, 0.82)
+	outline.points = polygon
+	parent.add_child(outline)
+
 func _add_collision_debug_outline(parent: Node, rect: Rect2) -> void:
 	var outline := Line2D.new()
 	outline.name = "CollisionDebugOutline"
@@ -709,6 +801,133 @@ static func get_room_wall_rects(room_index: int, room_rect: Rect2) -> Array[Rect
 			room_rect.position + Vector2(room_rect.size.x * rect_ratio.position.x, room_rect.size.y * rect_ratio.position.y),
 			Vector2(room_rect.size.x * rect_ratio.size.x, room_rect.size.y * rect_ratio.size.y)
 		))
+	return result
+
+static func load_generated_prop_manifest() -> Dictionary:
+	if not FileAccess.file_exists(GENERATED_PROP_MANIFEST_PATH):
+		return {}
+	var file := FileAccess.open(GENERATED_PROP_MANIFEST_PATH, FileAccess.READ)
+	if file == null:
+		return {}
+	var parsed = JSON.parse_string(file.get_as_text())
+	if not (parsed is Dictionary):
+		return {}
+	return parsed
+
+static func get_generated_prop_candidates(manifest: Dictionary, room_index: int) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var rooms := manifest.get("rooms", []) as Array
+	for raw_room in rooms:
+		var room := raw_room as Dictionary
+		if int(room.get("room", -1)) != room_index:
+			continue
+		var source_size := room.get("source_size", [1, 1]) as Array
+		var props := room.get("props", []) as Array
+		for raw_prop in props:
+			var prop := (raw_prop as Dictionary).duplicate(true)
+			prop["room"] = room_index
+			prop["source_size"] = source_size
+			result.append(prop)
+		break
+	return result
+
+static func random_cover_position_for_room(rng: RandomNumberGenerator, walk_rect: Rect2, prop_size: Vector2) -> Vector2:
+	var lane_height := walk_rect.size.y * RANDOM_PROP_MAIN_LANE_HEIGHT_RATIO
+	var upper_band := Rect2(
+		walk_rect.position + Vector2(prop_size.x * 0.55, prop_size.y * 0.55),
+		Vector2(
+			maxf(1.0, walk_rect.size.x - prop_size.x * 1.1),
+			maxf(1.0, (walk_rect.size.y - lane_height) * 0.5 - prop_size.y * 0.8)
+		)
+	)
+	var lower_y := walk_rect.get_center().y + lane_height * 0.5 + prop_size.y * 0.55
+	var lower_band := Rect2(
+		Vector2(walk_rect.position.x + prop_size.x * 0.55, lower_y),
+		Vector2(
+			maxf(1.0, walk_rect.size.x - prop_size.x * 1.1),
+			maxf(1.0, walk_rect.end.y - lower_y - prop_size.y * 0.55)
+		)
+	)
+	var band := upper_band if rng.randf() < 0.5 else lower_band
+	if band.size.y <= 2.0:
+		band = Rect2(
+			walk_rect.position + prop_size * 0.55,
+			Vector2(maxf(1.0, walk_rect.size.x - prop_size.x * 1.1), maxf(1.0, walk_rect.size.y - prop_size.y * 1.1))
+		)
+	return Vector2(
+		rng.randf_range(band.position.x, band.end.x),
+		rng.randf_range(band.position.y, band.end.y)
+	)
+
+static func is_cover_position_valid(prop_rect: Rect2, walk_rect: Rect2, placed_rects: Array[Rect2], player_spawn: Vector2, encounter_spawn: Vector2) -> bool:
+	if not walk_rect.encloses(prop_rect):
+		return false
+	var main_lane := Rect2(
+		Vector2(walk_rect.position.x, walk_rect.get_center().y - walk_rect.size.y * RANDOM_PROP_MAIN_LANE_HEIGHT_RATIO * 0.5),
+		Vector2(walk_rect.size.x, walk_rect.size.y * RANDOM_PROP_MAIN_LANE_HEIGHT_RATIO)
+	)
+	if prop_rect.intersects(main_lane):
+		return false
+	var left_door_lane := Rect2(
+		walk_rect.position,
+		Vector2(walk_rect.size.x * RANDOM_PROP_DOOR_LANE_WIDTH_RATIO, walk_rect.size.y)
+	)
+	if prop_rect.intersects(left_door_lane):
+		return false
+	var right_door_lane := Rect2(
+		Vector2(walk_rect.end.x - walk_rect.size.x * RANDOM_PROP_DOOR_LANE_WIDTH_RATIO, walk_rect.position.y),
+		Vector2(walk_rect.size.x * RANDOM_PROP_DOOR_LANE_WIDTH_RATIO, walk_rect.size.y)
+	)
+	if prop_rect.intersects(right_door_lane):
+		return false
+	if prop_rect.grow(RANDOM_PROP_SAFE_RADIUS).has_point(player_spawn):
+		return false
+	if prop_rect.grow(RANDOM_PROP_SAFE_RADIUS).has_point(encounter_spawn):
+		return false
+	for rect in placed_rects:
+		if prop_rect.intersects(rect):
+			return false
+	return true
+
+static func is_generated_prop_size_usable(prop_size: Vector2, room_size: Vector2) -> bool:
+	if prop_size.x <= 0.0 or prop_size.y <= 0.0 or room_size.x <= 0.0 or room_size.y <= 0.0:
+		return false
+	var width_ratio := prop_size.x / room_size.x
+	var height_ratio := prop_size.y / room_size.y
+	var area_ratio := (prop_size.x * prop_size.y) / (room_size.x * room_size.y)
+	if width_ratio < RANDOM_PROP_MIN_WIDTH_RATIO or height_ratio < RANDOM_PROP_MIN_HEIGHT_RATIO:
+		return false
+	if area_ratio < RANDOM_PROP_MIN_AREA_RATIO:
+		return false
+	if width_ratio > RANDOM_PROP_MAX_WIDTH_RATIO or height_ratio > RANDOM_PROP_MAX_HEIGHT_RATIO:
+		return false
+	if area_ratio > RANDOM_PROP_MAX_AREA_RATIO:
+		return false
+	var aspect := maxf(prop_size.x / prop_size.y, prop_size.y / prop_size.x)
+	if aspect > RANDOM_PROP_MAX_ASPECT_RATIO:
+		return false
+	return true
+
+static func build_alpha_collision_polygons(texture: Texture2D, texture_to_room_scale: Vector2) -> Array[PackedVector2Array]:
+	var result: Array[PackedVector2Array] = []
+	if texture == null:
+		return result
+	var image := texture.get_image()
+	if image == null:
+		return result
+	image.convert(Image.FORMAT_RGBA8)
+	var bitmap := BitMap.new()
+	bitmap.create_from_image_alpha(image, PROP_ALPHA_THRESHOLD)
+	var source_rect := Rect2i(Vector2i.ZERO, Vector2i(image.get_width(), image.get_height()))
+	var raw_polygons := bitmap.opaque_to_polygons(source_rect, 2.0)
+	var center := Vector2(float(image.get_width()) * 0.5, float(image.get_height()) * 0.5)
+	for raw_polygon in raw_polygons:
+		var polygon := PackedVector2Array()
+		for point in raw_polygon:
+			var local := (point - center) * texture_to_room_scale
+			polygon.append(local)
+		if polygon.size() >= 3:
+			result.append(polygon)
 	return result
 
 static func calculate_prop_collision_rect(texture: Texture2D, source_rect: Rect2, texture_to_room_scale: Vector2) -> Rect2:
