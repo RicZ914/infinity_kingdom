@@ -10,6 +10,8 @@ const DAMAGE_NUMBER_SCENE := preload("res://effects/damage_number.tscn")
 const RUN_PICKUP_SCRIPT := preload("res://systems/pickups/run_pickup.gd")
 const WORLD_HEALTH_BAR_SCRIPT := preload("res://ui/world_health_bar.gd")
 const INVENTORY_PANEL_SCRIPT := preload("res://ui/inventory_panel.gd")
+const LINEAGE_HUD_SCRIPT := preload("res://ui/lineage_hud.gd")
+const HEIR_SELECT_PANEL_SCRIPT := preload("res://ui/heir_select_panel.gd")
 const RANGER_BOSS_SCENE := preload("res://actors/bosses/town/ranger_boss.tscn")
 const MAGE_BOSS_SCENE := preload("res://actors/bosses/town/mage_boss.tscn")
 const EMPEROR_BOSS_SCENE := preload("res://actors/bosses/town/emperor_boss.tscn")
@@ -80,12 +82,18 @@ var gate_walk_last_distance: float = INF
 var door_transition_layer: CanvasLayer = null
 var door_transition_backdrop: ColorRect = null
 var inventory_panel: CanvasLayer = null
+var lineage_hud: CanvasLayer = null
+var heir_select_panel: CanvasLayer = null
+var pending_lineage_respawn: Dictionary = {}
+var active_character_id: StringName = &""
 
 func _ready() -> void:
 	reward_rng.randomize()
 	_prepare_map_runtime()
 	_build_door_transition_overlay()
 	_build_inventory_panel()
+	_build_lineage_hud()
+	_build_heir_select_panel()
 	if get_tree() != null and not get_tree().node_added.is_connected(_on_tree_node_added):
 		get_tree().node_added.connect(_on_tree_node_added)
 	RunDirector.configure_event_count(maxi(_encounter_count() - 1, 1))
@@ -236,6 +244,18 @@ func _build_inventory_panel() -> void:
 	if inventory_panel.has_method("reset_run"):
 		inventory_panel.reset_run()
 
+func _build_lineage_hud() -> void:
+	lineage_hud = LINEAGE_HUD_SCRIPT.new()
+	lineage_hud.name = "LineageHud"
+	add_child(lineage_hud)
+
+func _build_heir_select_panel() -> void:
+	heir_select_panel = HEIR_SELECT_PANEL_SCRIPT.new()
+	heir_select_panel.name = "HeirSelectPanel"
+	add_child(heir_select_panel)
+	if heir_select_panel.has_signal("confirmed"):
+		heir_select_panel.confirmed.connect(_on_heir_aptitude_confirmed)
+
 func _hide_legacy_arena() -> void:
 	for node_name in ["BackdropImage", "Backdrop", "CenterLane", "ThroneDais", "ThroneBanner"]:
 		var node := get_node_or_null(node_name)
@@ -343,6 +363,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _on_character_selected(character_id: StringName) -> void:
 	_cancel_scheduled_title_music()
 	_clear_player_auto_walk()
+	active_character_id = character_id
 	RunDirector.configure_event_count(maxi(_encounter_count() - 1, 1))
 	if result_screen != null:
 		result_screen.visible = false
@@ -354,6 +375,13 @@ func _on_character_selected(character_id: StringName) -> void:
 		_play_ui_feedback(true)
 	AccessoryManager.reset_run()
 	RunDirector.reset_run()
+	var slot := SaveManager.get_active_slot() if SaveManager != null else {}
+	if slot.is_empty() or not bool(slot.get("occupied", false)):
+		LineageDirector.begin_new_lineage(_character_id_to_family_id(character_id))
+	elif String(slot.get("family_id", "")).is_empty():
+		LineageDirector.begin_new_lineage(_character_id_to_family_id(character_id))
+	else:
+		LineageDirector.start_or_resume_from_slot(slot, _character_id_to_family_id(character_id))
 	if inventory_panel != null:
 		if inventory_panel.has_method("close") and inventory_panel.visible:
 			inventory_panel.close()
@@ -365,12 +393,7 @@ func _on_character_selected(character_id: StringName) -> void:
 	if current_encounter != null and is_instance_valid(current_encounter):
 		current_encounter.queue_free()
 		current_encounter = null
-	var next_scene: PackedScene = KNIGHT_SCENE
-	if character_id == &"ranger":
-		next_scene = RANGER_SCENE
-	elif character_id == &"mage":
-		next_scene = MAGE_SCENE
-	player_character = next_scene.instantiate()
+	player_character = _scene_for_character_id(character_id).instantiate()
 	player_character.position = _player_spawn_for_room(0)
 	add_child(player_character)
 	player_character.z_index = 3
@@ -382,6 +405,7 @@ func _on_character_selected(character_id: StringName) -> void:
 		character_hud.bind_character(player_character)
 	AccessoryManager.apply_to_actor(player_character)
 	RunEffects.refresh_persistent_modifiers(player_character)
+	LineageDirector.apply_aptitude_to_actor(player_character)
 	_bind_actor_audio(player_character)
 	if player_character.has_signal("died"):
 		player_character.died.connect(_on_player_died)
@@ -398,6 +422,9 @@ func _consume_startup_context() -> void:
 	var character_id := StringName(pending.get("character_id", &""))
 	if character_id == &"":
 		return
+	var slot_index := int(pending.get("slot_index", -1))
+	if slot_index >= 0 and SaveManager != null:
+		SaveManager.select_slot(slot_index)
 	_on_character_selected(character_id)
 
 func _start_next_encounter() -> void:
@@ -420,6 +447,8 @@ func _start_next_encounter() -> void:
 	_begin_current_encounter()
 
 func _begin_current_encounter() -> void:
+	if LineageDirector != null:
+		LineageDirector.record_checkpoint(encounter_index)
 	_activate_map_room(encounter_index)
 	_play_audio_profile_for_encounter(encounter_index)
 	current_encounter = _encounter_scene_for_index(encounter_index).instantiate()
@@ -544,6 +573,33 @@ func _on_player_died() -> void:
 		current_encounter.queue_free()
 	current_encounter = null
 	active_encounter_prep.clear()
+	var death_summary := _build_death_summary()
+	var lineage_payload := LineageDirector.consume_death(death_summary) if LineageDirector != null else {}
+	var lineage_state := lineage_payload.get("lineage", {}) as Dictionary
+	var score_data := lineage_payload.get("score", {}) as Dictionary
+	if int(lineage_state.get("seeds_left", 0)) > 0:
+		pending_lineage_respawn = lineage_payload.duplicate(true)
+		if Music != null:
+			Music.play_profile(&"defeat")
+		_refresh_battle_status(
+			_ui_text("Heir Awaits", "后继者待命", "後繼者待命"),
+			_ui_text("A blood ember is spent. The next generation inherits your score.", "一枚血脉火种已燃尽。下一代会继承本代评分。", "一枚血脈火種已燃盡。下一代會繼承本代評分。"),
+			_localized_detail_text(_lineage_score_text(score_data))
+		)
+		if result_screen != null and result_screen.has_method("show_result"):
+			result_screen.show_result(
+				"relic",
+				_ui_text("Next Generation", "下一代继承", "下一代繼承"),
+				_ui_text("The archive continues while embers remain.", "只要火种尚存，这个档案就还没有结束。", "只要火種尚存，這個檔案就還沒有結束。"),
+				_lineage_score_text(score_data),
+				_build_lineage_result_summary(lineage_payload)
+			)
+		_refresh_battle_status()
+		waiting_for_accessory_choice = false
+		active_accessory_reason = ""
+		active_accessory_source = ""
+		active_run_event_kind = ""
+		return
 	if Music != null:
 		Music.play_profile(&"defeat")
 	_schedule_title_music(2.4)
@@ -558,10 +614,10 @@ func _on_player_died() -> void:
 	if result_screen != null and result_screen.has_method("show_result"):
 		result_screen.show_result(
 			"defeat",
-			_ui_text("Defeated", "挑战失败", "挑戰失敗"),
-			_ui_text("The town boss rush resets after death.", "阵亡后，本轮城镇王战会重新开始。", "陣亡後，本輪城鎮王戰會重新開始。"),
-			_ui_text("Continue to return to champion selection and try a different relic path.", "继续后回到选角界面，换一条饰品路线重新尝试。", "繼續後回到選角介面，換一條飾品路線重新嘗試。"),
-			_build_result_summary()
+			_ui_text("Archive Burned Out", "档案火种耗尽", "檔案火種耗盡"),
+			_ui_text("All five blood embers are spent.", "五枚血脉火种已经全部耗尽。", "五枚血脈火種已經全部耗盡。"),
+			_ui_text("Continue to return to archive selection and start a new file.", "继续后回到档案选择，另开新档。", "繼續後回到檔案選擇，另開新檔。"),
+			_build_lineage_result_summary(lineage_payload)
 		)
 	_refresh_battle_status()
 	waiting_for_accessory_choice = false
@@ -719,6 +775,55 @@ func _build_result_summary() -> Dictionary:
 		"stats": _ui_text("Hero", "角色", "角色") + " %s  |  " % hero_name + _ui_text("Relic", "饰品", "飾品") + " %s  |  " % accessory_name + _ui_text("Gold", "金币", "金幣") + " %d  |  " % int(run_state.get("gold", 0)) + _ui_text("Cleared", "完成", "完成") + " %d  |  " % int(run_state.get("cleared_encounters", 0)) + _ui_text("Level", "等级", "等級") + " %d  |  " % int(run_state.get("hero_level", 1)) + _ui_text("Kills", "击杀", "擊殺") + " %d  |  " % int(run_state.get("total_kills", 0)) + _ui_text("Avg reward", "平均奖励", "平均獎勵") + " %d" % average_reward,
 		"timeline": timeline_text
 	}
+
+func _build_death_summary() -> Dictionary:
+	var run_state := RunDirector.get_state()
+	return {
+		"cleared_encounters": int(run_state.get("cleared_encounters", 0)),
+		"total_encounters": _encounter_count(),
+		"kills": int(run_state.get("total_kills", 0)),
+		"level": int(run_state.get("hero_level", 1)),
+		"gold": int(run_state.get("gold", 0)),
+		"encounter_index": maxi(encounter_index, 0)
+	}
+
+func _build_lineage_result_summary(payload: Dictionary) -> Dictionary:
+	var lineage := payload.get("lineage", {}) as Dictionary
+	var score := payload.get("score", {}) as Dictionary
+	var aptitude := lineage.get("aptitude", {}) as Dictionary
+	return {
+		"stats": "%s %s  |  %s %d  |  %s %d/%d  |  %s %d  %s %d  %s %d" % [
+			_ui_text("Grade", "评分", "評分"),
+			String(score.get("grade", "D")),
+			_ui_text("Generation", "第几代", "第幾代"),
+			int(lineage.get("generation_index", 1)),
+			_ui_text("Embers", "火种", "火種"),
+			int(lineage.get("seeds_left", 0)),
+			int(lineage.get("max_seeds", 5)),
+			_ui_text("STR", "强壮", "強壯"),
+			int(aptitude.get("strength", 3)),
+			_ui_text("AGI", "迅捷", "迅捷"),
+			int(aptitude.get("agility", 3)),
+			_ui_text("FOC", "专注", "專注"),
+			int(aptitude.get("focus", 3))
+		],
+		"timeline": _lineage_score_text(score)
+	}
+
+func _lineage_score_text(score: Dictionary) -> String:
+	return "%s %s / %d  |  %s %d  %s %d  %s %d  %s %d" % [
+		_ui_text("Grade", "评分", "評分"),
+		String(score.get("grade", "D")),
+		int(score.get("score", 0)),
+		_ui_text("Progress", "推进", "推進"),
+		int(score.get("progress_score", 0)),
+		_ui_text("Combat", "战斗", "戰鬥"),
+		int(score.get("combat_score", 0)),
+		_ui_text("Growth", "成长", "成長"),
+		int(score.get("growth_score", 0)),
+		_ui_text("Gold", "经济", "經濟"),
+		int(score.get("economy_score", 0))
+	]
 
 func _play_ui_feedback(success: bool) -> void:
 	if Sfx == null:
@@ -1660,7 +1765,49 @@ func _on_quit_requested() -> void:
 	get_tree().quit()
 
 func _on_result_closed() -> void:
+	if not pending_lineage_respawn.is_empty():
+		_open_heir_select_panel()
+		return
 	_reset_to_character_select()
+
+func _open_heir_select_panel() -> void:
+	if heir_select_panel != null and heir_select_panel.has_method("open"):
+		heir_select_panel.open(pending_lineage_respawn)
+		return
+	_respawn_lineage_heir()
+
+func _on_heir_aptitude_confirmed(attribute_id: String) -> void:
+	if LineageDirector != null:
+		LineageDirector.apply_manual_aptitude_bonus(attribute_id)
+	_respawn_lineage_heir()
+
+func _respawn_lineage_heir() -> void:
+	pending_lineage_respawn.clear()
+	_cancel_scheduled_title_music()
+	if result_screen != null:
+		result_screen.visible = false
+	if player_character != null and is_instance_valid(player_character):
+		player_character.queue_free()
+	player_character = _scene_for_character_id(active_character_id).instantiate()
+	player_character.position = _player_spawn_for_room(maxi(encounter_index, 0))
+	add_child(player_character)
+	player_character.z_index = 3
+	if character_select != null:
+		character_select.visible = false
+	_update_screen_layers()
+	if character_hud != null and character_hud.has_method("bind_character"):
+		character_hud.bind_character(player_character)
+	AccessoryManager.reset_run()
+	RunDirector.reset_run()
+	AccessoryManager.apply_to_actor(player_character)
+	RunEffects.refresh_persistent_modifiers(player_character)
+	LineageDirector.apply_aptitude_to_actor(player_character)
+	_bind_actor_audio(player_character)
+	if player_character.has_signal("died"):
+		player_character.died.connect(_on_player_died)
+	var restart_index := maxi(int(LineageDirector.get_state().get("current_encounter_index", 0)), 0)
+	encounter_index = restart_index - 1
+	_offer_accessory(_ui_text("Inherited Relic", "继承开局饰品", "繼承開局飾品"), "lineage")
 
 func _reset_to_character_select() -> void:
 	_cancel_scheduled_title_music()
@@ -1686,8 +1833,13 @@ func _reset_to_character_select() -> void:
 	return_pause_after_settings_panel = false
 	AccessoryManager.reset_run()
 	RunDirector.reset_run()
+	if SaveManager != null:
+		SaveManager.active_slot_index = -1
+		SaveManager.active_slot = {}
+	if LineageDirector != null:
+		LineageDirector.begin_new_lineage("")
 	if character_select != null:
-		character_select.visible = true
+		character_select.visible = false
 	_update_screen_layers()
 	_refresh_battle_status(
 		_ui_text("Town Boss Trial", "城镇王战试炼", "城鎮王戰試煉"),
@@ -1696,11 +1848,14 @@ func _reset_to_character_select() -> void:
 	)
 	if Music != null:
 		Music.play_profile(&"title")
+	get_tree().change_scene_to_file("res://app_entry.tscn")
 
 func _update_screen_layers() -> void:
 	var in_title_menu := character_select != null and character_select.visible and player_character == null and (result_screen == null or not result_screen.visible)
 	if character_hud != null:
 		character_hud.visible = not in_title_menu
+	if lineage_hud != null:
+		lineage_hud.visible = not in_title_menu
 	if battle_status != null:
 		battle_status.visible = not in_title_menu
 	if pause_menu != null and in_title_menu and pause_menu.visible:
@@ -1710,6 +1865,22 @@ func _current_locale() -> String:
 	if UISettings != null and UISettings.has_method("get_locale"):
 		return String(UISettings.get_locale())
 	return "zh_Hans"
+
+func _scene_for_character_id(character_id: StringName) -> PackedScene:
+	if character_id == &"ranger":
+		return RANGER_SCENE
+	if character_id == &"mage":
+		return MAGE_SCENE
+	return KNIGHT_SCENE
+
+func _character_id_to_family_id(character_id: StringName) -> String:
+	match character_id:
+		&"ranger":
+			return "ranger"
+		&"mage":
+			return "mage"
+		_:
+			return "knight"
 
 func _ui_text(en_text: String, zh_hans_text: String, zh_hant_text: String) -> String:
 	match _current_locale():

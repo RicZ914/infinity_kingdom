@@ -19,6 +19,8 @@ config/icon="res://icon.svg"
 
 AccessoryManager="*res://systems/accessories/accessory_manager.gd"
 RunDirector="*res://systems/run/run_director.gd"
+SaveManager="*res://systems/run/save_manager.gd"
+LineageDirector="*res://systems/run/lineage_director.gd"
 StartupContext="*res://systems/run/startup_context.gd"
 Feedback="*res://systems/feedback/feedback_manager.gd"
 Music="*res://audio/music_manager.gd"
