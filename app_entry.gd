@@ -118,11 +118,11 @@ func _on_opening_prologue_finished() -> void:
 	if character_select != null:
 		character_select.visible = true
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed or event.echo:
 		return
 	var title_visible := (save_slot_select != null and save_slot_select.visible) or (character_select != null and character_select.visible)
-	if title_visible and CheatMode != null and CheatMode.input_key(event.keycode):
+	if title_visible and CheatMode != null and CheatMode.input_event_key(event):
 		_show_cheat_notice()
 		get_viewport().set_input_as_handled()
 

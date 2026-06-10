@@ -43,6 +43,15 @@ func input_key(keycode: int) -> bool:
 	return false
 
 
+func input_event_key(event: InputEventKey) -> bool:
+	if event == null:
+		return false
+	var keycode := event.keycode
+	if keycode == 0 and event.physical_keycode != 0:
+		keycode = event.physical_keycode
+	return input_key(keycode)
+
+
 func unlock_developer_room() -> void:
 	developer_room_unlocked = true
 
