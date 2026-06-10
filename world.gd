@@ -1420,6 +1420,12 @@ func _objective_status_text() -> String:
 	return _ui_text("Pick a champion, then shape the run with relics.", "先选择角色，再用饰品塑造本局路线。", "先選擇角色，再用飾品塑造本局路線。")
 
 func _threat_status_text() -> String:
+	if CheatMode != null and bool(CheatMode.enabled) and player_character != null and is_instance_valid(player_character):
+		return _ui_text(
+			"Cheat Mode Active: HP, armor, and inspiration refill automatically.",
+			"作弊模式已启用：生命、护甲和灵感会自动回满。",
+			"作弊模式已啟用：生命、護甲和靈感會自動回滿。"
+		)
 	if result_screen != null and result_screen.visible:
 		return _ui_text("Try a different relic route or hero opener on the next run.", "下次可以换一条饰品路线或改用别的角色开局。", "下次可以換一條飾品路線或改用別的角色開局。")
 	if pause_menu != null and pause_menu.visible:
@@ -1475,6 +1481,8 @@ func _hero_status_text() -> String:
 		stats.append("%s %d/%d" % [_ui_text("DEF", "护甲", "護甲"), int(round(float(player_character.get("defense")))), int(round(float(player_character.get("max_defense"))))])
 	if _has_property(player_character, "inspiration") and _has_property(player_character, "max_inspiration"):
 		stats.append("%s %d/%d" % [_ui_text("Insp", "灵感", "靈感"), int(round(float(player_character.get("inspiration")))), int(round(float(player_character.get("max_inspiration"))))])
+	if CheatMode != null and bool(CheatMode.enabled):
+		stats.append(_ui_text("CHEAT", "作弊", "作弊"))
 	stats.append("%s %d/%d" % [_ui_text("XP", "经验", "經驗"), int(run_state.get("hero_xp", 0)), int(run_state.get("hero_xp_to_next", 45))])
 	stats.append("%s %d" % [_ui_text("Kills", "击杀", "擊殺"), int(run_state.get("total_kills", 0))])
 	return "%s\n%s" % [hero_name, "  |  ".join(stats)] if not stats.is_empty() else hero_name
