@@ -1,6 +1,7 @@
 extends Node
 
 const SAVE_SLOT_SELECT_SCRIPT := preload("res://ui/save_slot_select.gd")
+const OPENING_PROLOGUE_SCRIPT := preload("res://ui/opening_prologue.gd")
 
 @onready var character_select: CanvasLayer = $CharacterSelect
 @onready var play_mode_select: CanvasLayer = $PlayModeSelect
@@ -9,10 +10,12 @@ const SAVE_SLOT_SELECT_SCRIPT := preload("res://ui/save_slot_select.gd")
 var selected_character_id: StringName = &""
 var selected_slot_index: int = -1
 var save_slot_select: CanvasLayer = null
+var opening_prologue: CanvasLayer = null
 
 
 func _ready() -> void:
 	_build_save_slot_select()
+	_build_opening_prologue()
 	if character_select != null:
 		character_select.character_selected.connect(_on_character_selected)
 		if character_select.has_signal("settings_requested"):
@@ -34,6 +37,12 @@ func _build_save_slot_select() -> void:
 	save_slot_select.slot_selected.connect(_on_save_slot_selected)
 	save_slot_select.new_slot_requested.connect(_on_new_slot_requested)
 	save_slot_select.quit_requested.connect(_on_quit_requested)
+
+func _build_opening_prologue() -> void:
+	opening_prologue = OPENING_PROLOGUE_SCRIPT.new()
+	opening_prologue.name = "OpeningPrologue"
+	add_child(opening_prologue)
+	opening_prologue.finished.connect(_on_opening_prologue_finished)
 
 func _show_save_slots() -> void:
 	selected_slot_index = -1
@@ -60,8 +69,22 @@ func _on_new_slot_requested(slot_index: int) -> void:
 		SaveManager.create_slot(slot_index, "Archive %d" % (slot_index + 1))
 	if save_slot_select != null:
 		save_slot_select.visible = false
+	if opening_prologue != null and opening_prologue.has_method("open"):
+		opening_prologue.open()
+		return
 	if character_select != null:
 		character_select.visible = true
+
+func _on_opening_prologue_finished() -> void:
+	if character_select != null:
+		character_select.visible = true
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not (event is InputEventKey) or not event.pressed or event.echo:
+		return
+	var title_visible := (save_slot_select != null and save_slot_select.visible) or (character_select != null and character_select.visible)
+	if title_visible and CheatMode != null and CheatMode.input_key(event.keycode):
+		get_viewport().set_input_as_handled()
 
 func _on_character_selected(character_id: StringName) -> void:
 	selected_character_id = character_id

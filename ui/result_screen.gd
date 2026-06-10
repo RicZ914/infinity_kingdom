@@ -6,6 +6,7 @@ signal quit_requested
 const UISkin := preload("res://ui/ui_skin.gd")
 const PANEL_MIN_SIZE := Vector2(320, 320)
 const PANEL_MAX_SIZE := Vector2(720, 560)
+const OPEN_ENDING_IDLE_SECONDS := 1800.0
 
 @onready var backdrop: TextureRect = $Backdrop
 @onready var dimmer: ColorRect = $Dimmer
@@ -23,6 +24,9 @@ const PANEL_MAX_SIZE := Vector2(720, 560)
 @onready var quit_button: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonRow/QuitButton
 
 var layout_size_override: Vector2 = Vector2.ZERO
+var idle_seconds: float = 0.0
+var open_ending_allowed: bool = false
+var open_ending_triggered: bool = false
 
 func _ready() -> void:
 	layer = 24
@@ -64,6 +68,12 @@ func show_result(kind: String, title: String, subtitle: String, detail: String, 
 		accent = Color(0.82, 0.94, 0.76)
 		badge_text = UIText.text("result_relic_badge")
 		backdrop_path = "res://assets/ui/background/result_reincarnation_bg.png"
+	elif kind == "true_ending":
+		accent = Color(1.0, 0.90, 0.50)
+		badge_text = "CROWN BROKEN"
+	elif kind == "developer_room":
+		accent = Color(0.56, 0.94, 1.0)
+		badge_text = "DEBUG DOOR"
 	else:
 		badge_text = UIText.text("result_victory_badge")
 	panel.add_theme_stylebox_override("panel", UISkin.menu_panel_style())
@@ -78,13 +88,25 @@ func show_result(kind: String, title: String, subtitle: String, detail: String, 
 	_set_decoration_badge(badge_text, accent)
 	_apply_summary(summary)
 	_refresh_copy()
+	idle_seconds = 0.0
+	open_ending_triggered = false
+	open_ending_allowed = kind == "victory" or kind == "true_ending"
 	visible = true
 	get_tree().paused = true
 	continue_button.grab_focus()
 
+func _process(delta: float) -> void:
+	if not visible or not open_ending_allowed or open_ending_triggered:
+		return
+	idle_seconds += delta
+	if idle_seconds >= OPEN_ENDING_IDLE_SECONDS:
+		_show_open_ending()
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
+	if event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton:
+		idle_seconds = 0.0
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
 			KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_SPACE:
@@ -102,6 +124,18 @@ func _close_result() -> void:
 	visible = false
 	get_tree().paused = false
 	closed.emit()
+
+func _show_open_ending() -> void:
+	open_ending_triggered = true
+	open_ending_allowed = false
+	title_label.text = "No Crown"
+	subtitle_label.text = "The heir waits, then turns away from the throne."
+	detail_label.text = "After thirty quiet minutes, no one claims the crown. The loop remains behind as the archive walks out into an unwritten road."
+	_set_decoration_badge("OPEN ROAD", Color(0.78, 0.94, 0.78))
+	_apply_summary({
+		"stats": "Ending Open  |  Crown abandoned  |  Throne unclaimed",
+		"timeline": "Final boss defeated  /  Thirty minutes of silence  /  Freedom chosen"
+	})
 
 func _apply_summary(summary: Dictionary) -> void:
 	var stats_text := String(summary.get("stats", ""))

@@ -143,9 +143,19 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	_process_gate_walk()
+	_apply_cheat_safety()
 	_sync_audio_hint_state()
 	_update_map_camera()
 	_refresh_battle_status()
+
+func _apply_cheat_safety() -> void:
+	if CheatMode == null or not bool(CheatMode.infinite_hp):
+		return
+	if player_character == null or not is_instance_valid(player_character):
+		return
+	_restore_actor_resource(player_character, "hp", "max_hp")
+	_restore_actor_resource(player_character, "defense", "max_defense")
+	_restore_actor_resource(player_character, "inspiration", "max_inspiration")
 
 func _process_gate_walk() -> void:
 	if not gate_walk_active:
@@ -375,6 +385,8 @@ func _on_character_selected(character_id: StringName) -> void:
 		_play_ui_feedback(true)
 	AccessoryManager.reset_run()
 	RunDirector.reset_run()
+	if EndingDirector != null:
+		EndingDirector.reset_run()
 	var slot := SaveManager.get_active_slot() if SaveManager != null else {}
 	if slot.is_empty() or not bool(slot.get("occupied", false)):
 		LineageDirector.begin_new_lineage(_character_id_to_family_id(character_id))
@@ -409,6 +421,7 @@ func _on_character_selected(character_id: StringName) -> void:
 	_bind_actor_audio(player_character)
 	if player_character.has_signal("died"):
 		player_character.died.connect(_on_player_died)
+	_apply_cheat_safety()
 	encounter_index = -1
 	_offer_accessory(_ui_text("First Relic", "初始饰品", "初始飾品"), "opening")
 
@@ -727,6 +740,8 @@ func _on_run_event_choice_made(choice_id: String) -> void:
 		_run_event_summary(choice_id),
 		RunEffects.display_name(choice_id)
 	)
+	if EndingDirector != null and applied and _is_church_baptism_choice(choice_id):
+		EndingDirector.record_church_baptism()
 	active_run_event_kind = ""
 	if choice_id == "shop_relic" and applied:
 		_offer_accessory(_ui_text("Purchased Relic", "购买饰品", "購買飾品"), "shop")
@@ -837,6 +852,8 @@ func _play_ui_feedback(success: bool) -> void:
 	Sfx.play_event(&"ui_confirm", null, -7.0, 0.86, "UI")
 
 func _complete_run_victory() -> void:
+	if EndingDirector != null:
+		EndingDirector.record_final_boss_defeated()
 	if Music != null:
 		Music.play_profile(&"victory")
 	_schedule_title_music(2.8)
@@ -856,6 +873,16 @@ func _complete_run_victory() -> void:
 			_ui_text("Your relic build survived the trial. Continue to select a new champion.", "你的饰品构筑撑过了整场试炼。继续后可重新选择角色。", "你的飾品構築撐過了整場試煉。繼續後可重新選擇角色。"),
 			_build_result_summary()
 		)
+	if result_screen != null and result_screen.has_method("show_result"):
+		var ending_kind := _victory_result_kind()
+		if ending_kind != "victory":
+			result_screen.show_result(
+				ending_kind,
+				_victory_result_title(ending_kind),
+				_victory_result_subtitle(ending_kind),
+				_victory_result_detail(ending_kind),
+				_build_result_summary()
+			)
 	_refresh_battle_status()
 
 func _bind_actor_audio(actor: Node) -> void:
@@ -873,6 +900,8 @@ func _bind_actor_audio(actor: Node) -> void:
 func _on_actor_attack_started(attack_name: StringName, actor: Node) -> void:
 	if actor == null or not actor.has_method("get_character_name"):
 		return
+	if actor == player_character and EndingDirector != null and CheatMode != null and bool(CheatMode.enabled) and encounter_index >= _encounter_count() - 1:
+		EndingDirector.record_developer_skill(attack_name)
 	var actor_name := String(actor.get_character_name()).to_lower()
 	var event_id := "%s_attack" % actor_name
 	match actor_name:
@@ -904,6 +933,10 @@ func _on_actor_attack_started(attack_name: StringName, actor: Node) -> void:
 		Sfx.play_event(StringName(event_id), actor.global_position)
 
 func _on_actor_took_damage(_amount: float, _remaining_hp: float, actor: Node) -> void:
+	if actor == player_character and EndingDirector != null:
+		EndingDirector.record_player_damage()
+	if actor == player_character:
+		_apply_cheat_safety()
 	if actor == null or not actor.has_method("get_character_name") or Sfx == null:
 		return
 	var event_id := "%s_hit" % String(actor.get_character_name()).to_lower()
@@ -1678,6 +1711,46 @@ func _has_property(target: Object, field: String) -> bool:
 			return true
 	return false
 
+func _restore_actor_resource(actor: Node, current_field: String, max_field: String) -> void:
+	if actor == null or not is_instance_valid(actor):
+		return
+	if not _has_property(actor, current_field) or not _has_property(actor, max_field):
+		return
+	actor.set(current_field, actor.get(max_field))
+
+func _is_church_baptism_choice(choice_id: String) -> bool:
+	return active_run_event_kind == "services" and (choice_id == "rest_heal" or choice_id == "rest_focus" or choice_id == "rest_repair")
+
+func _victory_result_kind() -> String:
+	if CheatMode != null and bool(CheatMode.enabled) and EndingDirector != null and EndingDirector.developer_room_ready():
+		if CheatMode.has_method("unlock_developer_room"):
+			CheatMode.unlock_developer_room()
+		return "developer_room"
+	if EndingDirector != null and EndingDirector.can_break_crown():
+		return "true_ending"
+	return "victory"
+
+func _victory_result_title(kind: String) -> String:
+	if kind == "developer_room":
+		return _ui_text("Developer Room", "开发者房间", "開發者房間")
+	if kind == "true_ending":
+		return _ui_text("Crown Breaker", "王冠坠地", "王冠墜地")
+	return _ui_text("Town Cleared", "Town Cleared", "Town Cleared")
+
+func _victory_result_subtitle(kind: String) -> String:
+	if kind == "developer_room":
+		return _ui_text("Three forbidden arts answer beneath the throne.", "三道禁术在王座下回应。", "三道禁術在王座下回應。")
+	if kind == "true_ending":
+		return _ui_text("The crown can be broken because the bloodline remained unscarred.", "血脉未被玷污，王冠终于可以被击碎。", "血脈未被玷污，王冠終於可以被擊碎。")
+	return _ui_text("All enemy waves and bosses are defeated.", "All enemy waves and bosses are defeated.", "All enemy waves and bosses are defeated.")
+
+func _victory_result_detail(kind: String) -> String:
+	if kind == "developer_room":
+		return _ui_text("Cheat mode rewrites the throne-room exit into a hidden development chamber.", "作弊模式已把王座出口改写为隐藏开发房间。", "作弊模式已把王座出口改寫為隱藏開發房間。")
+	if kind == "true_ending":
+		return _ui_text("The heir raises a weapon, not to inherit, but to shatter the crown and end the loop.", "继承者举起武器，不为继位，只为打碎王冠并终止轮回。", "繼承者舉起武器，不為繼位，只為打碎王冠並終止輪迴。")
+	return _ui_text("Your relic build survived the trial. Continue to select a new champion.", "Your relic build survived the trial. Continue to select a new champion.", "Your relic build survived the trial. Continue to select a new champion.")
+
 func _sync_audio_hint_state() -> void:
 	if audio_shortcut_hint == null or not audio_shortcut_hint.has_method("set_panel_open"):
 		return
@@ -1799,12 +1872,15 @@ func _respawn_lineage_heir() -> void:
 		character_hud.bind_character(player_character)
 	AccessoryManager.reset_run()
 	RunDirector.reset_run()
+	if EndingDirector != null:
+		EndingDirector.reset_run()
 	AccessoryManager.apply_to_actor(player_character)
 	RunEffects.refresh_persistent_modifiers(player_character)
 	LineageDirector.apply_aptitude_to_actor(player_character)
 	_bind_actor_audio(player_character)
 	if player_character.has_signal("died"):
 		player_character.died.connect(_on_player_died)
+	_apply_cheat_safety()
 	var restart_index := maxi(int(LineageDirector.get_state().get("current_encounter_index", 0)), 0)
 	encounter_index = restart_index - 1
 	_offer_accessory(_ui_text("Inherited Relic", "继承开局饰品", "繼承開局飾品"), "lineage")
