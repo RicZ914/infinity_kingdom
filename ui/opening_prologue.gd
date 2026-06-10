@@ -6,23 +6,23 @@ const UISkin := preload("res://ui/ui_skin.gd")
 const PANELS := [
 	{
 		"image": "res://assets/ui/background/prologue/prologue_01_falling_kingdom.png",
-		"title": "The Kingdom Leans",
-		"body": "The capital still wears its crown, but every bell rings like a warning. Walls crack, banners rot, and the old throne demands another heir."
+		"title": "王国将倾",
+		"body": "王都仍戴着王冠，可每一声钟响都像警告。城墙开裂，旗帜腐烂，旧王座仍在索要下一位继承者。"
 	},
 	{
 		"image": "res://assets/ui/background/prologue/prologue_02_corrupt_throne.png",
-		"title": "The Crown Remembers",
-		"body": "Victory did not save the king. It taught the crown how to hunger. Each ruler who sits beneath it leaves less of themself behind."
+		"title": "王冠记得",
+		"body": "胜利没有拯救国王，只让王冠学会了饥饿。每一位坐上王座的人，都会把更多的自己留在那片阴影里。"
 	},
 	{
 		"image": "res://assets/ui/background/prologue/prologue_03_three_families.png",
-		"title": "Three Bloodlines Answer",
-		"body": "Steel, arrow, and arcane fire gather before the palace road. None are promised a second dawn, but all can leave something for the next hand."
+		"title": "三支血脉",
+		"body": "钢铁、箭矢与奥术之火聚集在通往王宫的道路前。无人被许诺第二个黎明，但每个人都能为下一双手留下些什么。"
 	},
 	{
 		"image": "res://assets/ui/background/prologue/prologue_04_bloodline_embers.png",
-		"title": "Five Embers",
-		"body": "A new archive begins with five blood embers. Spend them poorly and the file dies. Spend them well and the next life starts stronger."
+		"title": "五枚火种",
+		"body": "一份新的档案始于五枚血脉火种。若它们尽数熄灭，这份档案便会死亡；若它们燃烧得足够有意义，下一次生命将从更高处开始。"
 	}
 ]
 
@@ -111,7 +111,7 @@ func _show_current_panel() -> void:
 	image_rect.texture = load(String(panel.get("image", ""))) as Texture2D
 	title_label.text = String(panel.get("title", ""))
 	body_label.text = String(panel.get("body", ""))
-	hint_label.text = "Enter / Space continue   Esc skip   %d / %d" % [current_index + 1, PANELS.size()]
+	hint_label.text = "Enter / Space 继续   Esc 跳过   %d / %d" % [current_index + 1, PANELS.size()]
 
 
 func _advance() -> void:
